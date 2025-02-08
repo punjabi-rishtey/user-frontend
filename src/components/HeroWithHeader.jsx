@@ -1,9 +1,34 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import videoSrc from '../assets/video.mp4'; // Video path
 import logoSrc from '../assets/logo.png'; // Logo path
+import profileIcon from '../assets/profile.png'; // Profile icon path
+import LoginModal from './LoginModal';
+import { useAuth } from '../context/AuthContext';
 
 const HeroWithHeader = () => {
     const [isVideoLoaded, setIsVideoLoaded] = useState(false); // State to track video load status
+    const [showModal, setShowModal] = useState(false);
+    const navigate = useNavigate();
+    const { isAuthenticated, login, signup, toggleLoginModal } = useAuth();
+
+    const handleFindPartnerClick = () => {
+        navigate('/findpartner');
+    };
+
+    const handleLogin = () => {
+        login();
+        setShowModal(false);
+    };
+
+    const handleSignup = () => {
+        signup();
+        setShowModal(false);
+    };
+
+    const handleProfileClick = () => {
+        navigate('/profile');
+    };
 
     return (
         <div className="relative h-screen overflow-hidden bg-[#800000]"> {/* Default maroon background */}
@@ -48,8 +73,19 @@ const HeroWithHeader = () => {
                     </nav>
                     {/* Buttons */}
                     <div>
-                        <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300">Login</button>
-                        <button className="ml-4 bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300">Sign Up</button>
+                        {isAuthenticated ? (
+                            <img
+                                src={profileIcon}
+                                alt="Profile"
+                                className="h-10 w-10 rounded-full cursor-pointer"
+                                onClick={handleProfileClick}
+                            />
+                        ) : (
+                            <>
+                                <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => setShowModal(true)}>Login</button>
+                                <button className="ml-4 bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => setShowModal(true)}>Sign Up</button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -62,10 +98,15 @@ const HeroWithHeader = () => {
                 <p className="text-2xl mb-8 max-w-3xl mx-auto" style={{ fontFamily: "'Playfair Display', serif" }}>
                     Join us in celebrating the journey of love and partnership, as we forge connections that stand the test of time and create memories that last a lifetime.
                 </p>
-                <button className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-md transition duration-300 shadow-lg">
+                <button 
+                    className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-md transition duration-300 shadow-lg"
+                    onClick={handleFindPartnerClick}
+                >
                     Find Your Partner!
                 </button>
             </div>
+
+            {showModal && <LoginModal onClose={() => setShowModal(false)} onLogin={handleLogin} onSignup={handleSignup} />}
         </div>
     );
 };
