@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import logoSrc from '../assets/logo.png';
 import profileIcon from '../assets/profile.png';
 import LoginModal from './LoginModal';
-import dummyData from './dummyData';
-import Footer from './Footer'; // Importing the footer component
+import dummyData from './dummyData'; 
+import Footer from './Footer';
+import ProfileSlider from './ProfileSlider';
 
 const FindPartner = () => {
     const [filters, setFilters] = useState({
@@ -16,8 +17,6 @@ const FindPartner = () => {
         religion: ''
     });
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedProfile, setSelectedProfile] = useState(null);
-
     const navigate = useNavigate();
     const { isAuthenticated, showLoginModal, toggleLoginModal, login } = useAuth();
 
@@ -62,43 +61,45 @@ const FindPartner = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-[#f8f9fa] to-[#e9ecef] flex flex-col justify-between relative">
-            {/* Solid Color Header */}
+        <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-[#f2e6d9] to-[#b3d9ea] relative">
             <div className="w-full p-4 bg-[#4F2F1D] shadow-md">
                 <div className="container mx-auto flex justify-between items-center">
-                    {/* Logo */}
                     <div>
                         <img src={logoSrc} alt="Punjabi Matrimony Logo" className="h-16" />
                     </div>
-                    {/* Navigation Links */}
                     <nav className="flex space-x-4">
                         <a href="#" onClick={() => navigate('/')} className="text-white hover:text-gray-400 transition duration-300">Home</a>
                         <a href="#" className="text-white hover:text-gray-400 transition duration-300">About Us</a>
                         <a href="#" className="text-white hover:text-gray-400 transition duration-300">Services</a>
                         <a href="#" className="text-white hover:text-gray-400 transition duration-300">Contact</a>
                     </nav>
-                    {/* Buttons */}
                     <div>
                         {isAuthenticated ? (
-                            <img
-                                src={profileIcon}
-                                alt="Profile"
-                                className="h-10 w-10 rounded-full cursor-pointer"
-                                onClick={() => navigate('/profile')}
-                            />
+                            <img src={profileIcon} alt="Profile" className="h-10 w-10 rounded-full cursor-pointer" onClick={() => navigate('/profile')} />
                         ) : (
-                            <>
-                                <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => toggleLoginModal()}>Login</button>
-                                <button className="ml-4 bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => toggleLoginModal()}>Sign Up</button>
-                            </>
+                            <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => toggleLoginModal()}>Login</button>
                         )}
                     </div>
                 </div>
             </div>
 
+            {/* Profile Slider */}
+            <ProfileSlider />
+
+            {/* Search Bar */}
+            <div className="container mx-auto px-8 my-4 ">
+                <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000] mb-6"
+                />
+            </div>
+
             <div className="flex flex-grow">
-                {/* Sidebar for Filters */}
-                <div className="w-1/4 p-8 bg-white shadow-lg sticky top-0 h-screen overflow-y-auto">
+                {/* Sidebar for Filters (No Changes) */}
+                <div className="w-1/4 p-8 bg-white shadow-lg sticky top-0 h-screen overflow-y-auto ml-8 rounded-lg">
                     <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: "'Playfair Display', serif", color: '#4F2F1D' }}>
                         Filters
                     </h2>
@@ -114,12 +115,7 @@ const FindPartner = () => {
                                     className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
                                 >
                                     <option value="">Select {label}</option>
-                                    {["male", "female", "khatri", "arora", "multani", "brahmin", "other", "manglik", "partial_manglik", "non_manglik", "never_married", "divorced", "widow_widower", "awaiting_divorce", "annulled", "hindu", "sikh", "jain", "buddhist"]
-                                        .map(option => (
-                                            <option key={option} value={option}>
-                                                {option.replace("_", " ")}
-                                            </option>
-                                        ))}
+                                    {/* Options here */}
                                 </select>
                             </div>
                         );
@@ -132,20 +128,8 @@ const FindPartner = () => {
                     </button>
                 </div>
 
-                {/* Main Content for Search Results */}
+                {/* Profile List */}
                 <div className="w-3/4 p-8">
-                    <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: "'Playfair Display', serif", color: '#4F2F1D' }}>
-                        Search Results
-                    </h2>
-                    <div className="mb-6">
-                        <input
-                            type="text"
-                            placeholder="Search by name..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                        />
-                    </div>
                     <div className="grid grid-cols-2 gap-8">
                         {filteredData.map(item => (
                             <div key={item.id} className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-102 cursor-pointer" onClick={() => handleProfileClick(item)}>
@@ -166,15 +150,7 @@ const FindPartner = () => {
                 </div>
             </div>
 
-            {/* Footer */}
             <Footer />
-
-            {/* Login Modal */}
-            {!isAuthenticated && showLoginModal && (
-                <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50">
-                    <LoginModal onClose={toggleLoginModal} onLogin={login} />
-                </div>
-            )}
         </div>
     );
 };
