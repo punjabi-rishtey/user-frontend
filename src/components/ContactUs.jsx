@@ -1,8 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './Header';
 import Footer from './Footer';
 
 const ContactUs = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        mobile: '',
+        subject: '',
+        message: ''
+    });
+    const [errors, setErrors] = useState({});
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.name) newErrors.name = 'Name is required';
+        if (!formData.email) newErrors.email = 'Email is required';
+        if (!formData.mobile) newErrors.mobile = 'Mobile number is required';
+        if (!formData.subject) newErrors.subject = 'Subject is required';
+        if (!formData.message) newErrors.message = 'Message is required';
+        return newErrors;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+        } else {
+            // Handle form submission (e.g., send data to server)
+            console.log('Form submitted:', formData);
+            // Clear form
+            setFormData({
+                name: '',
+                email: '',
+                mobile: '',
+                subject: '',
+                message: ''
+            });
+            setErrors({});
+        }
+    };
+
     return (
         <div className="bg-[#F0ECE3] min-h-screen flex flex-col">
             <Header />
@@ -15,30 +62,66 @@ const ContactUs = () => {
                         <div className="flex flex-col md:flex-row items-center">
                             {/* Left Side - Contact Form */}
                             <div className="w-full md:w-1/2 md:pr-16">
-                                <form className="bg-white p-8 rounded-lg shadow-lg">
+                                <form className="bg-white p-8 rounded-lg shadow-lg" onSubmit={handleSubmit}>
                                     <div className="mb-4">
                                         <label className="block text-[#4F2F1D] mb-2 font-semibold">Name</label>
                                         <input
                                             type="text"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleChange}
                                             className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
                                             placeholder="Your Name"
                                         />
+                                        {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                                     </div>
                                     <div className="mb-4">
                                         <label className="block text-[#4F2F1D] mb-2 font-semibold">Email</label>
                                         <input
                                             type="email"
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
                                             className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
                                             placeholder="Your Email"
                                         />
+                                        {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-[#4F2F1D] mb-2 font-semibold">Mobile</label>
+                                        <input
+                                            type="text"
+                                            name="mobile"
+                                            value={formData.mobile}
+                                            onChange={handleChange}
+                                            className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                                            placeholder="Your Mobile Number"
+                                        />
+                                        {errors.mobile && <p className="text-red-500 text-sm">{errors.mobile}</p>}
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-[#4F2F1D] mb-2 font-semibold">Subject</label>
+                                        <input
+                                            type="text"
+                                            name="subject"
+                                            value={formData.subject}
+                                            onChange={handleChange}
+                                            className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                                            placeholder="Subject"
+                                        />
+                                        {errors.subject && <p className="text-red-500 text-sm">{errors.subject}</p>}
                                     </div>
                                     <div className="mb-4">
                                         <label className="block text-[#4F2F1D] mb-2 font-semibold">Message</label>
                                         <textarea
+                                            name="message"
+                                            value={formData.message}
+                                            onChange={handleChange}
                                             className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
                                             placeholder="Your Message"
                                             rows="5"
                                         ></textarea>
+                                        {errors.message && <p className="text-red-500 text-sm">{errors.message}</p>}
                                     </div>
                                     <button
                                         type="submit"
@@ -62,7 +145,7 @@ const ContactUs = () => {
                                         </span>
                                         <div>
                                             <p className="text-gray-500 text-sm">Phone</p>
-                                            <p className="font-semibold text-lg">+01 2242 3366</p>
+                                            <p className="font-semibold text-lg">+91-73546-19960</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-3">
@@ -71,7 +154,7 @@ const ContactUs = () => {
                                         </span>
                                         <div>
                                             <p className="text-gray-500 text-sm">Email</p>
-                                            <p className="font-semibold text-lg">info@example.com</p>
+                                            <p className="font-semibold text-lg">support@punjabi-rishtey.com</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center space-x-3">
@@ -80,7 +163,7 @@ const ContactUs = () => {
                                         </span>
                                         <div>
                                             <p className="text-gray-500 text-sm">Address</p>
-                                            <p className="font-semibold text-lg">1234 Street Name, City, Country</p>
+                                            <p className="font-semibold text-lg">Mahalaxmi Nagar, Indore, M.P. 452010</p>
                                         </div>
                                     </div>
                                 </div>
