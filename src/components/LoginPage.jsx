@@ -86,6 +86,11 @@ const LoginPage = () => {
               Don't have an account? Sign Up
             </button>
           </div>
+          <div className="mt-4 text-center">
+            <button className="text-[#990000] hover:underline">
+              Forgot Password?
+            </button>
+          </div>
         </div>
       </div>
 
