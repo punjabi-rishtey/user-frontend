@@ -15,19 +15,16 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 export default function ProfileSettings() {
   const { user, updateUser, logout } = useContext(AuthContext); // Use logout instead of signOut
   const navigate = useNavigate(); // Initialize useNavigate
-  const [profileVisibility, setProfileVisibility] = useState(
-    user.profileVisibility || "All users"
-  );
-  const [interestRequests, setInterestRequests] = useState(
-    user.interestRequests || "All users"
-  );
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user.name,
     mobile: user.mobile,
     email: user.email,
     password: "",
-    profileType: user.profileType,
+    gender: user.gender,
+    dob: user.dob,
+    religion: user.religion,
+    marital_status: user.marital_status,
   });
 
   const handleChange = (e) => {
@@ -39,7 +36,17 @@ export default function ProfileSettings() {
   };
 
   const handleSave = () => {
-    updateUser(formData);
+    const updatedUser = {
+      ...user,
+      name: formData.fullName,
+      mobile: formData.mobile,
+      email: formData.email,
+      gender: formData.gender,
+      dob: formData.dob,
+      religion: formData.religion,
+      marital_status: formData.marital_status,
+    };
+    updateUser(updatedUser);
     setIsEditing(false);
   };
 
@@ -49,7 +56,10 @@ export default function ProfileSettings() {
       mobile: user.mobile,
       email: user.email,
       password: "",
-      profileType: user.profileType,
+      gender: user.gender,
+      dob: user.dob,
+      religion: user.religion,
+      marital_status: user.marital_status,
     });
     setIsEditing(false);
   };
@@ -121,42 +131,6 @@ export default function ProfileSettings() {
                 Sign Out
               </button>
             </div>
-
-            {/* Profile Visibility */}
-            <div className="mt-6">
-              <h3 className="font-semibold">Profile visible</h3>
-              <p className="text-gray-500 text-sm">
-                You can set up who can view your profile.
-              </p>
-              <select
-                value={profileVisibility}
-                onChange={(e) => setProfileVisibility(e.target.value)}
-                className="w-full mt-2 border px-3 py-2 rounded-lg"
-              >
-                <option>All users</option>
-                <option>Premium users only</option>
-                <option>Hidden</option>
-              </select>
-            </div>
-
-            {/* Interest Requests */}
-            <div className="mt-6">
-              <h3 className="font-semibold">
-                Who can send you Interest requests?
-              </h3>
-              <p className="text-gray-500 text-sm">
-                You can set up who can send interest requests.
-              </p>
-              <select
-                value={interestRequests}
-                onChange={(e) => setInterestRequests(e.target.value)}
-                className="w-full mt-2 border px-3 py-2 rounded-lg"
-              >
-                <option>All users</option>
-                <option>Only matched users</option>
-                <option>No one</option>
-              </select>
-            </div>
           </div>
 
           {/* Account Section */}
@@ -191,13 +165,56 @@ export default function ProfileSettings() {
                 name="password"
                 onChange={handleChange}
                 type="password"
+                isPassword
               />
               <InfoRow
-                label="Profile type"
-                value={formData.profileType}
+                label="Gender"
+                value={formData.gender}
                 isEditing={isEditing}
-                name="profileType"
+                name="gender"
                 onChange={handleChange}
+                type="select"
+                options={[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                ]}
+              />
+              <InfoRow
+                label="Date of Birth"
+                value={formData.dob}
+                isEditing={isEditing}
+                name="dob"
+                onChange={handleChange}
+                type="date"
+              />
+              <InfoRow
+                label="Religion"
+                value={formData.religion}
+                isEditing={isEditing}
+                name="religion"
+                onChange={handleChange}
+                type="select"
+                options={[
+                  { value: "hindu", label: "Hindu" },
+                  { value: "sikh", label: "Sikh" },
+                  { value: "jain", label: "Jain" },
+                  { value: "buddhist", label: "Buddhist" },
+                ]}
+              />
+              <InfoRow
+                label="Marital Status"
+                value={formData.marital_status}
+                isEditing={isEditing}
+                name="marital_status"
+                onChange={handleChange}
+                type="select"
+                options={[
+                  { value: "never_married", label: "Never Married" },
+                  { value: "divorced", label: "Divorced" },
+                  { value: "widow_widower", label: "Widow/Widower" },
+                  { value: "awaiting_divorce", label: "Awaiting Divorce" },
+                  { value: "annulled", label: "Annulled" },
+                ]}
               />
             </div>
             {isEditing ? (
@@ -253,20 +270,46 @@ const InfoRow = ({
   name,
   onChange,
   type = "text",
+  isPassword = false,
+  options = [],
 }) => {
+  const formatValue = (name, value) => {
+    if (name === "dob") {
+      return new Date(value).toLocaleDateString();
+    }
+    return value;
+  };
+
   return (
     <div>
       <h4 className="text-gray-600 text-sm">{label}</h4>
       {isEditing ? (
-        <input
-          type={type}
-          name={name}
-          value={value}
-          onChange={onChange}
-          className="w-full p-2 border border-gray-300 rounded-lg"
-        />
+        type === "select" ? (
+          <select
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="w-full p-2 border border-gray-300 rounded-lg"
+          >
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="w-full p-2 border border-gray-300 rounded-lg"
+          />
+        )
       ) : (
-        <p className="text-gray-800">{value}</p>
+        <p className="text-gray-800">
+          {isPassword ? "••••••••" : formatValue(name, value)}
+        </p>
       )}
     </div>
   );
