@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import videoSrc from "../assets/video.mp4"; // Video path
@@ -25,7 +24,6 @@ const HeroWithHeader = () => {
 
   return (
     <div className="relative h-screen overflow-hidden bg-[#800000]">
-      {" "}
       {/* Default maroon background */}
       {/* Loader */}
       {!isVideoLoaded && (
@@ -71,10 +69,10 @@ const HeroWithHeader = () => {
               About Us
             </button>
             <button
-              onClick={() => navigate("/services")}
+              onClick={handleFindPartnerClick}
               className="text-white hover:text-gray-400 transition duration-300"
             >
-              Services
+              Find Your Partner
             </button>
             <button
               onClick={() => navigate("/contact")}

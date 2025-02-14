@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import logoSrc from "../assets/logo.png"; // Logo path
@@ -11,6 +10,14 @@ const Header = () => {
 
   const handleProfileClick = () => {
     navigate("/profilepage");
+  };
+
+  const handleFindPartnerClick = () => {
+    if (isAuthenticated) {
+      navigate("/findpartner");
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
@@ -33,10 +40,10 @@ const Header = () => {
             About Us
           </button>
           <button
-            onClick={() => navigate("/services")}
+            onClick={handleFindPartnerClick}
             className="text-white hover:text-gray-400 transition duration-300"
           >
-            Services
+            Find Your Partner
           </button>
           <button
             onClick={() => navigate("/contact")}

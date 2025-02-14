@@ -1,18 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Import the authentication context
 import logoSrc from "../assets/logo.png"; // Ensure the correct path to your logo file
 
 const Footer = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth(); // Get the authentication status
 
   const handleNavigation = (path) => {
-    const validPaths = ["/", "/about", "/services", "/contact"];
-    if (validPaths.includes(path)) {
-      navigate(path);
-      window.scrollTo(0, 0); // Scroll to top
+    if (path === "/findpartner" && !isAuthenticated) {
+      navigate("/login"); // Redirect to login if not authenticated
     } else {
-      console.error("Invalid navigation path:", path);
+      navigate(path);
     }
+    window.scrollTo(0, 0); // Scroll to top
   };
 
   return (
@@ -48,10 +49,10 @@ const Footer = () => {
               About Us
             </button>
             <button
-              onClick={() => handleNavigation("/services")}
+              onClick={() => handleNavigation("/findpartner")}
               className="hover:text-gray-400 transition duration-300"
             >
-              Services
+              Find Your Partner
             </button>
             <button
               onClick={() => handleNavigation("/contact")}
