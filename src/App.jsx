@@ -11,7 +11,7 @@ import Profile from './components/Profile';
 import ProfileDetail from './components/ProfileDetail';
 import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
-import AboutUsPage from './components/AboutUsPage';
+import AboutPage from './components/AboutPage';
 
 function App() {
   return (
@@ -30,7 +30,7 @@ function App() {
           <Route path="/profile/:id" element={<ProfileDetail />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/about" element={<AboutUsPage />} /> 
+          <Route path="/about" element={<AboutPage />} /> 
         </Routes>
       </div>
     </AuthProvider>
