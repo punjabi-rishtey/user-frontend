@@ -34,8 +34,14 @@ const SuccessStories = () => {
                     Success Stories
                 </h2>
 
-                {/* Central Line */}
-                <div className="absolute left-1/2 transform -translate-x-1/2 top-0 h-full w-[2px] bg-[#6B4226]"></div>
+                {/* Central Line - Adjusted to Start from First Story & End at Last Story */}
+                <div
+                    className="absolute left-1/2 transform -translate-x-1/2 bg-[#6B4226] w-[2px]"
+                    style={{
+                        top: '11rem', // Starts below the heading
+                        height: `calc(100% - 15rem)`, // Ends at the last story
+                    }}
+                ></div>
 
                 <div className="relative space-y-16">
                     {stories.map((story, index) => (
