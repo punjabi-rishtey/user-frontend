@@ -1,23 +1,25 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import logoSrc from '../assets/logo.png'; // Logo path
 
 const Header = () => {
+    const navigate = useNavigate();
+
     return (
-        <header className="bg-black text-white p-4 flex justify-between items-center">
-            <div className="logo text-xl font-bold">
-                <a href="/" className="hover:text-gray-300">PunjabiMatrimony</a>
+        <div className="w-full p-4 bg-[#4F2F1D] shadow-md">
+            <div className="container mx-auto flex justify-between items-center">
+                <div>
+                    <img src={logoSrc} alt="Punjabi Matrimony Logo" className="h-16" />
+                </div>
+                <nav className="flex space-x-4">
+                    <a href="#" onClick={() => navigate('/')} className="text-white hover:text-gray-400 transition duration-300">Home</a>
+                    <a href="#" onClick={() => navigate('/about')} className="text-white hover:text-gray-400 transition duration-300">About Us</a>
+                    <a href="#" className="text-white hover:text-gray-400 transition duration-300">Services</a>
+                    <a href="#" className="text-white hover:text-gray-400 transition duration-300">Contact</a>
+                </nav>
             </div>
-            <nav className="flex space-x-4">
-                <a href="#" className="hover:text-gray-400">Home</a>
-                <a href="#" className="hover:text-gray-400">About Us</a>
-                <a href="#" className="hover:text-gray-400">Services</a>
-                <a href="#" className="hover:text-gray-400">Contact</a>
-            </nav>
-            <div>
-                <button className="bg-blue-500 px-4 py-2 rounded hover:bg-blue-700 mr-2">Login</button>
-                <button className="bg-green-500 px-4 py-2 rounded hover:bg-green-700">Sign Up</button>
-            </div>
-        </header>
+        </div>
     );
-}
+};
 
 export default Header;

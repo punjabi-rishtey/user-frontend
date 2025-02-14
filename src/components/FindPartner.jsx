@@ -6,6 +6,7 @@ import profileIcon from '../assets/profile.png';
 import LoginModal from './LoginModal';
 import dummyData from './dummyData'; 
 import Footer from './Footer';
+import Header from './Header';
 import ProfileSlider from './ProfileSlider';
 
 const FindPartner = () => {
@@ -62,26 +63,7 @@ const FindPartner = () => {
 
     return (
         <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-[#f2e6d9] to-[#b3d9ea] relative">
-            <div className="w-full p-4 bg-[#4F2F1D] shadow-md">
-                <div className="container mx-auto flex justify-between items-center">
-                    <div>
-                        <img src={logoSrc} alt="Punjabi Matrimony Logo" className="h-16" />
-                    </div>
-                    <nav className="flex space-x-4">
-                        <a href="#" onClick={() => navigate('/')} className="text-white hover:text-gray-400 transition duration-300">Home</a>
-                        <a href="#" className="text-white hover:text-gray-400 transition duration-300">About Us</a>
-                        <a href="#" className="text-white hover:text-gray-400 transition duration-300">Services</a>
-                        <a href="#" className="text-white hover:text-gray-400 transition duration-300">Contact</a>
-                    </nav>
-                    <div>
-                        {isAuthenticated ? (
-                            <img src={profileIcon} alt="Profile" className="h-10 w-10 rounded-full cursor-pointer" onClick={() => navigate('/profile')} />
-                        ) : (
-                            <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => toggleLoginModal()}>Login</button>
-                        )}
-                    </div>
-                </div>
-            </div>
+            <Header />
 
             {/* Profile Slider */}
             <ProfileSlider />

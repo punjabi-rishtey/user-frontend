@@ -1,29 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import videoSrc from '../assets/video.mp4'; // Video path
 import logoSrc from '../assets/logo.png'; // Logo path
 import profileIcon from '../assets/profile.png'; // Profile icon path
-import LoginModal from './LoginModal';
 import { useAuth } from '../context/AuthContext';
 
 const HeroWithHeader = () => {
-    const [isVideoLoaded, setIsVideoLoaded] = useState(false); // State to track video load status
-    const [showModal, setShowModal] = useState(false);
     const navigate = useNavigate();
-    const { isAuthenticated, login, signup, toggleLoginModal } = useAuth();
+    const { isAuthenticated } = useAuth();
 
     const handleFindPartnerClick = () => {
         navigate('/findpartner');
-    };
-
-    const handleLogin = () => {
-        login();
-        setShowModal(false);
-    };
-
-    const handleSignup = () => {
-        signup();
-        setShowModal(false);
     };
 
     const handleProfileClick = () => {
@@ -32,23 +19,13 @@ const HeroWithHeader = () => {
 
     return (
         <div className="relative h-screen overflow-hidden bg-[#800000]"> {/* Default maroon background */}
-            {/* Loader */}
-            {!isVideoLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center z-20">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
-                </div>
-            )}
-
             {/* Local Background Video */}
             <video
                 autoPlay
                 loop
                 muted
                 playsInline
-                className={`absolute w-full h-full object-cover transition-opacity duration-500 ${
-                    isVideoLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
-                onCanPlayThrough={() => setIsVideoLoaded(true)} // Trigger when the video can play through
+                className="absolute w-full h-full object-cover"
             >
                 <source src={videoSrc} type="video/mp4" />
                 Your browser does not support the video tag.
@@ -82,8 +59,8 @@ const HeroWithHeader = () => {
                             />
                         ) : (
                             <>
-                                <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => setShowModal(true)}>Login</button>
-                                <button className="ml-4 bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => setShowModal(true)}>Sign Up</button>
+                                <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => navigate('/login')}>Login</button>
+                                <button className="ml-4 bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => navigate('/signup')}>Sign Up</button>
                             </>
                         )}
                     </div>
@@ -105,8 +82,6 @@ const HeroWithHeader = () => {
                     Find Your Partner!
                 </button>
             </div>
-
-            {showModal && <LoginModal onClose={() => setShowModal(false)} onLogin={handleLogin} onSignup={handleSignup} />}
         </div>
     );
 };

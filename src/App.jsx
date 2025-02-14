@@ -9,6 +9,9 @@ import Footer from './components/Footer';
 import FindPartner from './components/FindPartner';
 import Profile from './components/Profile';
 import ProfileDetail from './components/ProfileDetail';
+import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignupPage';
+import AboutUsPage from './components/AboutUsPage';
 
 function App() {
   return (
@@ -25,6 +28,9 @@ function App() {
           <Route path="/findpartner" element={<FindPartner />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<ProfileDetail />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/about" element={<AboutUsPage />} /> 
         </Routes>
       </div>
     </AuthProvider>
