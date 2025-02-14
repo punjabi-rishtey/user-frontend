@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import logoSrc from "../assets/logo.png"; // Logo path
@@ -9,7 +10,7 @@ const Header = () => {
   const { isAuthenticated } = useAuth();
 
   const handleProfileClick = () => {
-    navigate("/profile");
+    navigate("/profilepage");
   };
 
   return (

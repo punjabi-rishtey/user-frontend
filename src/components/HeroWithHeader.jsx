@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import videoSrc from "../assets/video.mp4"; // Video path
@@ -19,7 +20,7 @@ const HeroWithHeader = () => {
   };
 
   const handleProfileClick = () => {
-    navigate("/profile");
+    navigate("/profilepage");
   };
 
   return (

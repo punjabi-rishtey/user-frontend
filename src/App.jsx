@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
@@ -13,6 +14,7 @@ import LoginPage from "./components/LoginPage";
 import SignupPage from "./components/SignupPage";
 import AboutPage from "./components/AboutPage";
 import ContactUs from "./components/ContactUs";
+import Profilepage from "./components/Profilepage";
 
 function App() {
   return (
@@ -34,6 +36,7 @@ function App() {
           <Route path="/findpartner" element={<FindPartner />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<ProfileDetail />} />
+          <Route path="/profilepage" element={<Profilepage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/about" element={<AboutPage />} />
