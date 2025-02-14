@@ -12,6 +12,7 @@ import ProfileDetail from "./components/ProfileDetail";
 import LoginPage from "./components/LoginPage";
 import SignupPage from "./components/SignupPage";
 import AboutPage from "./components/AboutPage";
+import ContactUs from "./components/ContactUs";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/contact" element={<ContactUs />} />
         </Routes>
       </div>
     </AuthProvider>

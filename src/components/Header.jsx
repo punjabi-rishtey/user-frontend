@@ -19,32 +19,30 @@ const Header = () => {
           <img src={logoSrc} alt="Punjabi Matrimony Logo" className="h-16" />
         </div>
         <nav className="flex space-x-4">
-          <a
-            href="#"
+          <button
             onClick={() => navigate("/")}
             className="text-white hover:text-gray-400 transition duration-300"
           >
             Home
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
             onClick={() => navigate("/about")}
             className="text-white hover:text-gray-400 transition duration-300"
           >
             About Us
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
+            onClick={() => navigate("/services")}
             className="text-white hover:text-gray-400 transition duration-300"
           >
             Services
-          </a>
-          <a
-            href="#"
+          </button>
+          <button
+            onClick={() => navigate("/contact")}
             className="text-white hover:text-gray-400 transition duration-300"
           >
             Contact
-          </a>
+          </button>
         </nav>
         <div>
           {isAuthenticated ? (
