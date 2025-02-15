@@ -36,18 +36,32 @@ export default function ProfileSettings() {
   };
 
   const handleSave = () => {
-    const updatedUser = {
-      ...user,
-      name: formData.fullName,
-      mobile: formData.mobile,
-      email: formData.email,
-      gender: formData.gender,
-      dob: formData.dob,
-      religion: formData.religion,
-      marital_status: formData.marital_status,
-    };
-    updateUser(updatedUser);
-    setIsEditing(false);
+    try {
+      const updatedUser = {
+        ...user,
+        name: formData.fullName,
+        mobile: formData.mobile,
+        email: formData.email,
+        gender: formData.gender,
+        dob: formData.dob,
+        religion: formData.religion,
+        marital_status: formData.marital_status,
+      };
+
+      const success = updateUser(updatedUser);
+
+      if (success) {
+        setIsEditing(false);
+        // Show success message (optional)
+        alert("Profile updated successfully!");
+      } else {
+        // Show error message (optional)
+        alert("Failed to update profile. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      alert("An error occurred while saving your profile.");
+    }
   };
 
   const handleCancel = () => {
@@ -276,6 +290,9 @@ const InfoRow = ({
   const formatValue = (name, value) => {
     if (name === "dob") {
       return new Date(value).toLocaleDateString();
+    }
+    if (name === "gender" || name === "religion" || name === "marital_status") {
+      return value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
     }
     return value;
   };
