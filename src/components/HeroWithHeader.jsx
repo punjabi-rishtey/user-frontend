@@ -58,31 +58,31 @@ const HeroWithHeader = () => {
           <nav className="flex space-x-4">
             <button
               onClick={() => navigate("/")}
-              className="text-white hover:text-gray-400 transition duration-300"
+              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
             >
               Home
             </button>
             <button
               onClick={() => navigate("/about")}
-              className="text-white hover:text-gray-400 transition duration-300"
+              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
             >
               About Us
             </button>
             <button
               onClick={handleFindPartnerClick}
-              className="text-white hover:text-gray-400 transition duration-300"
+              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
             >
               Find Your Partner
             </button>
             <button
               onClick={() => navigate("/testimonials")}
-              className="text-white hover:text-gray-400 transition duration-300"
+              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
             >
               Testimonials
             </button>
             <button
               onClick={() => navigate("/contact")}
-              className="text-white hover:text-gray-400 transition duration-300"
+              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
             >
               Contact
             </button>

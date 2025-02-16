@@ -38,31 +38,31 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-8 text-center">
             <button
               onClick={() => handleNavigation("/")}
-              className="hover:text-gray-400 transition duration-300"
+              className="hover:text-gray-400 transition duration-300 hover:underline"
             >
               Home
             </button>
             <button
               onClick={() => handleNavigation("/about")}
-              className="hover:text-gray-400 transition duration-300"
+              className="hover:text-gray-400 transition duration-300 hover:underline"
             >
               About Us
             </button>
             <button
               onClick={() => handleNavigation("/findpartner")}
-              className="hover:text-gray-400 transition duration-300"
+              className="hover:text-gray-400 transition duration-300 hover:underline"
             >
               Find Your Partner
             </button>
             <button
               onClick={() => navigate("/testimonials")}
-              className="text-white hover:text-gray-400 transition duration-300"
+              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
             >
               Testimonials
             </button>
             <button
               onClick={() => handleNavigation("/contact")}
-              className="hover:text-gray-400 transition duration-300"
+              className="hover:text-gray-400 transition duration-300 hover:underline"
             >
               Contact
             </button>
