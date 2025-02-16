@@ -14,6 +14,7 @@ import SignupPage from "./components/SignupPage";
 import AboutPage from "./components/AboutPage";
 import ContactUs from "./components/ContactUs";
 import Profilepage from "./components/Profilepage";
+import Testimonials from "./components/Testimonials";
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path="/testimonials" element={<Testimonials />} />
         </Routes>
       </div>
     </AuthProvider>

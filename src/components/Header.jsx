@@ -46,6 +46,12 @@ const Header = () => {
             Find Your Partner
           </button>
           <button
+            onClick={() => navigate("/testimonials")}
+            className="text-white hover:text-gray-400 transition duration-300"
+          >
+            Testimonials
+          </button>
+          <button
             onClick={() => navigate("/contact")}
             className="text-white hover:text-gray-400 transition duration-300"
           >

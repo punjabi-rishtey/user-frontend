@@ -101,18 +101,11 @@ export default function ProfileSettings() {
             </p>
           </div>
           <nav className="mt-6 space-y-4">
-            <NavItem icon={<FaUser />} label="Dashboard" />
             <NavItem icon={<FaHeart />} label="My Matches" />
-            <NavItem icon={<FaUser />} label="Profile" />
             <NavItem icon={<FaComments />} label="Interests" />
             <NavItem icon={<FaComments />} label="Chat list" />
             <NavItem icon={<FaMoneyBill />} label="Plan" />
-            <NavItem icon={<FaCog />} label="Setting" active />
-            <NavItem
-              icon={<FaSignOutAlt />}
-              label="Log out"
-              onClick={handleLogout} // Use handleLogout
-            />
+            <NavItem icon={<FaCog />} label="Settings" active />
           </nav>
         </aside>
 
