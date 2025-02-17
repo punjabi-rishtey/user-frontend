@@ -13,94 +13,107 @@ import Footer from "./Footer"; // Import Footer component
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 export default function ProfileSettings() {
-  const { user, updateUser, logout } = useContext(AuthContext); // Use logout instead of signOut
-  const navigate = useNavigate(); // Initialize useNavigate
+  const { user, updateUser, logout } = useContext(AuthContext); // ✅ Always at the top
+
+  const navigate = useNavigate(); // ✅ Now correctly placed
+
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: user.name,
-    mobile: user.mobile,
-    email: user.email,
-    password: "",
-    gender: user.gender,
-    dob: user.dob,
-    religion: user.religion,
-    marital_status: user.marital_status,
-    age: user.age || 0,
-  });
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [isEditingProfession, setIsEditingProfession] = useState(false);
+  const [isEditingFamily, setIsEditingFamily] = useState(false);
+  const [isEditingEducation, setIsEditingEducation] = useState(false);
+  const [isEditingAstrology, setIsEditingAstrology] = useState(false);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [isEditingHobbies, setIsEditingHobbies] = useState(false);
+
+  // Ensure `user` is not null before accessing properties
+
+  const [formData, setFormData] = useState({
+    fullName: user?.name || "",
+    mobile: user?.mobile || "",
+    email: user?.email || "",
+    password: "",
+    gender: user?.gender || "",
+    dob: user?.dob || "",
+    religion: user?.religion || "",
+    marital_status: user?.marital_status || "",
+    age: user?.age || 0,
+  });
+
   const [personalData, setPersonalData] = useState({
-    height: user.height || "",
-    caste: user.caste || "",
-    language: user.language || "",
-    mangalik: user.mangalik || false,
+    height: user?.height || "",
+    caste: user?.caste || "",
+    language: user?.language || "",
+    mangalik: user?.mangalik || false,
     birth_details: {
-      birth_time: user.birth_details?.birth_time || "",
-      birth_place: user.birth_details?.birth_place || "",
+      birth_time: user?.birth_details?.birth_time || "",
+      birth_place: user?.birth_details?.birth_place || "",
     },
     physical_attributes: {
-      skin_tone: user.physical_attributes?.skin_tone || "",
-      body_type: user.physical_attributes?.body_type || "",
+      skin_tone: user?.physical_attributes?.skin_tone || "",
+      body_type: user?.physical_attributes?.body_type || "",
       physical_disability:
-        user.physical_attributes?.physical_disability || false,
-      disability_reason: user.physical_attributes?.disability_reason || "",
+        user?.physical_attributes?.physical_disability || false,
+      disability_reason: user?.physical_attributes?.disability_reason || "",
     },
     lifestyle: {
-      smoke: user.lifestyle?.smoke || false,
-      drink: user.lifestyle?.drink || false,
-      veg_nonveg: user.lifestyle?.veg_nonveg || "",
-      nri_status: user.lifestyle?.nri_status || false,
+      smoke: user?.lifestyle?.smoke || false,
+      drink: user?.lifestyle?.drink || false,
+      veg_nonveg: user?.lifestyle?.veg_nonveg || "",
+      nri_status: user?.lifestyle?.nri_status || false,
     },
   });
+
   const [locationData, setLocationData] = useState({
-    // New state for location
-    city: user.location?.city || "",
-    pincode: user.location?.pincode || "",
+    city: user?.location?.city || "",
+    pincode: user?.location?.pincode || "",
   });
+
   const [hobbiesData, setHobbiesData] = useState({
-    // New state for hobbies
-    hobbies: user.hobbies || [],
+    hobbies: user?.hobbies || [],
   });
 
-  const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [professionData, setProfessionData] = useState({
-    occupation: user.occupation || "",
-    designation: user.designation || "",
-    working_with: user.working_with || "",
-    working_as: user.working_as || "",
-    income: user.income || "",
-    work_address: user.work_address || "",
+    occupation: user?.occupation || "",
+    designation: user?.designation || "",
+    working_with: user?.working_with || "",
+    working_as: user?.working_as || "",
+    income: user?.income || "",
+    work_address: user?.work_address || "",
   });
 
-  const [isEditingFamily, setIsEditingFamily] = useState(false);
   const [familyData, setFamilyData] = useState({
-    family_value: user.family_value || "",
-    family_size: user.family_size || 0,
+    family_value: user?.family_value || "",
+    family_size: user?.family_size || 0,
     mother: {
-      name: user.mother?.name || "",
-      occupation: user.mother?.occupation || "",
+      name: user?.mother?.name || "",
+      occupation: user?.mother?.occupation || "",
     },
     father: {
-      name: user.father?.name || "",
-      occupation: user.father?.occupation || "",
+      name: user?.father?.name || "",
+      occupation: user?.father?.occupation || "",
     },
     siblings: {
-      brother_count: user.siblings?.brother_count || 0,
-      sister_count: user.siblings?.sister_count || 0,
+      brother_count: user?.siblings?.brother_count || 0,
+      sister_count: user?.siblings?.sister_count || 0,
     },
   });
 
-  const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [educationData, setEducationData] = useState({
-    education_level: user.education_level || "",
-    education_field: user.education_field || "",
-    qualification_details: user.qualification_details || "",
+    education_level: user?.education_level || "",
+    education_field: user?.education_field || "",
+    qualification_details: user?.qualification_details || "",
   });
-  const [isEditingAstrology, setIsEditingAstrology] = useState(false);
+
   const [astrologyData, setAstrologyData] = useState({
-    rashi_nakshatra: user.rashi_nakshatra || "",
-    gotra: user.gotra || "",
-    gotra_mama: user.gotra_mama || "",
+    rashi_nakshatra: user?.rashi_nakshatra || "",
+    gotra: user?.gotra || "",
+    gotra_mama: user?.gotra_mama || "",
   });
+
+  if (!user) {
+    return <div>Loading...</div>; // or redirect to login page
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -446,6 +459,13 @@ export default function ProfileSettings() {
     }
   };
 
+  const handleHobbiesChange = (e) => {
+    const { value } = e.target;
+    setHobbiesData({
+      hobbies: value.split(",").map((hobby) => hobby.trim()), // Convert string to an array
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-[#FCF9F2]">
       <Header /> {/* Add Header component */}
@@ -460,7 +480,7 @@ export default function ProfileSettings() {
             />
             <h2 className="text-lg font-semibold mt-3">{user.name}</h2>
             <p className="text-sm text-gray-500">
-              {user.profileType} user | {user.location}
+              {user.profileType} User | {user.location?.city}
             </p>
           </div>
           <nav className="mt-6 space-y-4">
@@ -489,7 +509,7 @@ export default function ProfileSettings() {
                 <div>
                   <h2 className="text-xl font-semibold">{user.name}</h2>
                   <p className="text-gray-500 text-sm">
-                    {user.profileType} user | {user.location}
+                    {user.profileType} User | {user.location?.city}
                   </p>
                 </div>
               </div>
