@@ -1,3 +1,4 @@
+// filepath: src/components/SignupPage.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -93,7 +94,7 @@ const SignupPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    signup(formData);
+    signup(formData); // Pass the complete formData
     navigate("/");
   };
 
@@ -490,17 +491,6 @@ const SignupPage = () => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-[#4F2F1D] mb-2">Income</label>
-                  <input
-                    type="text"
-                    name="income"
-                    value={formData.income}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
                   <label className="block text-[#4F2F1D] mb-2">
                     Working With
                   </label>
@@ -521,6 +511,17 @@ const SignupPage = () => {
                     type="text"
                     name="working_as"
                     value={formData.working_as}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-[#4F2F1D] mb-2">Income</label>
+                  <input
+                    type="text"
+                    name="income"
+                    value={formData.income}
                     onChange={handleChange}
                     className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
                     required
@@ -571,6 +572,7 @@ const SignupPage = () => {
                     value={formData.family_size}
                     onChange={handleChange}
                     className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                    min="0"
                     required
                   />
                 </div>
@@ -705,6 +707,52 @@ const SignupPage = () => {
               </div>
             </div>
 
+            {/* Astrology Details Section */}
+            <div className="mb-6 border-t pt-6">
+              <h3 className="text-xl font-semibold mb-4 text-[#4F2F1D]">
+                Astrology Details
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="mb-4">
+                  <label className="block text-[#4F2F1D] mb-2">
+                    Rashi Nakshatra
+                  </label>
+                  <input
+                    type="text"
+                    name="rashi_nakshatra"
+                    value={formData.rashi_nakshatra}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-[#4F2F1D] mb-2">Gotra</label>
+                  <input
+                    type="text"
+                    name="gotra"
+                    value={formData.gotra}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-[#4F2F1D] mb-2">
+                    Gotra Mama
+                  </label>
+                  <input
+                    type="text"
+                    name="gotra_mama"
+                    value={formData.gotra_mama}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Location Section - New Section */}
             <div className="mb-6 border-t pt-6">
               <h3 className="text-xl font-semibold mb-4 text-[#4F2F1D]">
@@ -757,55 +805,11 @@ const SignupPage = () => {
                     }));
                   }}
                   className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                  required
                 />
               </div>
             </div>
 
-            {/* Astrology Details Section */}
-            <div className="mb-6 border-t pt-6">
-              <h3 className="text-xl font-semibold mb-4 text-[#4F2F1D]">
-                Astrology Details
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="mb-4">
-                  <label className="block text-[#4F2F1D] mb-2">
-                    Rashi Nakshatra
-                  </label>
-                  <input
-                    type="text"
-                    name="rashi_nakshatra"
-                    value={formData.rashi_nakshatra}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-[#4F2F1D] mb-2">Gotra</label>
-                  <input
-                    type="text"
-                    name="gotra"
-                    value={formData.gotra}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-[#4F2F1D] mb-2">
-                    Gotra Mama
-                  </label>
-                  <input
-                    type="text"
-                    name="gotra_mama"
-                    value={formData.gotra_mama}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
             <div className="flex justify-end space-x-4">
               <button
                 type="submit"

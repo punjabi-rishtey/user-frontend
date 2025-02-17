@@ -13,9 +13,9 @@ import Footer from "./Footer"; // Import Footer component
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 export default function ProfileSettings() {
-  const { user, updateUser, logout } = useContext(AuthContext); // ✅ Always at the top
+  const { user, updateUser, logout } = useContext(AuthContext);
 
-  const navigate = useNavigate(); // ✅ Now correctly placed
+  const navigate = useNavigate();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
@@ -490,6 +490,14 @@ export default function ProfileSettings() {
             <NavItem icon={<FaMoneyBill />} label="Plan" />
             <NavItem icon={<FaCog />} label="Settings" active />
           </nav>
+          <div className="mt-auto">
+            <button
+              className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg w-full"
+              onClick={handleLogout} // Use handleLogout
+            >
+              Sign Out
+            </button>
+          </div>
         </aside>
 
         {/* Main Content */}
@@ -515,9 +523,9 @@ export default function ProfileSettings() {
               </div>
               <button
                 className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg"
-                onClick={handleLogout} // Use handleLogout
+                onClick={() => setIsEditing(true)}
               >
-                Sign Out
+                {isEditing ? "Cancel" : "Edit Profile"}
               </button>
             </div>
           </div>
@@ -882,6 +890,7 @@ export default function ProfileSettings() {
               </button>
             )}
           </div>
+
           {/* Family Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Family Details</h3>
@@ -1019,89 +1028,6 @@ export default function ProfileSettings() {
             )}
           </div>
 
-          {/* Location Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Location Details</h3>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <InfoRow
-                label="City"
-                value={locationData.city}
-                isEditing={isEditingLocation}
-                name="city"
-                onChange={handleLocationChange}
-              />
-              <InfoRow
-                label="Pincode"
-                value={locationData.pincode}
-                isEditing={isEditingLocation}
-                name="pincode"
-                onChange={handleLocationChange}
-              />
-            </div>
-            {isEditingLocation ? (
-              <div className="mt-4 flex space-x-4">
-                <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                  onClick={handleSaveLocation}
-                >
-                  Save
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
-                  onClick={handleCancelLocation}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setIsEditingLocation(true)}
-              >
-                Edit
-              </button>
-            )}
-          </div>
-
-          {/* Hobbies Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Hobbies & Interests</h3>
-            <div className="mt-4">
-              <InfoRow
-                label="Hobbies"
-                value={hobbiesData.hobbies.join(", ")}
-                isEditing={isEditingHobbies}
-                name="hobbies"
-                onChange={handleHobbiesChange}
-                type="text"
-                placeholder="Enter hobbies separated by commas"
-              />
-            </div>
-            {isEditingHobbies ? (
-              <div className="mt-4 flex space-x-4">
-                <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                  onClick={handleSaveHobbies}
-                >
-                  Save
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
-                  onClick={handleCancelHobbies}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setIsEditingHobbies(true)}
-              >
-                Edit
-              </button>
-            )}
-          </div>
-
           {/* Astrology Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Astrology Details</h3>
@@ -1152,6 +1078,90 @@ export default function ProfileSettings() {
               </button>
             )}
           </div>
+
+          {/* Location Section */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+            <h3 className="text-lg font-semibold mb-4">Location Details</h3>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <InfoRow
+                label="City"
+                value={locationData.city}
+                isEditing={isEditingLocation}
+                name="city"
+                onChange={handleLocationChange}
+              />
+              <InfoRow
+                label="Pincode"
+                value={locationData.pincode}
+                isEditing={isEditingLocation}
+                name="pincode"
+                onChange={handleLocationChange}
+              />
+            </div>
+            {isEditingLocation ? (
+              <div className="mt-4 flex space-x-4">
+                <button
+                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  onClick={handleSaveLocation}
+                >
+                  Save
+                </button>
+                <button
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  onClick={() => setIsEditingLocation(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                onClick={() => setIsEditingLocation(true)}
+              >
+                Edit
+              </button>
+            )}
+          </div>
+
+          {/* Hobbies Section */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+            <h3 className="text-lg font-semibold mb-4">Hobbies</h3>
+            <div className="mt-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2">
+                Hobbies (comma-separated)
+              </label>
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                type="text"
+                placeholder="Hobbies"
+                value={hobbiesData.hobbies.join(", ")}
+                onChange={handleHobbiesChange}
+              />
+            </div>
+            {isEditingHobbies ? (
+              <div className="mt-4 flex space-x-4">
+                <button
+                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  onClick={handleSaveHobbies}
+                >
+                  Save
+                </button>
+                <button
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  onClick={() => setIsEditingHobbies(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                onClick={() => setIsEditingHobbies(true)}
+              >
+                Edit
+              </button>
+            )}
+          </div>
         </main>
       </div>
       <Footer /> {/* Add Footer component */}
@@ -1159,51 +1169,41 @@ export default function ProfileSettings() {
   );
 }
 
-// Navigation Item Component
-const NavItem = ({ icon, label, active, onClick }) => {
+function NavItem({ icon, label, active = false }) {
   return (
-    <div
-      className={`flex items-center gap-3 px-4 py-2 rounded-lg cursor-pointer ${
-        active ? "bg-blue-100 text-blue-700" : "text-gray-600"
+    <a
+      href="#"
+      className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 ${
+        active ? "bg-gray-100 font-semibold" : ""
       }`}
-      onClick={onClick}
     >
-      {icon} <span>{label}</span>
-    </div>
+      {icon}
+      <span>{label}</span>
+    </a>
   );
-};
+}
 
-// Info Row Component
-const InfoRow = ({
+function InfoRow({
   label,
   value,
   isEditing,
   name,
   onChange,
   type = "text",
-  isPassword = false,
-  options = [],
-}) => {
-  const formatValue = (name, value) => {
-    if (name === "dob") {
-      return new Date(value).toLocaleDateString();
-    }
-    if (name === "gender" || name === "religion" || name === "marital_status") {
-      return value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-    }
-    return value;
-  };
-
-  return (
-    <div>
-      <h4 className="text-gray-600 text-sm">{label}</h4>
-      {isEditing ? (
-        type === "select" ? (
+  options,
+}) {
+  if (isEditing) {
+    return (
+      <div>
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          {label}
+        </label>
+        {type === "select" ? (
           <select
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             name={name}
             value={value}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
           >
             {options.map((option) => (
               <option key={option.value} value={option.value}>
@@ -1213,18 +1213,24 @@ const InfoRow = ({
           </select>
         ) : (
           <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             type={type}
+            placeholder={label}
             name={name}
             value={value}
             onChange={onChange}
-            className="w-full p-2 border border-gray-300 rounded-lg"
           />
-        )
-      ) : (
-        <p className="text-gray-800">
-          {isPassword ? "••••••••" : formatValue(name, value)}
-        </p>
-      )}
-    </div>
-  );
-};
+        )}
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          {label}
+        </label>
+        <p className="text-gray-600">{value}</p>
+      </div>
+    );
+  }
+}
