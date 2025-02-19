@@ -15,6 +15,7 @@ import AboutPage from "./components/AboutPage";
 import ContactUs from "./components/ContactUs";
 import Profilepage from "./components/Profilepage";
 import Testimonials from "./components/Testimonials";
+import MembershipPage from "./components/membershipPage"; // Add this import
 
 function App() {
   return (
@@ -33,6 +34,8 @@ function App() {
               </>
             }
           />
+          {/* ... existing routes ... */}
+          <Route path="/membership" element={<MembershipPage />} /> {/* Add this route */}
           <Route path="/findpartner" element={<FindPartner />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<ProfileDetail />} />
