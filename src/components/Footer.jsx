@@ -17,12 +17,12 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-[#4F2F1D] text-white py-10">
-      <div className="container mx-auto">
+    <footer className="bg-gradient-to-t from-[black] to-[#6F0B11] text-white py-10">
+      <div className="container mx-auto px-6"> {/* Added px-6 for horizontal padding */}
         {/* Top Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
           {/* Logo and Description */}
-          <div className="text-center md:text-left">
+          <div className="text-center md:text-left px-4"> {/* Added px-4 for logo section */}
             <img
               src={logoSrc}
               alt="Punjabi Matrimony Logo"
