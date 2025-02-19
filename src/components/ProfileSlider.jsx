@@ -30,6 +30,50 @@ const ProfileSlider = () => {
     ],
   };
 
+  const getProfilesWithMatchScore = () => {
+    if (!user?.preferences) {
+      return profiles.map(profile => ({ ...profile, matchScore: 0 }));
+    }
+
+    const prefs = user.preferences;
+    const weightage = {
+      height: 1,
+      caste: 2,
+      manglik: 2,
+      location: 1,
+      familyValues: 1,
+      diet: 1
+    };
+    const totalWeight = Object.values(weightage).reduce((a, b) => a + b, 0);
+
+    return profiles.map(profile => {
+      let matchScore = 0;
+
+      // ... other preference checks ...
+
+      // Updated manglik check to handle partial matches
+      if (prefs.manglik) {
+        if (prefs.manglik === profile.manglik) {
+          matchScore += weightage.manglik;
+        } else if (
+          (prefs.manglik === "partial_manglik" && 
+           (profile.manglik === "manglik" || profile.manglik === "non_manglik")) ||
+          ((prefs.manglik === "manglik" || prefs.manglik === "non_manglik") && 
+           profile.manglik === "partial_manglik")
+        ) {
+          matchScore += weightage.manglik / 2; // Half score for partial matches
+        }
+      }
+
+      // ... rest of the scoring logic ...
+
+      return {
+        ...profile,
+        matchScore: (matchScore / totalWeight) * 100
+      };
+    });
+  };
+
   return (
     <div className="container mx-auto px-2 py-6"> {/* Reduced overall padding */}
       {/* Slider Title */}

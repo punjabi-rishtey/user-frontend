@@ -19,14 +19,13 @@ const FindPartner = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-  const { isAuthenticated, showLoginModal, toggleLoginModal, login } =
-    useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated) {
-      toggleLoginModal();
+      navigate("/login", { replace: true });
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
