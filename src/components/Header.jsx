@@ -21,7 +21,7 @@ const Header = () => {
   };
 
   return (
-    <div className="w-full p-4 bg-gradient-to-t from-[black] to-[#6F0B11] shadow-md">
+    <div className="w-full p-4 bg-gradient-to-t from-[#6F0B11] to-black shadow-md">
       <div className="container mx-auto flex justify-between items-center px-6">
         <div>
           <img 
