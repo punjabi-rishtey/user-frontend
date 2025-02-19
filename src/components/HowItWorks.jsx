@@ -26,11 +26,11 @@ const HowItWorks = () => {
   ];
 
   return (
-    <div className="bg-[#FFFFFF] py-16"> {/* Updated background color */}
+    <div className="bg-[#FFFFFF] py-16">
       <div className="container mx-auto text-center px-4 sm:px-6 lg:px-8">
         <h2
-          className="text-5xl font-bold mb-12 text-[#111111]" // Updated text color and size
-          style={{ fontFamily: "'Lora', serif" }} // Updated font
+          className="text-5xl font-bold mb-12 text-[#111111]"
+          style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           How It Works
         </h2>
@@ -40,44 +40,25 @@ const HowItWorks = () => {
             <div key={index} className="relative flex items-center group">
               <div className="relative flex flex-col items-center bg-[#FEEAEA] p-6 rounded-lg shadow-lg transition-transform transform group-hover:scale-105 group-hover:bg-[#FFB6C1] border border-[#FFE5E5]">
                 {/* Icon */}
-                <div className="mb-4 p-4 rounded-full bg-[#FFFFFF]"> {/* Updated background color */}
+                <div className="mb-4 p-4 rounded-full bg-[#FFFFFF]">
                   {step.icon}
                 </div>
                 {/* Title */}
                 <h3
-                  className="text-2xl font-bold mb-2 text-[#111111]" // Updated text style
-                  style={{ fontFamily: "'Lora', serif" }}
+                  className="text-2xl mb-2 text-[#111111]"
+                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   {step.title}
                 </h3>
                 {/* Description */}
                 <p 
-                  className="text-[#333333] text-base" // Updated text color and size
-                  style={{ fontFamily: "'Merriweather', serif" }}
+                  className="text-[#333333] text-base"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {step.description}
                 </p>
               </div>
-
-              {/* Arrow */}
-              {index < steps.length - 1 && (
-                <div className="absolute hidden md:flex items-center justify-center -right-[45px] top-1/2 transform -translate-y-1/2 pointer-events-none">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={2}
-                    stroke="#FF3D57" // Updated arrow color
-                    className="w-8 h-8"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M8 4l8 8-8 8"
-                    />
-                  </svg>
-                </div>
-              )}
+              {/* ...existing arrow code... */}
             </div>
           ))}
         </div>

@@ -38,22 +38,21 @@ const WhyChooseUs = () => {
 
     return (
         <div className="bg-[#FFFFFF] py-16">
-            <div className="container mx-auto px-6 text-center"> {/* Added px-4 for horizontal padding */}
+            <div className="container mx-auto px-6 text-center">
                 <h2
-                    className="text-5xl font-bold mb-6 text-[#111111]"
-                    style={{ fontFamily: "'Lora', serif" }}
+                    className="text-5xl mb-6 text-[#111111]"
+                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                     Why Choose Us
                 </h2>
                 <p 
                     className="text-xl text-[#333333] mb-12"
-                    style={{ fontFamily: "'Merriweather', serif" }}
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                     Discover the benefits of joining our platform and find your perfect match with ease.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-11 max-w-7xl mx-auto"> {/* Added max-w-7xl and mx-auto */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-11 max-w-7xl mx-auto">
                     {features.map((feature, index) => (
-      
                         <motion.div
                             key={index}
                             variants={cardVariants}
@@ -63,17 +62,16 @@ const WhyChooseUs = () => {
                             transition={{ duration: 0.3, delay: index * 0.1 }}
                             className="bg-[#FEEAEA] px-4 py-6 rounded-lg shadow-lg border border-[#FFE5E5]"
                         >
-
                             <div className="mb-4 flex justify-center">{feature.icon}</div>
                             <h3
-                                className="text-2xl font-bold mb-2 text-[#111111]"
-                                style={{ fontFamily: "'Lora', serif" }}
+                                className="text-2xl mb-2 text-[#111111]"
+                                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                             >
                                 {feature.title}
                             </h3>
                             <p 
                                 className="text-[#333333]"
-                                style={{ fontFamily: "'Merriweather', serif" }}
+                                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                             >
                                 {feature.description}
                             </p>
