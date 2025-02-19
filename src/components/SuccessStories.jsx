@@ -39,7 +39,7 @@ const SuccessStories = () => {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "85%"]); // Stops at 85% of section
 
   return (
-    <div className="bg-[#FAF3E0] py-16 relative">
+    <div className="bg-[#FEEAEA] py-16 relative">
       <div
         className="container mx-auto text-center relative"
         ref={containerRef}
