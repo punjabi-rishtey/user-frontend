@@ -1,15 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Import the authentication context
-import logoSrc from "../assets/logo.png"; // Ensure the correct path to your logo file
+import { useAuth } from "../context/AuthContext";
+import logoSrc from "../assets/logo.png";
 
 const Footer = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth(); // Get the authentication status
+  const { isAuthenticated } = useAuth();
 
   const handleNavigation = (path) => {
     if (path === "/findpartner" && !isAuthenticated) {
-      navigate("/login"); // Redirect to login if not authenticated
+      navigate("/login");
     } else {
       navigate(path);
     }
