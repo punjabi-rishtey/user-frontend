@@ -16,7 +16,6 @@ import ContactUs from "./components/ContactUs";
 import Profilepage from "./components/Profilepage";
 import Testimonials from "./components/Testimonials";
 import MembershipPage from "./components/membershipPage"; // Add this import
-import PreferencesPage from "./components/PreferencesPage";
 
 function App() {
   return (
@@ -46,7 +45,6 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/testimonials" element={<Testimonials />} />
-          <Route path="/preferences" element={<PreferencesPage />} />
         </Routes>
       </div>
     </AuthProvider>
