@@ -640,30 +640,30 @@ export default function ProfileSettings() {
             Profile Settings
           </h1>
           {/* Profile Section */}
-<div className="bg-white p-6 rounded-lg shadow-lg mt-4">
-  <div className="flex justify-between items-center">
-    <div className="flex items-center gap-4">
-      <img
-        src={user.profilePicture || "/profile.jpg"}
-        alt={user.name}
-        className="w-16 h-16 rounded-full"
-      />
-      <div>
-        <h2 className="text-xl font-semibold">{user.name}</h2>
-        <p className="text-gray-500 text-sm">
-          {user.profileType} User | {user.location?.city}
-        </p>
-      </div>
-    </div>
-    <button
-      className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg"
-      onClick={handleLogout}
-    >
-      Sign Out
-    </button>
-  </div>
-</div>
-          {/* Account Section */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-4">
+                <img
+                  src={user.profilePicture || "/profile.jpg"}
+                  alt={user.name}
+                  className="w-16 h-16 rounded-full"
+                />
+                <div>
+                  <h2 className="text-xl font-semibold">{user.name}</h2>
+                  <p className="text-gray-500 text-sm">
+                    {user.profileType} User | {user.location?.city}
+                  </p>
+                </div>
+              </div>
+              <button
+                className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg"
+                onClick={handleLogout}
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+          {/* 1. Account Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Account</h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -771,7 +771,7 @@ export default function ProfileSettings() {
               </button>
             )}
           </div>
-          {/* Personal Details Section */}
+          {/* 2. Personal Details Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Personal Details</h3>
 
@@ -958,79 +958,7 @@ export default function ProfileSettings() {
             )}
           </div>
 
-          {/* Profession Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Profession Details</h3>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <InfoRow
-                label="Occupation"
-                value={professionData.occupation}
-                isEditing={isEditingProfession}
-                name="occupation"
-                onChange={handleProfessionChange}
-              />
-              <InfoRow
-                label="Designation"
-                value={professionData.designation}
-                isEditing={isEditingProfession}
-                name="designation"
-                onChange={handleProfessionChange}
-              />
-              <InfoRow
-                label="Working With"
-                value={professionData.working_with}
-                isEditing={isEditingProfession}
-                name="working_with"
-                onChange={handleProfessionChange}
-              />
-              <InfoRow
-                label="Working As"
-                value={professionData.working_as}
-                isEditing={isEditingProfession}
-                name="working_as"
-                onChange={handleProfessionChange}
-              />
-              <InfoRow
-                label="Income"
-                value={professionData.income}
-                isEditing={isEditingProfession}
-                name="income"
-                onChange={handleProfessionChange}
-              />
-              <InfoRow
-                label="Work Address"
-                value={professionData.work_address}
-                isEditing={isEditingProfession}
-                name="work_address"
-                onChange={handleProfessionChange}
-              />
-            </div>
-            {isEditingProfession ? (
-              <div className="mt-4 flex space-x-4">
-                <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                  onClick={handleSaveProfession}
-                >
-                  Save
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
-                  onClick={handleCancelProfession}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setIsEditingProfession(true)}
-              >
-                Edit
-              </button>
-            )}
-          </div>
-
-          {/* Family Section */}
+          {/* 3. Family Details Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Family Details</h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -1116,7 +1044,7 @@ export default function ProfileSettings() {
             )}
           </div>
 
-          {/* Education Section */}
+          {/* 4. Education Details Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Education Details</h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -1167,7 +1095,123 @@ export default function ProfileSettings() {
             )}
           </div>
 
-          {/* Astrology Section */}
+          {/* 5. Professional Details Section */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+            <h3 className="text-lg font-semibold mb-4">Professional Details</h3>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <InfoRow
+                label="Occupation"
+                value={professionData.occupation}
+                isEditing={isEditingProfession}
+                name="occupation"
+                onChange={handleProfessionChange}
+              />
+              <InfoRow
+                label="Designation"
+                value={professionData.designation}
+                isEditing={isEditingProfession}
+                name="designation"
+                onChange={handleProfessionChange}
+              />
+              <InfoRow
+                label="Working With"
+                value={professionData.working_with}
+                isEditing={isEditingProfession}
+                name="working_with"
+                onChange={handleProfessionChange}
+              />
+              <InfoRow
+                label="Working As"
+                value={professionData.working_as}
+                isEditing={isEditingProfession}
+                name="working_as"
+                onChange={handleProfessionChange}
+              />
+              <InfoRow
+                label="Income"
+                value={professionData.income}
+                isEditing={isEditingProfession}
+                name="income"
+                onChange={handleProfessionChange}
+              />
+              <InfoRow
+                label="Work Address"
+                value={professionData.work_address}
+                isEditing={isEditingProfession}
+                name="work_address"
+                onChange={handleProfessionChange}
+              />
+            </div>
+            {isEditingProfession ? (
+              <div className="mt-4 flex space-x-4">
+                <button
+                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  onClick={handleSaveProfession}
+                >
+                  Save
+                </button>
+                <button
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  onClick={handleCancelProfession}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                onClick={() => setIsEditingProfession(true)}
+              >
+                Edit
+              </button>
+            )}
+          </div>
+
+          {/* 6. Location Section */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+            <h3 className="text-lg font-semibold mb-4">Location Details</h3>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <InfoRow
+                label="City"
+                value={locationData.city}
+                isEditing={isEditingLocation}
+                name="city"
+                onChange={handleLocationChange}
+              />
+              <InfoRow
+                label="Pincode"
+                value={locationData.pincode}
+                isEditing={isEditingLocation}
+                name="pincode"
+                onChange={handleLocationChange}
+              />
+            </div>
+            {isEditingLocation ? (
+              <div className="mt-4 flex space-x-4">
+                <button
+                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  onClick={handleSaveLocation}
+                >
+                  Save
+                </button>
+                <button
+                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  onClick={() => setIsEditingLocation(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                onClick={() => setIsEditingLocation(true)}
+              >
+                Edit
+              </button>
+            )}
+          </div>
+
+          {/* 7. Astrology Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Astrology Details</h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -1218,51 +1262,7 @@ export default function ProfileSettings() {
             )}
           </div>
 
-          {/* Location Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Location Details</h3>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <InfoRow
-                label="City"
-                value={locationData.city}
-                isEditing={isEditingLocation}
-                name="city"
-                onChange={handleLocationChange}
-              />
-              <InfoRow
-                label="Pincode"
-                value={locationData.pincode}
-                isEditing={isEditingLocation}
-                name="pincode"
-                onChange={handleLocationChange}
-              />
-            </div>
-            {isEditingLocation ? (
-              <div className="mt-4 flex space-x-4">
-                <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                  onClick={handleSaveLocation}
-                >
-                  Save
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
-                  onClick={() => setIsEditingLocation(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setIsEditingLocation(true)}
-              >
-                Edit
-              </button>
-            )}
-          </div>
-
-          {/* Hobbies Section */}
+          {/* 8. Hobbies Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Hobbies</h3>
             <div className="mt-4">
