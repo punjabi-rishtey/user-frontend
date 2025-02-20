@@ -12,6 +12,141 @@ import Header from "./Header"; // Import Header component
 import Footer from "./Footer"; // Import Footer component
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 
+// Add the helper functions here
+const generateFeetOptions = () => {
+  const options = [];
+  for (let feet = 4; feet <= 7; feet++) {
+    options.push({ value: feet.toString(), label: `${feet} ft` });
+  }
+  return options;
+};
+
+const generateInchesOptions = () => {
+  const options = [];
+  for (let inches = 0; inches <= 11; inches++) {
+    options.push({ value: inches.toString(), label: `${inches} in` });
+  }
+  return options;
+};
+
+// Then define HeightDropdowns component
+function HeightDropdowns({ value, onChange, isEditing }) {
+  if (!value) return null;
+
+  if (isEditing) {
+    return (
+      <div>
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Height
+        </label>
+        <div className="flex gap-2">
+          <select
+            className="shadow appearance-none border rounded w-1/2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            name="height.feet"
+            value={value.feet || ""}
+            onChange={onChange}
+          >
+            <option value="">Feet</option>
+            {generateFeetOptions().map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <select
+            className="shadow appearance-none border rounded w-1/2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            name="height.inches"
+            value={value.inches || ""}
+            onChange={onChange}
+          >
+            <option value="">Inches</option>
+            {generateInchesOptions().map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Height
+        </label>
+        <p className="text-gray-600">
+          {`${value.feet || ""}' ${value.inches || ""}"`}
+        </p>
+      </div>
+    );
+  }
+}
+
+// Then define InfoRow component
+function InfoRow({
+  label,
+  value,
+  isEditing,
+  name,
+  onChange,
+  type = "text",
+  options,
+  isPassword
+}) {
+  if (name === "height") {
+    return (
+      <HeightDropdowns
+        value={value}
+        onChange={onChange}
+        isEditing={isEditing}
+      />
+    );
+  }
+
+  if (isEditing) {
+    return (
+      <div>
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          {label}
+        </label>
+        {type === "select" ? (
+          <select
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            name={name}
+            value={value}
+            onChange={onChange}
+          >
+            {options.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            type={type}
+            placeholder={label}
+            name={name}
+            value={value}
+            onChange={onChange}
+          />
+        )}
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          {label}
+        </label>
+        <p className="text-gray-600">{value}</p>
+      </div>
+    );
+  }
+}
+
 export default function ProfileSettings() {
   const { user, updateUser, logout } = useContext(AuthContext);
 
@@ -41,7 +176,10 @@ export default function ProfileSettings() {
   });
 
   const [personalData, setPersonalData] = useState({
-    height: user?.height || "",
+    height: {
+      feet: user?.height?.feet || "5",
+      inches: user?.height?.inches || "0"
+    },
     caste: user?.caste || "",
     language: user?.language || "",
     mangalik: user?.mangalik || false,
@@ -50,7 +188,7 @@ export default function ProfileSettings() {
       birth_place: user?.birth_details?.birth_place || "",
     },
     physical_attributes: {
-      skin_tone: user?.physical_attributes?.skin_tone || "",
+      skin_tone: user?.physical_attributes?.skin_tone || "wheatish",
       body_type: user?.physical_attributes?.body_type || "",
       physical_disability:
         user?.physical_attributes?.physical_disability || false,
@@ -214,7 +352,10 @@ export default function ProfileSettings() {
 
   const handleCancelPersonal = () => {
     setPersonalData({
-      height: user.height || "",
+      height: {
+        feet: user.height?.feet || "5",
+        inches: user.height?.inches || "0"
+      },
       caste: user.caste || "",
       language: user.language || "",
       mangalik: user.mangalik || false,
@@ -223,7 +364,7 @@ export default function ProfileSettings() {
         birth_place: user.birth_details?.birth_place || "",
       },
       physical_attributes: {
-        skin_tone: user.physical_attributes?.skin_tone || "",
+        skin_tone: user.physical_attributes?.skin_tone || "wheatish",
         body_type: user.physical_attributes?.body_type || "",
         physical_disability:
           user.physical_attributes?.physical_disability || false,
@@ -490,14 +631,7 @@ export default function ProfileSettings() {
             <NavItem icon={<FaMoneyBill />} label="Plan" />
             <NavItem icon={<FaCog />} label="Settings" active />
           </nav>
-          <div className="mt-auto">
-            <button
-              className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg w-full"
-              onClick={handleLogout} // Use handleLogout
-            >
-              Sign Out
-            </button>
-          </div>
+          
         </aside>
 
         {/* Main Content */}
@@ -506,29 +640,29 @@ export default function ProfileSettings() {
             Profile Settings
           </h1>
           {/* Profile Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-4">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <img
-                  src={user.profilePicture || "/profile.jpg"}
-                  alt={user.name}
-                  className="w-16 h-16 rounded-full"
-                />
-                <div>
-                  <h2 className="text-xl font-semibold">{user.name}</h2>
-                  <p className="text-gray-500 text-sm">
-                    {user.profileType} User | {user.location?.city}
-                  </p>
-                </div>
-              </div>
-              <button
-                className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg"
-                onClick={() => setIsEditing(true)}
-              >
-                {isEditing ? "Cancel" : "Edit Profile"}
-              </button>
-            </div>
-          </div>
+<div className="bg-white p-6 rounded-lg shadow-lg mt-4">
+  <div className="flex justify-between items-center">
+    <div className="flex items-center gap-4">
+      <img
+        src={user.profilePicture || "/profile.jpg"}
+        alt={user.name}
+        className="w-16 h-16 rounded-full"
+      />
+      <div>
+        <h2 className="text-xl font-semibold">{user.name}</h2>
+        <p className="text-gray-500 text-sm">
+          {user.profileType} User | {user.location?.city}
+        </p>
+      </div>
+    </div>
+    <button
+      className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg"
+      onClick={handleLogout}
+    >
+      Sign Out
+    </button>
+  </div>
+</div>
           {/* Account Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <h3 className="text-lg font-semibold mb-4">Account</h3>
@@ -705,9 +839,14 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value: "very_fair", label: "Very Fair" },
                   { value: "fair", label: "Fair" },
+                  { value: "wheatish", label: "Wheatish" },
+                  { value: "wheatish_medium", label: "Wheatish Medium" },
+                  { value: "wheatish_brown", label: "Wheatish Brown" },
                   { value: "medium", label: "Medium" },
-                  { value: "dark", label: "Dark" },
+                  { value: "brown", label: "Brown" },
+                  { value: "dark", label: "Dark" }
                 ]}
               />
               <InfoRow
@@ -1181,56 +1320,4 @@ function NavItem({ icon, label, active = false }) {
       <span>{label}</span>
     </a>
   );
-}
-
-function InfoRow({
-  label,
-  value,
-  isEditing,
-  name,
-  onChange,
-  type = "text",
-  options,
-}) {
-  if (isEditing) {
-    return (
-      <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          {label}
-        </label>
-        {type === "select" ? (
-          <select
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            name={name}
-            value={value}
-            onChange={onChange}
-          >
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            type={type}
-            placeholder={label}
-            name={name}
-            value={value}
-            onChange={onChange}
-          />
-        )}
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <label className="block text-gray-700 text-sm font-bold mb-2">
-          {label}
-        </label>
-        <p className="text-gray-600">{value}</p>
-      </div>
-    );
-  }
 }
