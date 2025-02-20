@@ -705,6 +705,24 @@ export default function ProfileSettings() {
           <h1 className="text-2xl font-semibold text-gray-700">
             Profile Settings
           </h1>
+          {/* Top Section with Buttons */}
+          <div className="flex justify-end space-x-4 mb-6">
+            <button
+              className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg flex items-center gap-2"
+              onClick={() => setShowPreferences(true)}
+            >
+              <FaCog /> Edit Preferences
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg flex items-center gap-2"
+              onClick={() => {
+                logout();
+                navigate("/");
+              }}
+            >
+              <FaSignOutAlt /> Sign Out
+            </button>
+          </div>
           {/* Profile Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-4">
             <div className="flex justify-between items-center">
@@ -721,12 +739,6 @@ export default function ProfileSettings() {
                   </p>
                 </div>
               </div>
-              <button
-                className="bg-[#990000] hover:bg-[#800000] text-white px-4 py-2 rounded-lg"
-                onClick={handleLogout}
-              >
-                Sign Out
-              </button>
             </div>
           </div>
           {/* 1. Account Section */}
@@ -1544,28 +1556,6 @@ export default function ProfileSettings() {
                   )}
                 </div>
               ))}
-            </div>
-          </div>
-
-          {/* 9. Partner Preferences Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Partner Preferences</h3>
-              <button
-                className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setShowPreferences(true)}
-              >
-                Edit Preferences
-              </button>
-            </div>
-            {/* Display current preferences */}
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              <div><strong>Height:</strong> {user?.preferences?.height}</div>
-              <div><strong>Caste:</strong> {user?.preferences?.caste}</div>
-              <div><strong>Manglik Status:</strong> {user?.preferences?.manglik}</div>
-              <div><strong>Location:</strong> {user?.preferences?.location}</div>
-              <div><strong>Family Values:</strong> {user?.preferences?.familyValues}</div>
-              <div><strong>Diet:</strong> {user?.preferences?.diet}</div>
             </div>
           </div>
         </main>
