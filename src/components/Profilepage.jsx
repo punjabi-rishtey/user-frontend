@@ -11,6 +11,7 @@ import AuthContext from "../context/AuthContext";
 import Header from "./Header"; // Import Header component
 import Footer from "./Footer"; // Import Footer component
 import { useNavigate } from "react-router-dom"; // Import useNavigate
+import PreferencesPopup from "./PreferencesPopup";
 
 // Add the helper functions here
 const generateFeetOptions = () => {
@@ -178,6 +179,7 @@ export default function ProfileSettings() {
   const [isEditingAstrology, setIsEditingAstrology] = useState(false);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isEditingHobbies, setIsEditingHobbies] = useState(false);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   // Ensure `user` is not null before accessing properties
 
@@ -1544,9 +1546,38 @@ export default function ProfileSettings() {
               ))}
             </div>
           </div>
+
+          {/* 9. Partner Preferences Section */}
+          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Partner Preferences</h3>
+              <button
+                className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                onClick={() => setShowPreferences(true)}
+              >
+                Edit Preferences
+              </button>
+            </div>
+            {/* Display current preferences */}
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div><strong>Height:</strong> {user?.preferences?.height}</div>
+              <div><strong>Caste:</strong> {user?.preferences?.caste}</div>
+              <div><strong>Manglik Status:</strong> {user?.preferences?.manglik}</div>
+              <div><strong>Location:</strong> {user?.preferences?.location}</div>
+              <div><strong>Family Values:</strong> {user?.preferences?.familyValues}</div>
+              <div><strong>Diet:</strong> {user?.preferences?.diet}</div>
+            </div>
+          </div>
         </main>
       </div>
       <Footer /> {/* Add Footer component */}
+
+      {showPreferences && (
+        <PreferencesPopup
+          initialPreferences={user?.preferences}
+          onClose={() => setShowPreferences(false)}
+        />
+      )}
     </div>
   );
 }

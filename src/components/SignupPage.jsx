@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Footer from "./Footer";
 import Header from "./Header";
+import PreferencesPopup from "./PreferencesPopup";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const SignupPage = () => {
   });
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const [showPreferences, setShowPreferences] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -31,10 +33,9 @@ const SignupPage = () => {
     const result = signup(formData);
     
     if (result.success) {
-      navigate("/preferences");
+      setShowPreferences(true);
     } else {
-      // Show error message to user
-      alert(result.message); // You might want to use a better UI component for error messages
+      alert(result.message);
     }
   };
 
@@ -180,6 +181,15 @@ const SignupPage = () => {
           </div>
         </div>
       </div>
+
+      {showPreferences && (
+        <PreferencesPopup
+          onClose={() => {
+            setShowPreferences(false);
+            navigate("/");
+          }}
+        />
+      )}
 
       {/* Footer */}
       <Footer />
