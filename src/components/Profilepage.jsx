@@ -226,6 +226,7 @@ export default function ProfileSettings() {
 
   const [hobbiesData, setHobbiesData] = useState({
     hobbies: user?.hobbies || [],
+    newHobby: ""
   });
 
   const [professionData, setProfessionData] = useState({
@@ -273,6 +274,11 @@ export default function ProfileSettings() {
   const [astrologyData, setAstrologyData] = useState({
     rashi_nakshatra: user?.rashi_nakshatra || "",
     gotra: user?.gotra || "",
+  });
+
+  const [languageData, setLanguageData] = useState({
+    languages: user?.languages || [],
+    selectedLanguage: ""
   });
 
   if (!user) {
@@ -360,6 +366,7 @@ export default function ProfileSettings() {
       const updatedUser = {
         ...user,
         ...personalData,
+        languages: languageData.languages
       };
 
       const success = updateUser(updatedUser);
@@ -401,6 +408,10 @@ export default function ProfileSettings() {
         veg_nonveg: user.lifestyle?.veg_nonveg || "veg",
         nri_status: user.lifestyle?.nri_status || "false",
       },
+    });
+    setLanguageData({
+      languages: user?.languages || [],
+      selectedLanguage: ""
     });
     setIsEditingPersonal(false);
   };
@@ -642,27 +653,22 @@ export default function ProfileSettings() {
   };
 
   const handleSaveHobbies = () => {
-    try {
-      const updatedUser = {
-        ...user,
-        hobbies: hobbiesData.hobbies,
-      };
-      const success = updateUser(updatedUser);
-      if (success) {
-        setIsEditingHobbies(false);
-        alert("Hobbies updated successfully!");
-      }
-    } catch (error) {
-      console.error("Error saving hobbies:", error);
-      alert("An error occurred while saving hobbies.");
+    const updatedUser = {
+      ...user,
+      hobbies: hobbiesData.hobbies
+    };
+    const success = updateUser(updatedUser);
+    if (success) {
+      setIsEditingHobbies(false);
     }
   };
 
-  const handleHobbiesChange = (e) => {
-    const { value } = e.target;
+  const handleCancelHobbies = () => {
     setHobbiesData({
-      hobbies: value.split(",").map((hobby) => hobby.trim()), // Convert string to an array
+      hobbies: user?.hobbies || [],
+      newHobby: ""
     });
+    setIsEditingHobbies(false);
   };
 
   return (
@@ -855,13 +861,70 @@ export default function ProfileSettings() {
                   { value: "other", label: "Other" },
                 ]}
               />
-              <InfoRow
-                label="Language"
-                value={personalData.language}
-                isEditing={isEditingPersonal}
-                name="language"
-                onChange={handlePersonalChange}
-              />
+              <div className="col-span-2">
+                <label className="block text-gray-700 text-sm font-bold mb-2">Languages</label>
+                {isEditingPersonal ? (
+                  <div className="flex gap-2 mb-2">
+                    <select
+                      value={languageData.selectedLanguage}
+                      onChange={(e) => setLanguageData(prev => ({ ...prev, selectedLanguage: e.target.value }))}
+                      className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    >
+                      <option value="">Select a language</option>
+                      <option value="Hindi">Hindi</option>
+                      <option value="English">English</option>
+                      <option value="Punjabi">Punjabi</option>
+                      <option value="Bengali">Bengali</option>
+                      <option value="Gujarati">Gujarati</option>
+                      <option value="Marathi">Marathi</option>
+                      <option value="Tamil">Tamil</option>
+                      <option value="Telugu">Telugu</option>
+                      <option value="Kannada">Kannada</option>
+                      <option value="Malayalam">Malayalam</option>
+                      <option value="Urdu">Urdu</option>
+                      <option value="French">French</option>
+                      <option value="German">German</option>
+                      <option value="Spanish">Spanish</option>
+                    </select>
+                    <button
+                      onClick={() => {
+                        if (languageData.selectedLanguage && !languageData.languages.includes(languageData.selectedLanguage)) {
+                          setLanguageData(prev => ({
+                            languages: [...prev.languages, prev.selectedLanguage],
+                            selectedLanguage: ""
+                          }));
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  {languageData.languages.map((language, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center bg-gray-100 rounded-full px-4 py-2"
+                    >
+                      <span>{language}</span>
+                      {isEditingPersonal && (
+                        <button
+                          onClick={() => {
+                            setLanguageData(prev => ({
+                              ...prev,
+                              languages: prev.languages.filter((_, i) => i !== index)
+                            }));
+                          }}
+                          className="ml-2 text-gray-500 hover:text-red-500"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
               <InfoRow
                 label="Mangalik Status"
                 value={personalData.mangalik}
@@ -1405,42 +1468,81 @@ export default function ProfileSettings() {
 
           {/* 8. Hobbies Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Hobbies</h3>
-            <div className="mt-4">
-              <label className="block text-gray-700 text-sm font-bold mb-2">
-                Hobbies (comma-separated)
-              </label>
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                type="text"
-                placeholder="Hobbies"
-                value={hobbiesData.hobbies.join(", ")}
-                onChange={handleHobbiesChange}
-              />
-            </div>
-            {isEditingHobbies ? (
-              <div className="mt-4 flex space-x-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold mb-4">Hobbies</h3>
+              {isEditingHobbies ? (
+                <div className="flex space-x-4">
+                  <button
+                    className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                    onClick={handleSaveHobbies}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                    onClick={handleCancelHobbies}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
                 <button
                   className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                  onClick={handleSaveHobbies}
+                  onClick={() => setIsEditingHobbies(true)}
                 >
-                  Save
+                  Edit
                 </button>
+              )}
+            </div>
+
+            {isEditingHobbies && (
+              <div className="flex gap-2 mt-4">
+                <input
+                  type="text"
+                  value={hobbiesData.newHobby}
+                  onChange={(e) => setHobbiesData(prev => ({ ...prev, newHobby: e.target.value }))}
+                  className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Enter a hobby"
+                />
                 <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
-                  onClick={() => setIsEditingHobbies(false)}
+                  onClick={() => {
+                    if (hobbiesData.newHobby.trim()) {
+                      setHobbiesData(prev => ({
+                        hobbies: [...prev.hobbies, prev.newHobby.trim()],
+                        newHobby: ""
+                      }));
+                    }
+                  }}
+                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
                 >
-                  Cancel
+                  Add
                 </button>
               </div>
-            ) : (
-              <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setIsEditingHobbies(true)}
-              >
-                Edit
-              </button>
             )}
+
+            <div className="flex flex-wrap gap-2 mt-4">
+              {hobbiesData.hobbies.map((hobby, index) => (
+                <div
+                  key={index}
+                  className="flex items-center bg-gray-100 rounded-full px-4 py-2"
+                >
+                  <span>{hobby}</span>
+                  {isEditingHobbies && (
+                    <button
+                      onClick={() => {
+                        setHobbiesData(prev => ({
+                          ...prev,
+                          hobbies: prev.hobbies.filter((_, i) => i !== index)
+                        }));
+                      }}
+                      className="ml-2 text-gray-500 hover:text-red-500"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </main>
       </div>
