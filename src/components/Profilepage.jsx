@@ -100,7 +100,10 @@ function InfoRow({
       if (typeof value === "boolean") {
         return value ? "Yes" : "No";
       }
-      const option = options.find(opt => opt.value === value);
+      if (value === undefined || value === null || value === "") {
+        return "";
+      }
+      const option = options.find(opt => opt.value === value.toString());
       return option ? option.label : value;
     }
     if (isPassword) {
@@ -229,14 +232,16 @@ export default function ProfileSettings() {
     occupation: user?.occupation || "",
     designation: user?.designation || "",
     working_with: user?.working_with || "",
-    working_as: user?.working_as || "",
     income: user?.income || "",
-    work_address: user?.work_address || "",
+    work_address: {
+      address: user?.work_address?.address || "",
+      city: user?.work_address?.city || "",
+    }
   });
 
   const [familyData, setFamilyData] = useState({
     family_value: user?.family_value || "",
-    family_size: user?.family_size || 0,
+    family_type: user?.family_type || "",
     mother: {
       name: user?.mother?.name || "",
       occupation: user?.mother?.occupation || "",
@@ -252,15 +257,22 @@ export default function ProfileSettings() {
   });
 
   const [educationData, setEducationData] = useState({
+    school: {
+      name: user?.school?.name || "",
+      city: user?.school?.city || "",
+    },
+    college: {
+      name: user?.college?.name || "",
+      city: user?.college?.city || "",
+      passout_year: user?.college?.passout_year || "",
+    },
     education_level: user?.education_level || "",
     education_field: user?.education_field || "",
-    qualification_details: user?.qualification_details || "",
   });
 
   const [astrologyData, setAstrologyData] = useState({
     rashi_nakshatra: user?.rashi_nakshatra || "",
     gotra: user?.gotra || "",
-    gotra_mama: user?.gotra_mama || "",
   });
 
   if (!user) {
@@ -424,12 +436,14 @@ export default function ProfileSettings() {
 
   const handleCancelProfession = () => {
     setProfessionData({
-      occupation: user.occupation || "",
-      designation: user.designation || "",
-      working_with: user.working_with || "",
-      working_as: user.working_as || "",
-      income: user.income || "",
-      work_address: user.work_address || "",
+      occupation: user?.occupation || "",
+      designation: user?.designation || "",
+      working_with: user?.working_with || "",
+      income: user?.income || "",
+      work_address: {
+        address: user?.work_address?.address || "",
+        city: user?.work_address?.city || "",
+      }
     });
     setIsEditingProfession(false);
   };
@@ -459,6 +473,18 @@ export default function ProfileSettings() {
       const updatedUser = {
         ...user,
         ...familyData,
+        mother: {
+          ...user.mother,
+          ...familyData.mother,
+        },
+        father: {
+          ...user.father,
+          ...familyData.father,
+        },
+        siblings: {
+          ...user.siblings,
+          ...familyData.siblings,
+        }
       };
 
       const success = updateUser(updatedUser);
@@ -478,7 +504,7 @@ export default function ProfileSettings() {
   const handleCancelFamily = () => {
     setFamilyData({
       family_value: user.family_value || "",
-      family_size: user.family_size || 0,
+      family_type: user.family_type || "",
       mother: {
         name: user.mother?.name || "",
         occupation: user.mother?.occupation || "",
@@ -497,9 +523,21 @@ export default function ProfileSettings() {
 
   const handleEducationChange = (e) => {
     const { name, value } = e.target;
-    setEducationData({
-      ...educationData,
-      [name]: value,
+    setEducationData((prev) => {
+      if (name.includes(".")) {
+        const [section, field] = name.split(".");
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value,
+          },
+        };
+      }
+      return {
+        ...prev,
+        [name]: value,
+      };
     });
   };
 
@@ -526,9 +564,17 @@ export default function ProfileSettings() {
 
   const handleCancelEducation = () => {
     setEducationData({
-      education_level: user.education_level || "",
-      education_field: user.education_field || "",
-      qualification_details: user.qualification_details || "",
+      school: {
+        name: user?.school?.name || "",
+        city: user?.school?.city || "",
+      },
+      college: {
+        name: user?.college?.name || "",
+        city: user?.college?.city || "",
+        passout_year: user?.college?.passout_year || "",
+      },
+      education_level: user?.education_level || "",
+      education_field: user?.education_field || "",
     });
     setIsEditingEducation(false);
   };
@@ -566,7 +612,6 @@ export default function ProfileSettings() {
     setAstrologyData({
       rashi_nakshatra: user.rashi_nakshatra || "",
       gotra: user.gotra || "",
-      gotra_mama: user.gotra_mama || "",
     });
     setIsEditingAstrology(false);
   };
@@ -825,30 +870,31 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
-                  { value: "true", label: "Yes" },
-                  { value: "false", label: "No" },
+                  { value: "manglik", label: "Manglik" },
+                  { value: "partial_manglik", label: "Partial Manglik" },
+                  { value: "non_manglik", label: "Non Manglik" },
                 ]}
               />
               <InfoRow
                 label="Birth Time"
-                value={personalData.birth_details?.birth_time}
+                value={personalData.birth_details.birth_time}
                 isEditing={isEditingPersonal}
-                name="birth_time"
+                name="birth_details.birth_time"
                 onChange={handlePersonalChange}
                 type="time"
               />
               <InfoRow
                 label="Birth Place"
-                value={personalData.birth_details?.birth_place}
+                value={personalData.birth_details.birth_place}
                 isEditing={isEditingPersonal}
-                name="birth_place"
+                name="birth_details.birth_place"
                 onChange={handlePersonalChange}
               />
               <InfoRow
                 label="Skin Tone"
-                value={personalData.physical_attributes?.skin_tone}
+                value={personalData.physical_attributes.skin_tone}
                 isEditing={isEditingPersonal}
-                name="skin_tone"
+                name="physical_attributes.skin_tone"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
@@ -864,9 +910,9 @@ export default function ProfileSettings() {
               />
               <InfoRow
                 label="Body Type"
-                value={personalData.physical_attributes?.body_type}
+                value={personalData.physical_attributes.body_type}
                 isEditing={isEditingPersonal}
-                name="body_type"
+                name="physical_attributes.body_type"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
@@ -877,9 +923,9 @@ export default function ProfileSettings() {
               />
               <InfoRow
                 label="Physical Disability"
-                value={personalData.physical_attributes?.physical_disability}
+                value={personalData.physical_attributes.physical_disability}
                 isEditing={isEditingPersonal}
-                name="physical_disability"
+                name="physical_attributes.physical_disability"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
@@ -887,21 +933,18 @@ export default function ProfileSettings() {
                   { value: "false", label: "No" }
                 ]}
               />
-              {personalData.physical_attributes?.physical_disability ===
-                "true" && (
-                <InfoRow
-                  label="Disability Reason"
-                  value={personalData.physical_attributes?.disability_reason}
-                  isEditing={isEditingPersonal}
-                  name="disability_reason"
-                  onChange={handlePersonalChange}
-                />
-              )}
+              <InfoRow
+                label="Disability Details"
+                value={personalData.physical_attributes.disability_reason}
+                isEditing={isEditingPersonal}
+                name="physical_attributes.disability_reason"
+                onChange={handlePersonalChange}
+              />
               <InfoRow
                 label="Smoking"
-                value={personalData.lifestyle?.smoke}
+                value={personalData.lifestyle.smoke}
                 isEditing={isEditingPersonal}
-                name="smoke"
+                name="lifestyle.smoke"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
@@ -912,9 +955,9 @@ export default function ProfileSettings() {
               />
               <InfoRow
                 label="Drinking"
-                value={personalData.lifestyle?.drink}
+                value={personalData.lifestyle.drink}
                 isEditing={isEditingPersonal}
-                name="drink"
+                name="lifestyle.drink"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
@@ -925,21 +968,22 @@ export default function ProfileSettings() {
               />
               <InfoRow
                 label="Diet Preference"
-                value={personalData.lifestyle?.veg_nonveg}
+                value={personalData.lifestyle.veg_nonveg}
                 isEditing={isEditingPersonal}
-                name="veg_nonveg"
+                name="lifestyle.veg_nonveg"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
                   { value: "veg", label: "Vegetarian" },
                   { value: "nonveg", label: "Non-Vegetarian" },
+                  { value: "occasionally_nonveg", label: "Occasionally Non-Vegetarian" },
                 ]}
               />
               <InfoRow
                 label="NRI Status"
-                value={personalData.lifestyle?.nri_status}
+                value={personalData.lifestyle.nri_status}
                 isEditing={isEditingPersonal}
-                name="nri_status"
+                name="lifestyle.nri_status"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
@@ -983,13 +1027,28 @@ export default function ProfileSettings() {
                 isEditing={isEditingFamily}
                 name="family_value"
                 onChange={handleFamilyChange}
+                type="select"
+                options={[
+                  { value: "orthodox", label: "Orthodox" },
+                  { value: "traditional", label: "Traditional" },
+                  { value: "moderate", label: "Moderate" },
+                  { value: "liberal", label: "Liberal" },
+                  { value: "modern", label: "Modern" }
+                ]}
               />
               <InfoRow
-                label="Family Size"
-                value={familyData.family_size}
+                label="Family Type"
+                value={familyData.family_type}
                 isEditing={isEditingFamily}
-                name="family_size"
+                name="family_type"
                 onChange={handleFamilyChange}
+                type="select"
+                options={[
+                  { value: "nuclear", label: "Nuclear Family" },
+                  { value: "joint", label: "Joint Family" },
+                  { value: "extended", label: "Extended Family" },
+                  { value: "living_alone", label: "Living Alone" }
+                ]}
               />
               <InfoRow
                 label="Mother's Name"
@@ -1069,6 +1128,14 @@ export default function ProfileSettings() {
                 isEditing={isEditingEducation}
                 name="education_level"
                 onChange={handleEducationChange}
+                type="select"
+                options={[
+                  { value: "high_school", label: "High School" },
+                  { value: "undergraduate", label: "Undergraduate" },
+                  { value: "graduate", label: "Graduate" },
+                  { value: "post_graduate", label: "Post Graduate" },
+                  { value: "doctorate", label: "Doctorate" },
+                ]}
               />
               <InfoRow
                 label="Education Field"
@@ -1076,13 +1143,61 @@ export default function ProfileSettings() {
                 isEditing={isEditingEducation}
                 name="education_field"
                 onChange={handleEducationChange}
+                type="select"
+                options={[
+                  { value: "engineering", label: "Engineering" },
+                  { value: "medical", label: "Medical" },
+                  { value: "commerce", label: "Commerce" },
+                  { value: "arts", label: "Arts" },
+                  { value: "science", label: "Science" },
+                  { value: "other", label: "Other" },
+                ]}
+              />
+              
+              {/* School Details */}
+              <div className="col-span-2">
+                <h4 className="text-md font-semibold mb-2 mt-4">School Details</h4>
+              </div>
+              <InfoRow
+                label="School Name"
+                value={educationData.school.name}
+                isEditing={isEditingEducation}
+                name="school.name"
+                onChange={handleEducationChange}
               />
               <InfoRow
-                label="Qualification Details"
-                value={educationData.qualification_details}
+                label="School City"
+                value={educationData.school.city}
                 isEditing={isEditingEducation}
-                name="qualification_details"
+                name="school.city"
                 onChange={handleEducationChange}
+              />
+
+              {/* College Details */}
+              <div className="col-span-2">
+                <h4 className="text-md font-semibold mb-2 mt-4">College Details</h4>
+              </div>
+              <InfoRow
+                label="College Name"
+                value={educationData.college.name}
+                isEditing={isEditingEducation}
+                name="college.name"
+                onChange={handleEducationChange}
+              />
+              <InfoRow
+                label="College City"
+                value={educationData.college.city}
+                isEditing={isEditingEducation}
+                name="college.city"
+                onChange={handleEducationChange}
+              />
+              <InfoRow
+                label="Passout Year"
+                value={educationData.college.passout_year}
+                isEditing={isEditingEducation}
+                name="college.passout_year"
+                onChange={handleEducationChange}
+                type="number"
               />
             </div>
             {isEditingEducation ? (
@@ -1136,24 +1251,42 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
               />
               <InfoRow
-                label="Working As"
-                value={professionData.working_as}
-                isEditing={isEditingProfession}
-                name="working_as"
-                onChange={handleProfessionChange}
-              />
-              <InfoRow
-                label="Income"
+                label="Annual Income"
                 value={professionData.income}
                 isEditing={isEditingProfession}
                 name="income"
                 onChange={handleProfessionChange}
+                type="select"
+                options={[
+                  { value: "0-3", label: "Up to 3 Lakhs" },
+                  { value: "3-5", label: "3-5 Lakhs" },
+                  { value: "5-7", label: "5-7 Lakhs" },
+                  { value: "7-10", label: "7-10 Lakhs" },
+                  { value: "10-15", label: "10-15 Lakhs" },
+                  { value: "15-20", label: "15-20 Lakhs" },
+                  { value: "20-25", label: "20-25 Lakhs" },
+                  { value: "25-35", label: "25-35 Lakhs" },
+                  { value: "35-50", label: "35-50 Lakhs" },
+                  { value: "50-75", label: "50-75 Lakhs" },
+                  { value: "75-100", label: "75 Lakhs - 1 Crore" },
+                  { value: "100+", label: "1 Crore+" }
+                ]}
+              />
+              <div className="col-span-2">
+                <h4 className="text-md font-semibold mb-2 mt-4">Work Address</h4>
+              </div>
+              <InfoRow
+                label="Address"
+                value={professionData.work_address.address}
+                isEditing={isEditingProfession}
+                name="work_address.address"
+                onChange={handleProfessionChange}
               />
               <InfoRow
-                label="Work Address"
-                value={professionData.work_address}
+                label="City"
+                value={professionData.work_address.city}
                 isEditing={isEditingProfession}
-                name="work_address"
+                name="work_address.city"
                 onChange={handleProfessionChange}
               />
             </div>
@@ -1231,7 +1364,7 @@ export default function ProfileSettings() {
             <h3 className="text-lg font-semibold mb-4">Astrology Details</h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <InfoRow
-                label="Rashi Nakshatra"
+                label="Rashi/Nakshatra"
                 value={astrologyData.rashi_nakshatra}
                 isEditing={isEditingAstrology}
                 name="rashi_nakshatra"
@@ -1242,13 +1375,6 @@ export default function ProfileSettings() {
                 value={astrologyData.gotra}
                 isEditing={isEditingAstrology}
                 name="gotra"
-                onChange={handleAstrologyChange}
-              />
-              <InfoRow
-                label="Gotra Mama"
-                value={astrologyData.gotra_mama}
-                isEditing={isEditingAstrology}
-                name="gotra_mama"
                 onChange={handleAstrologyChange}
               />
             </div>
