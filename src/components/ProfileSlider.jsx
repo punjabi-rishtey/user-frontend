@@ -3,8 +3,10 @@ import Slider from 'react-slick';
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import profiles from './profiles.json'; // Import profile data from a JSON file
+import { useAuth } from '../context/AuthContext';
 
 const ProfileSlider = () => {
+  const { user } = useAuth(); // Add this line to get user context
   // Configuration for the Slick Slider
   const settings = {
     dots: true, // Show dot indicators at the bottom of the slider
@@ -49,9 +51,18 @@ const ProfileSlider = () => {
     return profiles.map(profile => {
       let matchScore = 0;
 
-      // ... other preference checks ...
+      // Height preference check
+      if (prefs.height && profile.height) {
+        const heightDiff = Math.abs(prefs.height - profile.height);
+        if (heightDiff <= 5) matchScore += weightage.height;
+      }
 
-      // Updated manglik check to handle partial matches
+      // Caste preference check
+      if (prefs.caste && profile.caste === prefs.caste) {
+        matchScore += weightage.caste;
+      }
+
+      // Manglik preference check
       if (prefs.manglik) {
         if (prefs.manglik === profile.manglik) {
           matchScore += weightage.manglik;
@@ -61,18 +72,33 @@ const ProfileSlider = () => {
           ((prefs.manglik === "manglik" || prefs.manglik === "non_manglik") && 
            profile.manglik === "partial_manglik")
         ) {
-          matchScore += weightage.manglik / 2; // Half score for partial matches
+          matchScore += weightage.manglik / 2;
         }
       }
 
-      // ... rest of the scoring logic ...
+      // Location preference check
+      if (prefs.location && profile.city === prefs.location) {
+        matchScore += weightage.location;
+      }
+
+      // Family values check
+      if (prefs.familyValues && profile.familyValues === prefs.familyValues) {
+        matchScore += weightage.familyValues;
+      }
+
+      // Diet preference check
+      if (prefs.diet && profile.diet === prefs.diet) {
+        matchScore += weightage.diet;
+      }
 
       return {
         ...profile,
         matchScore: (matchScore / totalWeight) * 100
       };
-    });
+    }).sort((a, b) => b.matchScore - a.matchScore); // Sort by match score
   };
+
+  const sortedProfiles = getProfilesWithMatchScore();
 
   return (
     <div className="container mx-auto px-2 py-6"> {/* Reduced overall padding */}
@@ -81,7 +107,7 @@ const ProfileSlider = () => {
 
       {/* Slick Slider Component */}
       <Slider {...settings}>
-        {profiles.map((profile) => (
+        {sortedProfiles.map((profile) => (
           <div key={profile.id} className="p-1"> {/* Reduced padding */}
             <div className="relative overflow-hidden rounded-md shadow-md h-[250px] w-[220px] mx-auto"> {/* Fixed portrait frame */}
               {/* Profile Image */}
@@ -96,6 +122,7 @@ const ProfileSlider = () => {
                 <div className="p-1"> {/* Reduced padding */}
                   <h5 className="text-sm font-medium">{profile.name}</h5> {/* Smaller text */}
                   <p className="text-xs">{profile.city}, {profile.age} Years old</p> {/* Smaller text */}
+                  <p className="text-xs">Match: {Math.round(profile.matchScore)}%</p>
                 </div>
               </div>
             </div>
@@ -107,3 +134,4 @@ const ProfileSlider = () => {
 };
 
 export default ProfileSlider;
+
