@@ -94,6 +94,21 @@ function InfoRow({
   options,
   isPassword
 }) {
+  const getDisplayValue = () => {
+    if (type === "select" && options) {
+      // Handle different types of values
+      if (typeof value === "boolean") {
+        return value ? "Yes" : "No";
+      }
+      const option = options.find(opt => opt.value === value);
+      return option ? option.label : value;
+    }
+    if (isPassword) {
+      return "••••••••";
+    }
+    return value;
+  };
+
   if (name === "height") {
     return (
       <HeightDropdowns
@@ -141,7 +156,7 @@ function InfoRow({
         <label className="block text-gray-700 text-sm font-bold mb-2">
           {label}
         </label>
-        <p className="text-gray-600">{value}</p>
+        <p className="text-gray-600">{getDisplayValue()}</p>
       </div>
     );
   }
@@ -190,15 +205,14 @@ export default function ProfileSettings() {
     physical_attributes: {
       skin_tone: user?.physical_attributes?.skin_tone || "wheatish",
       body_type: user?.physical_attributes?.body_type || "",
-      physical_disability:
-        user?.physical_attributes?.physical_disability || false,
+      physical_disability: user?.physical_attributes?.physical_disability || "false",
       disability_reason: user?.physical_attributes?.disability_reason || "",
     },
     lifestyle: {
-      smoke: user?.lifestyle?.smoke || false,
-      drink: user?.lifestyle?.drink || false,
-      veg_nonveg: user?.lifestyle?.veg_nonveg || "",
-      nri_status: user?.lifestyle?.nri_status || false,
+      smoke: user?.lifestyle?.smoke || "no",
+      drink: user?.lifestyle?.drink || "no",
+      veg_nonveg: user?.lifestyle?.veg_nonveg || "veg",
+      nri_status: user?.lifestyle?.nri_status || "false",
     },
   });
 
@@ -366,15 +380,14 @@ export default function ProfileSettings() {
       physical_attributes: {
         skin_tone: user.physical_attributes?.skin_tone || "wheatish",
         body_type: user.physical_attributes?.body_type || "",
-        physical_disability:
-          user.physical_attributes?.physical_disability || false,
+        physical_disability: user.physical_attributes?.physical_disability || "false",
         disability_reason: user.physical_attributes?.disability_reason || "",
       },
       lifestyle: {
-        smoke: user.lifestyle?.smoke || false,
-        drink: user.lifestyle?.drink || false,
-        veg_nonveg: user.lifestyle?.veg_nonveg || "",
-        nri_status: user.lifestyle?.nri_status || false,
+        smoke: user.lifestyle?.smoke || "no",
+        drink: user.lifestyle?.drink || "no",
+        veg_nonveg: user.lifestyle?.veg_nonveg || "veg",
+        nri_status: user.lifestyle?.nri_status || "false",
       },
     });
     setIsEditingPersonal(false);
@@ -871,7 +884,7 @@ export default function ProfileSettings() {
                 type="select"
                 options={[
                   { value: "true", label: "Yes" },
-                  { value: "false", label: "No" },
+                  { value: "false", label: "No" }
                 ]}
               />
               {personalData.physical_attributes?.physical_disability ===
@@ -892,8 +905,9 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
-                  { value: "true", label: "Yes" },
-                  { value: "false", label: "No" },
+                  { value: "yes", label: "Yes" },
+                  { value: "no", label: "No" },
+                  { value: "occasionally", label: "Occasionally" }
                 ]}
               />
               <InfoRow
@@ -904,8 +918,9 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
-                  { value: "true", label: "Yes" },
-                  { value: "false", label: "No" },
+                  { value: "yes", label: "Yes" },
+                  { value: "no", label: "No" },
+                  { value: "occasionally", label: "Occasionally" }
                 ]}
               />
               <InfoRow
