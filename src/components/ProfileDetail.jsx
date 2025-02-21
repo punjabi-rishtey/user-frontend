@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import dummyData from "./dummyData";
-import Footer from "./Footer"; // Importing the footer component
-import logoSrc from '../assets/logo.png'; // Logo path
-import profileIcon from '../assets/profile.png'; // Profile icon path
+import Footer from "./Footer";
+import Header from "./Header";
 import {
   FaHeart, FaUser, FaGraduationCap, FaPhone, FaUsers, FaTimes, FaArrowLeft,
 } from "react-icons/fa";
@@ -100,54 +99,25 @@ const ProfileDetail = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-[#f7f2e9] to-[#dbeaf2] relative">
+    <div className="min-h-screen flex flex-col bg-[#FCF9F2]">
+      <Header />
       
-      {/* Header */}
-      <div className="w-full p-4 bg-[#4F2F1D] shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          {/* Logo */}
-          <div>
-            <img src={logoSrc} alt="Punjabi Matrimony Logo" className="h-16" />
-          </div>
-          {/* Navigation Links */}
-          <nav className="flex space-x-4">
-            <button onClick={() => navigate('/')} className="text-white hover:text-gray-400 transition duration-300">Home</button>
-            <button onClick={() => navigate('/about')} className="text-white hover:text-gray-400 transition duration-300">About Us</button>
-            <button onClick={() => navigate('/services')} className="text-white hover:text-gray-400 transition duration-300">Services</button>
-            <button onClick={() => navigate('/contact')} className="text-white hover:text-gray-400 transition duration-300">Contact</button>
-          </nav>
-          {/* Buttons */}
-          <div>
-            {isAuthenticated ? (
-              <img
-                src={profileIcon}
-                alt="Profile"
-                className="h-10 w-10 rounded-full cursor-pointer"
-                onClick={() => navigate('/profile')}
-              />
-            ) : (
-              <>
-                <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => toggleLoginModal()}>Login</button>
-                <button className="ml-4 bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => toggleLoginModal()}>Sign Up</button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Back Button */}
-      <button
-        className="absolute top-26 left-4 bg-[#D4AF37] hover:bg-[#c8a236] text-white font-bold py-2 px-4 rounded-full transition duration-300 shadow-lg"
-        onClick={() => navigate("/findpartner")}
-      >
-        <FaArrowLeft />
-      </button>
+      <div className="container mx-auto px-6 mt-8">
+        <button
+          className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-full transition duration-300 shadow-lg flex items-center"
+          onClick={() => navigate("/findpartner")}
+          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+        >
+          <FaArrowLeft className="mr-2" /> Back to Search
+        </button>
+      </div>
 
       {/* Profile Picture */}
       <motion.img
         src={profileImage}
         alt={profile.name}
-        className="rounded-full border-4 border-[#D4AF37] cursor-pointer mx-auto mt-20 mb-8 shadow-xl" // Reduced margin-top
+        className="rounded-full border-4 border-[#FF3D57] cursor-pointer mx-auto mt-12 mb-8 shadow-xl"
         style={{
           width: imageSize,
           height: imageSize,
@@ -159,10 +129,10 @@ const ProfileDetail = () => {
 
       {/* Enlarged Image Popup */}
       {isImagePopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg shadow-2xl border border-gray-300 relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#FEEAEA] p-4 rounded-lg shadow-2xl border border-[#FFE5E5] relative">
             <button
-              className="absolute top-2 right-2 text-gray-600 text-xl"
+              className="absolute top-2 right-2 text-[#FF3D57] text-xl hover:text-[#FF6B80] transition-colors duration-300"
               onClick={() => setIsImagePopupOpen(false)}
             >
               <FaTimes />
@@ -177,10 +147,16 @@ const ProfileDetail = () => {
       )}
 
       {/* Profile Name & About */}
-      <h2 className="text-5xl font-bold text-center text-[#4F2F1D] mb-4 drop-shadow-md">
+      <h2
+        className="text-5xl font-bold text-center text-[#111111] mb-4"
+        style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+      >
         {profile.name}
       </h2>
-      <p className="text-center text-[#D4AF37] italic text-xl mb-16 px-6">
+      <p
+        className="text-center text-[#FF3D57] italic text-xl mb-16 px-6"
+        style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+      >
         "{profile.aboutMe}"
       </p>
 
@@ -194,7 +170,7 @@ const ProfileDetail = () => {
                   <img
                     src={image}
                     alt={`Profile ${index + 1}`}
-                    className="w-48 h-48 rounded-lg shadow-md cursor-pointer"
+                    className="w-48 h-48 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300"
                     onClick={() => handleImageClick(image)}
                   />
                 </div>
@@ -202,37 +178,50 @@ const ProfileDetail = () => {
             </Slider>
           </div>
         ) : (
-          <p className="text-gray-500">No additional images available</p>
+          <p 
+            className="text-[#333333]"
+            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+          >
+            No additional images available
+          </p>
         )}
       </div>
 
       {/* Profile Details Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 w-full px-16 mb-20">
-        
-        {/* Universal Box Component for Sections */}
         {[
-          { title: "Basic Details", icon: FaUser, data: basicDetails, bg: "bg-[#ffe8b3]" },
-          { title: "Horoscope", icon: FaHeart, data: horoscopeDetails, bg: "bg-[#c3e6cb]" },
-          { title: "Education & Work", icon: FaGraduationCap, data: educationAndWorking, bg: "bg-[#e0f7fa]" },
-          { title: "Contact Details", icon: FaPhone, data: contactDetails, bg: "bg-[#dbeaf2]" },
-          { title: "Family Details", icon: FaUsers, data: familyDetails, bg: "bg-[#f3e5f5]" },
+          { title: "Basic Details", icon: FaUser, data: basicDetails, bg: "bg-[#FEEAEA]" },
+          { title: "Horoscope", icon: FaHeart, data: horoscopeDetails, bg: "bg-[#FEEAEA]" },
+          { title: "Education & Work", icon: FaGraduationCap, data: educationAndWorking, bg: "bg-[#FEEAEA]" },
+          { title: "Contact Details", icon: FaPhone, data: contactDetails, bg: "bg-[#FEEAEA]" },
+          { title: "Family Details", icon: FaUsers, data: familyDetails, bg: "bg-[#FEEAEA]" },
         ].map(({ title, icon: Icon, data, bg }, index) => (
           <motion.div 
-            key={index} 
-            className={`p-8 ${bg} rounded-xl shadow-lg border border-gray-200 transition-all`}
-            style={{ scale: boxScale }} // Apply scrolling minimization effect
+            key={index}
+            variants={cardVariants}
+            initial="initial"
+            animate="animate"
+            whileHover="hover" 
+            className={`p-8 ${bg} rounded-xl shadow-lg border border-[#FFE5E5] transition-all`}
           >
-            <h3 className="text-2xl font-bold mb-4 flex items-center text-[#4F2F1D]">
-              <Icon className="mr-2 text-[#D4AF37]" /> {title}
+            <h3 
+              className="text-2xl mb-4 flex items-center text-[#111111]"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              <Icon className="mr-2 text-[#FF3D57]" /> {title}
             </h3>
             <div className="space-y-2">
               {Object.entries(data).map(([key, value]) => (
                 key !== "referenceId" && (
-                  <p key={key} className="text-lg">
-                    <strong className="text-[#4F2F1D] capitalize">
+                  <p 
+                    key={key} 
+                    className="text-lg"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  >
+                    <strong className="text-[#111111] capitalize">
                       {key.replace(/([A-Z])/g, " $1")}:
                     </strong> 
-                    <span className="text-gray-700 ml-2">
+                    <span className="text-[#333333] ml-2">
                       {value || "N/A"}
                     </span>
                   </p>
@@ -241,14 +230,22 @@ const ProfileDetail = () => {
             </div>
           </motion.div>
         ))}
-
       </div>
 
-      {/* Footer */}
       <Footer />
-
     </div>
   );
+};
+
+// Add cardVariants for consistent hover animation
+const cardVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  hover: {
+    scale: 1.05,
+    backgroundColor: "#FFB6C1",
+    transition: { duration: 0.2 },
+  },
 };
 
 export default ProfileDetail;
