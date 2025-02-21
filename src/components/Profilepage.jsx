@@ -177,7 +177,6 @@ export default function ProfileSettings() {
   const [isEditingFamily, setIsEditingFamily] = useState(false);
   const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [isEditingAstrology, setIsEditingAstrology] = useState(false);
-  const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isEditingHobbies, setIsEditingHobbies] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
 
@@ -219,11 +218,10 @@ export default function ProfileSettings() {
       veg_nonveg: user?.lifestyle?.veg_nonveg || "veg",
       nri_status: user?.lifestyle?.nri_status || "false",
     },
-  });
-
-  const [locationData, setLocationData] = useState({
-    city: user?.location?.city || "",
-    pincode: user?.location?.pincode || "",
+    home_address: {
+      address: user?.home_address?.address || "",
+      city: user?.home_address?.city || "",
+    },
   });
 
   const [hobbiesData, setHobbiesData] = useState({
@@ -409,6 +407,10 @@ export default function ProfileSettings() {
         drink: user.lifestyle?.drink || "no",
         veg_nonveg: user.lifestyle?.veg_nonveg || "veg",
         nri_status: user.lifestyle?.nri_status || "false",
+      },
+      home_address: {
+        address: user.home_address?.address || "",
+        city: user.home_address?.city || "",
       },
     });
     setLanguageData({
@@ -627,31 +629,6 @@ export default function ProfileSettings() {
       gotra: user.gotra || "",
     });
     setIsEditingAstrology(false);
-  };
-
-  const handleLocationChange = (e) => {
-    const { name, value } = e.target;
-    setLocationData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSaveLocation = () => {
-    try {
-      const updatedUser = {
-        ...user,
-        location: locationData,
-      };
-      const success = updateUser(updatedUser);
-      if (success) {
-        setIsEditingLocation(false);
-        alert("Location details updated successfully!");
-      }
-    } catch (error) {
-      console.error("Error saving location details:", error);
-      alert("An error occurred while saving location details.");
-    }
   };
 
   const handleSaveHobbies = () => {
@@ -1068,6 +1045,24 @@ export default function ProfileSettings() {
                   { value: "false", label: "No" },
                 ]}
               />
+              {/* Move Home Address section to the end */}
+              <div className="col-span-2">
+                <h4 className="text-md font-semibold mb-2 mt-4">Home Address</h4>
+              </div>
+              <InfoRow
+                label="Address"
+                value={personalData.home_address?.address}
+                isEditing={isEditingPersonal}
+                name="home_address.address"
+                onChange={handlePersonalChange}
+              />
+              <InfoRow
+                label="City"
+                value={personalData.home_address?.city}
+                isEditing={isEditingPersonal}
+                name="home_address.city"
+                onChange={handlePersonalChange}
+              />
             </div>
             {isEditingPersonal ? (
               <div className="mt-4 flex space-x-4">
@@ -1386,50 +1381,6 @@ export default function ProfileSettings() {
               <button
                 className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
                 onClick={() => setIsEditingProfession(true)}
-              >
-                Edit
-              </button>
-            )}
-          </div>
-
-          {/* 6. Location Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Location Details</h3>
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              <InfoRow
-                label="City"
-                value={locationData.city}
-                isEditing={isEditingLocation}
-                name="city"
-                onChange={handleLocationChange}
-              />
-              <InfoRow
-                label="Pincode"
-                value={locationData.pincode}
-                isEditing={isEditingLocation}
-                name="pincode"
-                onChange={handleLocationChange}
-              />
-            </div>
-            {isEditingLocation ? (
-              <div className="mt-4 flex space-x-4">
-                <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                  onClick={handleSaveLocation}
-                >
-                  Save
-                </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
-                  onClick={() => setIsEditingLocation(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setIsEditingLocation(true)}
               >
                 Edit
               </button>
