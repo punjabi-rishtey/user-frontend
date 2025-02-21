@@ -60,7 +60,7 @@ const AboutPage = () => {
             Most Trusted and Premium Matrimony Service.
           </p>
 
-          <section className="bg-[#FFFFFF] flex justify-center gap-8 mt-12 flex-wrap py-8">
+          <section className="bg-[#FFFFFF] flex justify-center gap-8 mt-12 flex-wrap py-1">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
@@ -105,7 +105,7 @@ const AboutPage = () => {
 
             <div className="w-full md:w-1/2 md:pl-16 text-center md:text-left">
               <h2
-                className="text-4xl font-bold text-[#111111] leading-tight"
+                className="text-4xl font-bold text-[#111111] leading-tight mt-0"
                 style={{ fontFamily: "'Lora', serif" }}
               >
                 WELCOME TO <br />
