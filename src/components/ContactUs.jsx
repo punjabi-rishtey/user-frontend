@@ -12,6 +12,7 @@ const ContactUs = () => {
   });
   const [errors, setErrors] = useState({});
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -36,9 +37,7 @@ const ContactUs = () => {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      // Handle form submission (e.g., send data to server)
       console.log("Form submitted:", formData);
-      // Clear form
       setFormData({
         name: "",
         email: "",
@@ -51,104 +50,70 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="bg-[#F0ECE3] min-h-screen flex flex-col">
+    <div className="bg-[#FCF9F4] min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow">
-        <section className="bg-[#fdf8f4] py-16 px-6 md:px-20 relative">
+        <section className="py-16 px-6 md:px-20 relative">
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-4xl font-serif font-bold text-[#6b3e1f] text-center mb-8">
+            <h1
+              className="text-5xl text-center mb-12 text-[#111111]"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
               Contact Us
             </h1>
-            <div className="flex flex-col md:flex-row items-center">
+            <div className="flex flex-col md:flex-row items-center gap-8">
               {/* Left Side - Contact Form */}
-              <div className="w-full md:w-1/2 md:pr-16">
+              <div className="w-full md:w-1/2">
                 <form
-                  className="bg-white p-8 rounded-lg shadow-lg"
+                  className="bg-[#FEEAEA] p-8 rounded-lg shadow-lg"
                   onSubmit={handleSubmit}
                 >
-                  <div className="mb-4">
-                    <label className="block text-[#4F2F1D] mb-2 font-semibold">
-                      Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                      placeholder="Your Name"
-                    />
-                    {errors.name && (
-                      <p className="text-red-500 text-sm">{errors.name}</p>
-                    )}
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-[#4F2F1D] mb-2 font-semibold">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                      placeholder="Your Email"
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm">{errors.email}</p>
-                    )}
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-[#4F2F1D] mb-2 font-semibold">
-                      Mobile
-                    </label>
-                    <input
-                      type="text"
-                      name="mobile"
-                      value={formData.mobile}
-                      onChange={handleChange}
-                      className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                      placeholder="Your Mobile Number"
-                    />
-                    {errors.mobile && (
-                      <p className="text-red-500 text-sm">{errors.mobile}</p>
-                    )}
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-[#4F2F1D] mb-2 font-semibold">
-                      Subject
-                    </label>
-                    <input
-                      type="text"
-                      name="subject"
-                      value={formData.subject}
-                      onChange={handleChange}
-                      className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                      placeholder="Subject"
-                    />
-                    {errors.subject && (
-                      <p className="text-red-500 text-sm">{errors.subject}</p>
-                    )}
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-[#4F2F1D] mb-2 font-semibold">
+                  {["name", "email", "mobile", "subject"].map((field) => (
+                    <div key={field} className="mb-6">
+                      <label
+                        className="block text-[#111111] mb-2"
+                        style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                      >
+                        {field.charAt(0).toUpperCase() + field.slice(1)}
+                      </label>
+                      <input
+                        type={field === "email" ? "email" : "text"}
+                        name={field}
+                        value={formData[field]}
+                        onChange={handleChange}
+                        className="w-full p-3 border border-[#FF3D57] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                        placeholder={`Your ${field}`}
+                      />
+                      {errors[field] && (
+                        <p className="text-[#FF3D57] text-sm mt-1">{errors[field]}</p>
+                      )}
+                    </div>
+                  ))}
+
+                  <div className="mb-6">
+                    <label
+                      className="block text-[#111111] mb-2"
+                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                    >
                       Message
                     </label>
                     <textarea
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                      placeholder="Your Message"
+                      className="w-full p-3 border border-[#FF3D57] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                      placeholder="Your message"
                       rows="5"
                     ></textarea>
                     {errors.message && (
-                      <p className="text-red-500 text-sm">{errors.message}</p>
+                      <p className="text-[#FF3D57] text-sm mt-1">{errors.message}</p>
                     )}
                   </div>
+
                   <button
                     type="submit"
-                    className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-md transition duration-300"
+                    className="w-full py-3 rounded-lg transition-all duration-300 bg-[#FF3D57] text-white hover:bg-[#FF6B80]"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                   >
                     Send Message
                   </button>
@@ -156,52 +121,52 @@ const ContactUs = () => {
               </div>
 
               {/* Right Side - Contact Info */}
-              <div className="w-full md:w-1/2 md:pl-16 mt-8 md:mt-0 text-center md:text-left">
-                <h2 className="text-2xl font-bold text-[#6b3e1f] mb-4">
+              <div className="w-full md:w-1/2 bg-[#FEEAEA] p-8 rounded-lg shadow-lg">
+                <h2
+                  className="text-2xl mb-6 text-[#111111]"
+                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                >
                   Get in Touch
                 </h2>
-                <p className="text-gray-700 mb-4">
-                  If you have any questions, feel free to reach out to us. We
-                  are here to help you.
+                <p
+                  className="text-[#333333] mb-8"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                >
+                  If you have any questions, feel free to reach out to us. We are here to help you.
                 </p>
-                <div className="flex flex-col items-center md:items-start space-y-4">
-                  <div className="flex items-center space-x-3">
-                    <span className="bg-black text-white p-3 rounded-full">
-                      📞
-                    </span>
-                    <div>
-                      <p className="text-gray-500 text-sm">Phone</p>
-                      <p className="font-semibold text-lg">+91-73546-19960</p>
+
+                <div className="space-y-6 " >
+                  {[
+                    { icon: "📞", label: "Phone", value: "+91-73546-19960" },
+                    { icon: "✉️", label: "Email", value: "support@punjabi-rishtey.com" },
+                    { icon: "📍", label: "Address", value: "Mahalaxmi Nagar, Indore, M.P. 452010" }
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center space-x-4">
+                      <span className="bg-[#FCF9F2] text-white p-3 rounded-full">
+                        {item.icon}
+                      </span>
+                      <div>
+                        <p
+                          className="text-[#666666] text-sm"
+                          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                        >
+                          {item.label}
+                        </p>
+                        <p
+                          className="text-[#333333]"
+                          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                        >
+                          {item.value}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="bg-black text-white p-3 rounded-full">
-                      ✉️
-                    </span>
-                    <div>
-                      <p className="text-gray-500 text-sm">Email</p>
-                      <p className="font-semibold text-lg">
-                        support@punjabi-rishtey.com
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className="bg-black text-white p-3 rounded-full">
-                      📍
-                    </span>
-                    <div>
-                      <p className="text-gray-500 text-sm">Address</p>
-                      <p className="font-semibold text-lg">
-                        Mahalaxmi Nagar, Indore, M.P. 452010
-                      </p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
 
             {/* Map Section */}
-            <div className="mt-12">
+            <div className="mt-12 rounded-lg overflow-hidden shadow-lg">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3679.1979448425536!2d75.90972427496939!3d22.75803417936002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39631dc98ba6d683%3A0x64f13661e6711e45!2sPunjabi%20Rishtey!5e0!3m2!1sen!2sin!4v1739554919003!5m2!1sen!2sin"
                 width="100%"
