@@ -652,54 +652,69 @@ export default function ProfileSettings() {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FCF9F2]">
-      <Header /> {/* Add Header component */}
+      <Header />
+      
       <div className="flex flex-grow">
         {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-lg p-5 rounded-r-lg">
+        <aside className="w-64 bg-white shadow-lg p-5 rounded-r-lg m-4">
           <div className="text-center">
             <img
               src={user.profilePicture || "/profile.jpg"}
               alt="Profile"
-              className="w-24 h-24 rounded-full mx-auto"
+              className="w-24 h-24 rounded-full mx-auto border-2 border-[#FF3D57]"
             />
-            <h2 className="text-lg font-semibold mt-3">{user.name}</h2>
-            <p className="text-sm text-gray-500">
+            <h2 
+              className="text-lg mt-3 text-[#111111]"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              {user.name}
+            </h2>
+            <p 
+              className="text-sm text-[#333333]"
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            >
               {user.profileType} User | {user.location?.city}
             </p>
           </div>
           <nav className="mt-6 space-y-4">
-            <NavItem icon={<FaHeart />} label="My Matches" />
-            <NavItem icon={<FaComments />} label="Interests" />
-            <NavItem icon={<FaComments />} label="Chat list" />
-            <NavItem icon={<FaMoneyBill />} label="Plan" />
-            <NavItem icon={<FaCog />} label="Settings" active />
+            <NavItem icon={<FaHeart className="text-[#FF3D57]" />} label="My Matches" />
+            <NavItem icon={<FaComments className="text-[#FF3D57]" />} label="Interests" />
+            <NavItem icon={<FaComments className="text-[#FF3D57]" />} label="Chat list" />
+            <NavItem icon={<FaMoneyBill className="text-[#FF3D57]" />} label="Plan" />
+            <NavItem icon={<FaCog className="text-[#FF3D57]" />} label="Settings" active />
           </nav>
-          
         </aside>
 
         {/* Main Content */}
         <main className="flex-1 p-8">
-          <h1 className="text-2xl font-semibold text-gray-700">
+          <h1 
+            className="text-3xl text-[#111111]"
+            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+          >
             Profile Settings
           </h1>
+          
           {/* Top Section with Buttons */}
           <div className="flex justify-end space-x-4 mb-6">
             <button
-              className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg flex items-center gap-2"
+              className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg flex items-center gap-2 transition duration-300"
               onClick={() => setShowPreferences(true)}
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
               <FaCog /> Edit Preferences
             </button>
             <button
-              className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg flex items-center gap-2"
+              className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg flex items-center gap-2 transition duration-300"
               onClick={() => {
                 logout();
                 navigate("/");
               }}
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
               <FaSignOutAlt /> Sign Out
             </button>
           </div>
+
           {/* Profile Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-4">
             <div className="flex justify-between items-center">
@@ -707,20 +722,35 @@ export default function ProfileSettings() {
                 <img
                   src={user.profilePicture || "/profile.jpg"}
                   alt={user.name}
-                  className="w-16 h-16 rounded-full"
+                  className="w-16 h-16 rounded-full border-2 border-[#FF3D57]"
                 />
                 <div>
-                  <h2 className="text-xl font-semibold">{user.name}</h2>
-                  <p className="text-gray-500 text-sm">
+                  <h2 
+                    className="text-xl text-[#111111]"
+                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                  >
+                    {user.name}
+                  </h2>
+                  <p 
+                    className="text-[#333333] text-sm"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  >
                     {user.profileType} User | {user.location?.city}
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          {/* 1. Account Section */}
+
+          {/* Account Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Account</h3>
+            <h3 
+              className="text-xl text-[#111111] mb-4"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Account
+            </h3>
+            
             <div className="grid grid-cols-2 gap-4 mt-4">
               <InfoRow
                 label="Full name"
@@ -802,33 +832,45 @@ export default function ProfileSettings() {
                 ]}
               />
             </div>
-            {isEditing ? (
-              <div className="mt-4 flex space-x-4">
+
+            <div className="flex justify-end space-x-4 mt-6">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={handleSave}
+                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg transition duration-300"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg transition duration-300"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : (
                 <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                  onClick={handleSave}
+                  onClick={() => setIsEditing(true)}
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg transition duration-300"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
-                  Save
+                  Edit
                 </button>
-                <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
-                onClick={() => setIsEditing(true)}
-              >
-                Edit
-              </button>
-            )}
+              )}
+            </div>
           </div>
+
           {/* 2. Personal Details Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Personal Details</h3>
+            <h3 
+              className="text-xl text-[#111111] mb-4"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Personal Details
+            </h3>
 
             <div className="grid grid-cols-2 gap-4 mt-4">
               <InfoRow
@@ -886,7 +928,7 @@ export default function ProfileSettings() {
                           }));
                         }
                       }}
-                      className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                      className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                     >
                       Add
                     </button>
@@ -1067,13 +1109,13 @@ export default function ProfileSettings() {
             {isEditingPersonal ? (
               <div className="mt-4 flex space-x-4">
                 <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                   onClick={handleSavePersonal}
                 >
                   Save
                 </button>
                 <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
                   onClick={handleCancelPersonal}
                 >
                   Cancel
@@ -1081,7 +1123,7 @@ export default function ProfileSettings() {
               </div>
             ) : (
               <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                 onClick={() => setIsEditingPersonal(true)}
               >
                 Edit
@@ -1091,7 +1133,12 @@ export default function ProfileSettings() {
 
           {/* 3. Family Details Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Family Details</h3>
+            <h3 
+              className="text-xl text-[#111111] mb-4"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Family Details
+            </h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <InfoRow
                 label="Family Value"
@@ -1168,13 +1215,13 @@ export default function ProfileSettings() {
             {isEditingFamily ? (
               <div className="mt-4 flex space-x-4">
                 <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                   onClick={handleSaveFamily}
                 >
                   Save
                 </button>
                 <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
                   onClick={handleCancelFamily}
                 >
                   Cancel
@@ -1182,7 +1229,7 @@ export default function ProfileSettings() {
               </div>
             ) : (
               <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                 onClick={() => setIsEditingFamily(true)}
               >
                 Edit
@@ -1192,7 +1239,12 @@ export default function ProfileSettings() {
 
           {/* 4. Education Details Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Education Details</h3>
+            <h3 
+              className="text-xl text-[#111111] mb-4"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Education Details
+            </h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <InfoRow
                 label="Education Level"
@@ -1275,13 +1327,13 @@ export default function ProfileSettings() {
             {isEditingEducation ? (
               <div className="mt-4 flex space-x-4">
                 <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                   onClick={handleSaveEducation}
                 >
                   Save
                 </button>
                 <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
                   onClick={handleCancelEducation}
                 >
                   Cancel
@@ -1289,7 +1341,7 @@ export default function ProfileSettings() {
               </div>
             ) : (
               <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                 onClick={() => setIsEditingEducation(true)}
               >
                 Edit
@@ -1299,7 +1351,12 @@ export default function ProfileSettings() {
 
           {/* 5. Professional Details Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Professional Details</h3>
+            <h3 
+              className="text-xl text-[#111111] mb-4"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Professional Details
+            </h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <InfoRow
                 label="Occupation"
@@ -1365,13 +1422,13 @@ export default function ProfileSettings() {
             {isEditingProfession ? (
               <div className="mt-4 flex space-x-4">
                 <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                   onClick={handleSaveProfession}
                 >
                   Save
                 </button>
                 <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
                   onClick={handleCancelProfession}
                 >
                   Cancel
@@ -1379,7 +1436,7 @@ export default function ProfileSettings() {
               </div>
             ) : (
               <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                 onClick={() => setIsEditingProfession(true)}
               >
                 Edit
@@ -1389,7 +1446,12 @@ export default function ProfileSettings() {
 
           {/* 7. Astrology Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
-            <h3 className="text-lg font-semibold mb-4">Astrology Details</h3>
+            <h3 
+              className="text-xl text-[#111111] mb-4"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Astrology Details
+            </h3>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <InfoRow
                 label="Rashi/Nakshatra"
@@ -1409,13 +1471,13 @@ export default function ProfileSettings() {
             {isEditingAstrology ? (
               <div className="mt-4 flex space-x-4">
                 <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                   onClick={handleSaveAstrology}
                 >
                   Save
                 </button>
                 <button
-                  className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                  className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
                   onClick={handleCancelAstrology}
                 >
                   Cancel
@@ -1423,7 +1485,7 @@ export default function ProfileSettings() {
               </div>
             ) : (
               <button
-                className="mt-4 px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                 onClick={() => setIsEditingAstrology(true)}
               >
                 Edit
@@ -1434,17 +1496,22 @@ export default function ProfileSettings() {
           {/* 8. Hobbies Section */}
           <div className="bg-white p-6 rounded-lg shadow-lg mt-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold mb-4">Hobbies</h3>
+              <h3 
+                className="text-xl text-[#111111] mb-4"
+                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+              >
+                Hobbies
+              </h3>
               {isEditingHobbies ? (
                 <div className="flex space-x-4">
                   <button
-                    className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                     onClick={handleSaveHobbies}
                   >
                     Save
                   </button>
                   <button
-                    className="px-4 py-2 bg-gray-500 hover:bg-gray-700 text-white rounded-lg"
+                    className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
                     onClick={handleCancelHobbies}
                   >
                     Cancel
@@ -1452,7 +1519,7 @@ export default function ProfileSettings() {
                 </div>
               ) : (
                 <button
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                   onClick={() => setIsEditingHobbies(true)}
                 >
                   Edit
@@ -1478,7 +1545,7 @@ export default function ProfileSettings() {
                       }));
                     }
                   }}
-                  className="px-4 py-2 bg-[#990000] hover:bg-[#800000] text-white rounded-lg"
+                  className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
                 >
                   Add
                 </button>
