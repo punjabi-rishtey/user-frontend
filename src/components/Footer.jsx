@@ -17,7 +17,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-t from-[black] to-[#6F0B11] text-white py-10">
+    <footer className="bg-gradient-to-t from-[#3D0000] to-[#B31312] text-white py-10">
       <div className="container mx-auto px-6"> {/* Added px-6 for horizontal padding */}
         {/* Top Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">

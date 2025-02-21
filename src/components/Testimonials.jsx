@@ -52,20 +52,17 @@ const Testimonials = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF3E0] flex flex-col">
+    <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
       <Header />
 
       <main className="flex-grow py-16 px-4">
         <div className="container mx-auto">
-          <h1
-            className="text-4xl font-bold text-center mb-12"
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              color: "#4F2F1D",
-            }}
+          <h2
+            className="text-5xl text-center mb-12 text-[#111111]"
+            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
           >
-            Testimonials
-          </h1>
+            Our Success Stories
+          </h2>
 
           {/* Main Content */}
           <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
@@ -75,8 +72,10 @@ const Testimonials = () => {
                 <motion.div
                   key={index}
                   whileHover={{ scale: 1.05 }}
-                  className={`cursor-pointer overflow-hidden rounded-lg ${
-                    selectedClient === index ? "ring-4 ring-[#990000]" : ""
+                  className={`cursor-pointer overflow-hidden rounded-lg shadow-lg ${
+                    selectedClient === index 
+                      ? "ring-2 ring-[#FF3D57] bg-[#FEEAEA]" 
+                      : "bg-[#FEEAEA]"
                   }`}
                   onClick={() => selectClient(index)}
                 >
@@ -89,46 +88,49 @@ const Testimonials = () => {
               ))}
             </div>
 
-            {/* Right Side - Selected Client */}
-            <div className="w-full md:w-1/2 flex flex-col items-center">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center"
-              >
-                <motion.div
-                  id="client-photo"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="w-64 h-64 mx-auto mb-8"
-                >
-                  <img
-                    src={clientObj.photo}
-                    alt={clientObj.name}
-                    className="w-full h-full object-cover rounded-full shadow-lg"
-                  />
-                </motion.div>
+{/* Right Side - Selected Client */}
+<div className="w-full md:w-1/2 flex flex-col items-center">
+  {/* Image Container - Outside blockquote */}
+  <motion.div
+    id="client-photo"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="w-64 h-64 mb-8"
+  >
+    <img
+      src={clientObj.photo}
+      alt={clientObj.name}
+      className="w-full h-full object-cover rounded-full shadow-lg ring-2 ring-[#FF3D57]"
+    />
+  </motion.div>
 
-                <motion.blockquote
-                  id="client-quote"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-xl italic text-[#5A3E29] mb-4 px-8"
-                >
-                  "{clientObj.quote}"
-                </motion.blockquote>
+  {/* Quote and Name Container */}
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="text-center bg-[#FEEAEA] p-6 rounded-lg shadow-lg w-full max-w-xl"
+  >
+    <motion.blockquote
+      id="client-quote"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="text-xl text-[#333333] mb-4 mx-auto px-4"
+      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+    >
+      "{clientObj.quote}"
+    </motion.blockquote>
 
-                <motion.p
-                  id="client-name"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-2xl font-semibold text-[#4F2F1D]"
-                  style={{ fontFamily: "'Playfair Display', serif" }}
-                >
-                  {clientObj.name}
-                </motion.p>
-              </motion.div>
-            </div>
+    <motion.p
+      id="client-name"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="text-2xl text-[#FF3D57]"
+      style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+    >
+      {clientObj.name}
+    </motion.p>
+  </motion.div>
+</div>
           </div>
         </div>
       </main>
