@@ -75,6 +75,12 @@ const HeroWithHeader = () => {
               Find Your Partner
             </button>
             <button
+              onClick={() => navigate("/membership")}
+              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
+            >
+              Membership Details
+            </button>
+            <button
               onClick={() => navigate("/testimonials")}
               className="text-white hover:text-gray-400 transition duration-300 hover:underline"
             >
