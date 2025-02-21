@@ -8,6 +8,7 @@ import dummyData from "./dummyData";
 import Footer from "./Footer";
 import Header from "./Header";
 import ProfileSlider from "./ProfileSlider";
+import { motion } from "framer-motion";
 
 const FindPartner = () => {
   const [filters, setFilters] = useState({
@@ -75,33 +76,42 @@ const FindPartner = () => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
+  // Add cardVariants for consistent hover animation
+  const cardVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    hover: {
+      scale: 1.05,
+      backgroundColor: "#FFB6C1", // Darker pink on hover
+      transition: { duration: 0.2 }, // Quicker transition for better responsiveness
+    },
+  };
+
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-[#f2e6d9] to-[#b3d9ea] relative">
+    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
 
       {/* Profile Slider */}
       <ProfileSlider />
 
       {/* Search Bar */}
-      <div className="container mx-auto px-8 my-4 ">
+      <div className="container mx-auto px-8 my-4">
         <input
           type="text"
           placeholder="Search by name..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000] mb-6"
+          className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
         />
       </div>
 
       <div className="flex flex-grow">
         {/* Sidebar for Filters */}
-        <div className="w-1/4 p-8 bg-white shadow-lg sticky top-0 h-screen overflow-y-auto ml-8 rounded-lg">
+        <div className="w-1/4 p-8 bg-[#FEEAEA] shadow-lg sticky top-0 h-screen overflow-y-auto ml-8 rounded-lg border border-[#FFE5E5]">
           <h2
-            className="text-2xl font-bold mb-6"
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              color: "#4F2F1D",
-            }}
+            className="text-2xl mb-6 text-[#111111]"
+            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
           >
             Filters
           </h2>
@@ -129,14 +139,18 @@ const FindPartner = () => {
             },
           ].map(({ label, name, options }, index) => (
             <div className="mb-4" key={index}>
-              <label className="block text-[#4F2F1D] mb-2 font-semibold">
+              <label 
+                className="block text-[#333333] mb-2"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              >
                 {label}
               </label>
               <select
                 name={name}
                 value={filters[name]}
                 onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
+                className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 <option value="">Select {label}</option>
                 {options.map((option, idx) => (
@@ -148,7 +162,8 @@ const FindPartner = () => {
             </div>
           ))}
           <button
-            className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-md transition duration-300"
+            className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             onClick={handleClearFilters}
           >
             Clear Filters
@@ -159,9 +174,13 @@ const FindPartner = () => {
         <div className="w-3/4 p-8">
           <div className="grid grid-cols-2 gap-8">
             {filteredData.map((item) => (
-              <div
+              <motion.div
                 key={item.id}
-                className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-transform duration-300 transform hover:scale-102 cursor-pointer"
+                variants={cardVariants}
+                initial="initial"
+                animate="animate"
+                whileHover="hover"
+                className="bg-[#FEEAEA] p-6 rounded-lg shadow-lg cursor-pointer border border-[#FFE5E5]"
                 onClick={() => handleProfileClick(item)}
               >
                 <div className="flex items-center">
@@ -172,26 +191,32 @@ const FindPartner = () => {
                   />
                   <div>
                     <h3
-                      className="text-xl font-bold mb-2"
-                      style={{
-                        fontFamily: "'Playfair Display', serif",
-                        color: "#4F2F1D",
-                      }}
+                      className="text-xl mb-2 text-[#111111]"
+                      style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                     >
                       {item.name}
                     </h3>
-                    <p className="text-[#4F2F1D] mb-1">
+                    <p 
+                      className="text-[#333333] mb-1"
+                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                    >
                       <strong>Age:</strong> {item.age}
                     </p>
-                    <p className="text-[#4F2F1D] mb-1">
+                    <p 
+                      className="text-[#333333] mb-1"
+                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                    >
                       <strong>Religion:</strong> {item.religion}
                     </p>
-                    <p className="text-[#4F2F1D] mb-1">
+                    <p 
+                      className="text-[#333333] mb-1"
+                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                    >
                       <strong>Marital Status:</strong> {item.maritalStatus}
                     </p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
