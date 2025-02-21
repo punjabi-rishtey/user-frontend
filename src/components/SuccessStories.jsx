@@ -38,7 +38,7 @@ const SuccessStories = () => {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "85%"]);
 
   return (
-    <div className="bg-[#FEEAEA] py-16 relative">
+    <div className="bg-[#FCF9F2] py-16 relative">
       <div className="container mx-auto px-2 text-center relative" ref={containerRef}>
         <h2
           className="text-4xl mb-12 text-[#111111]"
@@ -49,7 +49,7 @@ const SuccessStories = () => {
 
         <motion.div
           style={{ height: lineHeight, top: "11rem" }}
-          className="absolute left-1/2 transform -translate-x-1/2 bg-[#610614] w-[3px]"
+          className="absolute left-1/2 transform -translate-x-1/2 bg-[#FF3D57] w-[3px]"
         ></motion.div>
 
         <div className="relative space-y-16 px-2 md:px-5">
@@ -66,7 +66,7 @@ const SuccessStories = () => {
             >
               {/* Diamond */}
               <div
-                className="absolute left-1/2 transform -translate-x-1/2 bg-[#610614] w-4 h-4 rotate-45 z-0"
+                className="absolute left-1/2 transform -translate-x-1/2 bg-[#FF3D57] w-4 h-4 rotate-45 z-0"
                 style={{ top: "calc(50% - 2px)" }}
               ></div>
 

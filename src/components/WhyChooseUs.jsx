@@ -40,7 +40,7 @@ const WhyChooseUs = () => {
         <div className="bg-[#FFFFFF] py-16">
             <div className="container mx-auto px-6 text-center">
                 <h2
-                    className="text-5xl mb-6 text-[#111111]"
+                    className="text-5xl text-center mb-12 text-[#111111]"
                     style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                     Why Choose Us

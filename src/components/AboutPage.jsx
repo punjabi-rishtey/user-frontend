@@ -42,25 +42,25 @@ const AboutPage = () => {
   };
 
   return (
-    <div className="bg-[#FFFFFF] min-h-screen flex flex-col">
+    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
 
       <main className="flex-grow">
         <motion.header className="text-center py-16" style={{ y: headerY }}>
           <h1
-            className="text-5xl font-bold text-center mb-8 text-[#111111]"
-            style={{ fontFamily: "'Lora', serif" }}
+            className="text-5xl text-center mb-12 text-[#111111]"
+            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
           >
             About us
           </h1>
           <p
-            className="text-xl mt-4 text-[#333333]"
-            style={{ fontFamily: "'Merriweather', serif" }}
+            className="text-xl text-[#333333]"
+            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
           >
             Most Trusted and Premium Matrimony Service.
           </p>
 
-          <section className="bg-[#FFFFFF] flex justify-center gap-8 mt-12 flex-wrap py-1">
+          <section className="bg-[#FCF9F2] flex justify-center gap-8 mt-12 flex-wrap py-1">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
@@ -69,20 +69,20 @@ const AboutPage = () => {
                 animate="animate"
                 whileHover="hover"
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="bg-[#FEEAEA] shadow-lg p-8 rounded-lg text-center w-96 transition-all duration-300"
+                className="bg-[#FCF9F2] shadow-lg p-8 rounded-lg text-center w-96 transition-all duration-300"
               >
                 <div className="text-6xl mb-6 text-[#FF3D57]">
                   {feature.icon}
                 </div>
                 <h3
-                  className="text-2xl font-bold mt-4 text-[#111111]"
-                  style={{ fontFamily: "'Lora', serif" }}
+                  className="text-2xl text-[#111111]"
+                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   {feature.title}
                 </h3>
                 <p
                   className="text-lg text-[#333333] mt-4"
-                  style={{ fontFamily: "'Merriweather', serif" }}
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {feature.description}
                 </p>

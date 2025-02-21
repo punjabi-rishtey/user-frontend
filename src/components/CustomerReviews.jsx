@@ -35,10 +35,10 @@ const CustomerReviews = () => {
   };
 
   return (
-    <div className="bg-[#FFFFFF] py-12">
+    <div className="bg-[#FCF9F2] py-12">
       <div className="container mx-auto px-6 text-center">
         <h2
-          className="text-5xl mb-6 text-[#111111]"
+          className="text-5xl text-center mb-12 text-[#111111]"
           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           Everybody Loves Us
@@ -59,7 +59,7 @@ const CustomerReviews = () => {
               animate="animate"
               whileHover="hover"
               transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="bg-[#FEEAEA] px-4 py-6 rounded-lg shadow-lg border border-[#FFE5E5]"
+              className="bg-[#FCF9F2] px-4 py-6 rounded-lg shadow-lg border border-[#D1BFA7]"
             >
               {/* Star Rating */}
               <div className="flex justify-center mb-3 space-x-1">
@@ -73,7 +73,7 @@ const CustomerReviews = () => {
 
               {/* Title */}
               <h3
-                className="text-2xl mt-3 mb-2 text-[#111111]"
+                className="text-2xl text-[#111111]"
                 style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
               >
                 {review.title}
