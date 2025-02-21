@@ -63,7 +63,7 @@ const MembershipPage = () => {
   };
 
   return (
-    <div className="bg-[#FFFFFF] min-h-screen flex flex-col">
+    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
       
       <main className="flex-grow py-16 px-6">
