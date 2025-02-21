@@ -53,7 +53,7 @@ const PreferencesPopup = ({ onClose, initialPreferences = null }) => {
     <>
       {/* Overlay */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -63,133 +63,109 @@ const PreferencesPopup = ({ onClose, initialPreferences = null }) => {
         className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-8 rounded-lg shadow-2xl w-full max-w-md z-50 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-bold mb-6 text-[#4F2F1D] font-playfair">
+        <h2 
+          className="text-2xl mb-6 text-[#111111]"
+          style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+        >
           Set Your Partner Preferences
         </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[#4F2F1D] mb-2">Height</label>
-            <select
-              name="height"
-              value={preferences.height}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-            >
-              <option value="">Select Height</option>
-              <option value="5.0">5'0" (152 cm)</option>
-              <option value="5.1">5'1" (154 cm)</option>
-              <option value="5.2">5'2" (157 cm)</option>
-              <option value="5.3">5'3" (160 cm)</option>
-              <option value="5.4">5'4" (162 cm)</option>
-              <option value="5.5">5'5" (165 cm)</option>
-              <option value="5.6">5'6" (167 cm)</option>
-              <option value="5.7">5'7" (170 cm)</option>
-              <option value="5.8">5'8" (172 cm)</option>
-              <option value="5.9">5'9" (175 cm)</option>
-              <option value="5.10">5'10" (177 cm)</option>
-              <option value="5.11">5'11" (180 cm)</option>
-              <option value="6.0">6'0" (182 cm)</option>
-              <option value="6.1">6'1" (185 cm)</option>
-              <option value="6.2">6'2" (187 cm)</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[#4F2F1D] mb-2">Caste</label>
-            <select
-              name="caste"
-              value={preferences.caste}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-            >
-              <option value="">Select Caste</option>
-              <option value="khatri">Khatri</option>
-              <option value="arora">Arora</option>
-              <option value="brahmin">Brahmin</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[#4F2F1D] mb-2">Manglik Status</label>
-            <select
-              name="manglik"
-              value={preferences.manglik}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-            >
-              <option value="">Select Manglik Status</option>
-              <option value="manglik">Manglik</option>
-              <option value="partial_manglik">Partial Manglik</option>
-              <option value="non_manglik">Non Manglik</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[#4F2F1D] mb-2">Location</label>
-            <select
-              name="location"
-              value={preferences.location}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-            >
-              <option value="">Select Location</option>
-              <option value="indore">Indore</option>
-              <option value="delhi">Delhi</option>
-              <option value="mumbai">Mumbai</option>
-              <option value="bangalore">Bangalore</option>
-              <option value="hyderabad">Hyderabad</option>
-              <option value="chennai">Chennai</option>
-              <option value="kolkata">Kolkata</option>
-              <option value="pune">Pune</option>
-              <option value="jaipur">Jaipur</option>
-              <option value="ahmedabad">Ahmedabad</option>
-              <option value="chandigarh">Chandigarh</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[#4F2F1D] mb-2">Family Values</label>
-            <select
-              name="familyValues"
-              value={preferences.familyValues}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-            >
-              <option value="">Select Family Values</option>
-              <option value="traditional">Traditional</option>
-              <option value="moderate">Moderate</option>
-              <option value="liberal">Liberal</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[#4F2F1D] mb-2">Diet Preference</label>
-            <select
-              name="diet"
-              value={preferences.diet}
-              onChange={handleChange}
-              className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-            >
-              <option value="">Select Diet</option>
-              <option value="veg">Vegetarian</option>
-              <option value="nonveg">Non-Vegetarian</option>
-              <option value="occasionally_nonveg">Occasionally Non-Vegetarian</option>
-            </select>
-          </div>
+          {[
+            { label: "Height", name: "height", options: [
+              { value: "", label: "Select Height" },
+              { value: "5.0", label: "5'0\" (152 cm)" },
+              { value: "5.1", label: "5'1\" (154 cm)" },
+              { value: "5.2", label: "5'2\" (157 cm)" },
+              { value: "5.3", label: "5'3\" (160 cm)" },
+              { value: "5.4", label: "5'4\" (162 cm)" },
+              { value: "5.5", label: "5'5\" (165 cm)" },
+              { value: "5.6", label: "5'6\" (167 cm)" },
+              { value: "5.7", label: "5'7\" (170 cm)" },
+              { value: "5.8", label: "5'8\" (172 cm)" },
+              { value: "5.9", label: "5'9\" (175 cm)" },
+              { value: "5.10", label: "5'10\" (177 cm)" },
+              { value: "5.11", label: "5'11\" (180 cm)" },
+              { value: "6.0", label: "6'0\" (182 cm)" },
+              { value: "6.1", label: "6'1\" (185 cm)" },
+              { value: "6.2", label: "6'2\" (187 cm)" },
+            ]},
+            { label: "Caste", name: "caste", options: [
+              { value: "", label: "Select Caste" },
+              { value: "khatri", label: "Khatri" },
+              { value: "arora", label: "Arora" },
+              { value: "brahmin", label: "Brahmin" },
+              { value: "other", label: "Other" },
+            ]},
+            { label: "Manglik Status", name: "manglik", options: [
+              { value: "", label: "Select Manglik Status" },
+              { value: "manglik", label: "Manglik" },
+              { value: "partial_manglik", label: "Partial Manglik" },
+              { value: "non_manglik", label: "Non Manglik" },
+            ]},
+            { label: "Location", name: "location", options: [
+              { value: "", label: "Select Location" },
+              { value: "indore", label: "Indore" },
+              { value: "delhi", label: "Delhi" },
+              { value: "mumbai", label: "Mumbai" },
+              { value: "bangalore", label: "Bangalore" },
+              { value: "hyderabad", label: "Hyderabad" },
+              { value: "chennai", label: "Chennai" },
+              { value: "kolkata", label: "Kolkata" },
+              { value: "pune", label: "Pune" },
+              { value: "jaipur", label: "Jaipur" },
+              { value: "ahmedabad", label: "Ahmedabad" },
+              { value: "chandigarh", label: "Chandigarh" },
+              { value: "other", label: "Other" },
+            ]},
+            { label: "Family Values", name: "familyValues", options: [
+              { value: "", label: "Select Family Values" },
+              { value: "traditional", label: "Traditional" },
+              { value: "moderate", label: "Moderate" },
+              { value: "liberal", label: "Liberal" },
+            ]},
+            { label: "Diet Preference", name: "diet", options: [
+              { value: "", label: "Select Diet" },
+              { value: "veg", label: "Vegetarian" },
+              { value: "nonveg", label: "Non-Vegetarian" },
+              { value: "occasionally_nonveg", label: "Occasionally Non-Vegetarian" },
+            ]},
+          ].map((field) => (
+            <div key={field.name}>
+              <label 
+                className="block text-[#333333] mb-2"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              >
+                {field.label}
+              </label>
+              <select
+                name={field.name}
+                value={preferences[field.name]}
+                onChange={handleChange}
+                className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              >
+                {field.options.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
 
           <div className="flex space-x-4 mt-6">
             <button
               type="submit"
-              className="flex-1 bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-md transition duration-300"
+              className="flex-1 bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
               Save Preferences
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
+              className="flex-1 bg-[#333333] hover:bg-[#444444] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
               Cancel
             </button>

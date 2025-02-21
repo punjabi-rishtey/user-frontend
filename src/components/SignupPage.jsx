@@ -40,7 +40,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-gray-100">
+    <div className="min-h-screen flex flex-col justify-between bg-[#FCF9F2]">
       <Header />
 
       {/* Signup Form */}
@@ -49,132 +49,90 @@ const SignupPage = () => {
         {/* Added margin */}
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
           <h2
-            className="text-2xl font-bold mb-4"
-            style={{
-              fontFamily: "'Playfair Display', serif",
-              color: "#4F2F1D",
-            }}
+            className="text-3xl mb-6 text-[#111111]"
+            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
           >
             Sign Up
           </h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">Name</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">Mobile</label>
-              <input
-                type="text"
-                name="mobile"
-                value={formData.mobile}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">Gender</label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              >
-                <option value="">Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">Date of Birth</label>
-              <input
-                type="date"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">Religion</label>
-              <select
-                name="religion"
-                value={formData.religion}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              >
-                <option value="">Select Religion</option>
-                <option value="hindu">Hindu</option>
-                <option value="sikh">Sikh</option>
-                <option value="jain">Jain</option>
-                <option value="buddhist">Buddhist</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">
-                Marital Status
-              </label>
-              <select
-                name="marital_status"
-                value={formData.marital_status}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              >
-                <option value="">Select Marital Status</option>
-                <option value="never_married">Never Married</option>
-                <option value="divorced">Divorced</option>
-                <option value="widow_widower">Widow/Widower</option>
-                <option value="awaiting_divorce">Awaiting Divorce</option>
-                <option value="annulled">Annulled</option>
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-[#4F2F1D] mb-2">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#D1BFA7] rounded focus:outline-none focus:ring-2 focus:ring-[#990000]"
-                required
-              />
-            </div>
-            <div className="flex justify-end space-x-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {[
+              { label: "Name", name: "name", type: "text" },
+              { label: "Mobile", name: "mobile", type: "text" },
+              { label: "Gender", name: "gender", type: "select", options: [
+                { value: "", label: "Select Gender" },
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" }
+              ]},
+              { label: "Date of Birth", name: "dob", type: "date" },
+              { label: "Religion", name: "religion", type: "select", options: [
+                { value: "", label: "Select Religion" },
+                { value: "hindu", label: "Hindu" },
+                { value: "sikh", label: "Sikh" },
+                { value: "jain", label: "Jain" },
+                { value: "buddhist", label: "Buddhist" }
+              ]},
+              { label: "Marital Status", name: "marital_status", type: "select", options: [
+                { value: "", label: "Select Marital Status" },
+                { value: "never_married", label: "Never Married" },
+                { value: "divorced", label: "Divorced" },
+                { value: "widow_widower", label: "Widow/Widower" },
+                { value: "awaiting_divorce", label: "Awaiting Divorce" },
+                { value: "annulled", label: "Annulled" }
+              ]},
+              { label: "Email", name: "email", type: "email" },
+              { label: "Password", name: "password", type: "password" },
+            ].map((field) => (
+              <div key={field.name}>
+                <label 
+                  className="block text-[#333333] mb-2"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                >
+                  {field.label}
+                </label>
+                {field.type === "select" ? (
+                  <select
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                    required
+                  >
+                    {field.options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={field.type}
+                    name={field.name}
+                    value={formData[field.name]}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                    required
+                  />
+                )}
+              </div>
+            ))}
+            
+            <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-md transition duration-300"
+                className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Sign Up
               </button>
             </div>
           </form>
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <button
-              className="text-[#990000] hover:underline"
+              className="text-[#FF3D57] hover:text-[#FF6B80] transition duration-300"
               onClick={() => navigate("/login")}
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
               Already have an account? Login
             </button>
