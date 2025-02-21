@@ -16,7 +16,7 @@ import ContactUs from "./components/ContactUs";
 import Profilepage from "./components/Profilepage";
 import Testimonials from "./components/Testimonials";
 import MembershipPage from "./components/membershipPage"; // Add this import
-
+import CustomerReviews from "./components/CustomerReviews";
 function App() {
   return (
     <AuthProvider>
@@ -30,6 +30,7 @@ function App() {
                 <HowItWorks />
                 <SuccessStories />
                 <WhyChooseUs />
+                <CustomerReviews />
                 <Footer />
               </>
             }
