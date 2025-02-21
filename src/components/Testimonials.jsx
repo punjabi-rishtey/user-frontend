@@ -52,7 +52,7 @@ const Testimonials = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF] flex flex-col">
+    <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
       <Header />
 
       <main className="flex-grow py-16 px-4">
@@ -75,7 +75,7 @@ const Testimonials = () => {
                   className={`cursor-pointer overflow-hidden rounded-lg shadow-lg ${
                     selectedClient === index 
                       ? "ring-2 ring-[#FF3D57] bg-[#FEEAEA]" 
-                      : "bg-[#FEEAEA]"
+                      : "bg-[#FCF9F2]"
                   }`}
                   onClick={() => selectClient(index)}
                 >
