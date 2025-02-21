@@ -37,7 +37,7 @@ const AboutPage = () => {
     hover: {
       scale: 1.05,
       backgroundColor: "#FFB6C1",
-      transition: { duration: 0.3 },
+      transition: { duration: 0.2 },
     },
   };
 
@@ -60,7 +60,7 @@ const AboutPage = () => {
             Most Trusted and Premium Matrimony Service.
           </p>
 
-          <section className="bg-[#FCF9F2] flex justify-center gap-8 mt-12 flex-wrap py-1">
+          <section className="bg-[#FCF9F2] flex justify-center gap-8 mt-12 flex-wrap pb-8">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
@@ -90,7 +90,7 @@ const AboutPage = () => {
             ))}
           </section>
         </motion.header>
-        <motion.section className="bg-[#FFFFFF] py-16 px-6 md:px-20">
+        <motion.section className="bg-[#FCF9F2] pt-0 pb-16 px-6 md:px-20">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
             <motion.div
               className="relative w-full md:w-1/2"
@@ -105,8 +105,8 @@ const AboutPage = () => {
 
             <div className="w-full md:w-1/2 md:pl-16 text-center md:text-left">
               <h2
-                className="text-4xl font-bold text-[#111111] leading-tight mt-0"
-                style={{ fontFamily: "'Lora', serif" }}
+                className="text-4xl text-[#111111] leading-tight mt-0"
+                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
               >
                 WELCOME TO <br />
                 <span className="text-[#FF3D57]">
@@ -115,7 +115,7 @@ const AboutPage = () => {
               </h2>
               <p
                 className="text-[#333333] mt-6 text-lg leading-relaxed"
-                style={{ fontFamily: "'Merriweather', serif" }}
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Marriage is a lifetime promise, a beautiful blend of two lives,
                 two loves, and two hearts. It is a wonderful, mystical moment
@@ -126,12 +126,14 @@ const AboutPage = () => {
                 <button
                   onClick={handleFindPartnerClick}
                   className="bg-[#FEEAEA] text-[#FF3D57] font-semibold text-lg px-6 py-2 rounded-md hover:bg-[#FFB6C1] transition-all duration-300"
-                  style={{ fontFamily: "'Merriweather', serif" }}
+                  style={{ fontFamily: "'Modern Era', sans-serif" }}
                 >
                   Click here
                 </button>
-                <span className="text-[#333333] ml-2">
-                  {" "}
+                <span 
+                  className="text-[#333333] ml-2"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                >
                   to start your matrimony service now.
                 </span>
               </div>
@@ -140,7 +142,7 @@ const AboutPage = () => {
 
               <p
                 className="text-[#333333] text-lg"
-                style={{ fontFamily: "'Merriweather', serif" }}
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Shri Balraj Sablok established "Punjabi Marriage Forum (Now
                 Punjabi-Rishtey, our digital platform)" in 2000 and has been
