@@ -69,7 +69,7 @@ const AboutPage = () => {
                 animate="animate"
                 whileHover="hover"
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="bg-[#FCF9F2] shadow-lg p-8 rounded-lg text-center w-96 transition-all duration-300"
+                className="bg-[#FCF9F2] shadow-lg p-6 sm:p-8 rounded-lg text-center w-full sm:w-96 transition-all duration-300"
               >
                 <div className="text-6xl mb-6 text-[#FF3D57]">
                   {feature.icon}
@@ -90,8 +90,8 @@ const AboutPage = () => {
             ))}
           </section>
         </motion.header>
-        <motion.section className="bg-[#FCF9F2] pt-0 pb-16 px-6 md:px-20">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        <motion.section className="bg-[#FCF9F2] pt-0 pb-8 sm:pb-16 px-4 sm:px-6 md:px-20">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <motion.div
               className="relative w-full md:w-1/2"
               whileHover={{ scale: 1.02 }}
@@ -103,9 +103,9 @@ const AboutPage = () => {
               />
             </motion.div>
 
-            <div className="w-full md:w-1/2 md:pl-16 text-center md:text-left">
+            <div className="w-full md:w-1/2 md:pl-16 text-center md:text-left px-4 sm:px-0">
               <h2
-                className="text-4xl text-[#111111] leading-tight mt-0"
+                className="text-3xl sm:text-4xl text-[#111111] leading-tight mt-0"
                 style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
               >
                 WELCOME TO <br />
@@ -149,7 +149,7 @@ const AboutPage = () => {
                 running successfully for 22 years.
               </p>
 
-              <div className="flex flex-col md:flex-row items-center mt-8 space-y-6 md:space-y-0 md:space-x-12">
+              <div className="flex flex-col md:flex-row items-center mt-8 space-y-4 md:space-y-0 md:space-x-12">
                 <motion.div
                   className="flex items-center space-x-4"
                   whileHover={{ scale: 1.05 }}
