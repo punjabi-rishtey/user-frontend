@@ -42,11 +42,11 @@ const AboutPage = () => {
   };
 
   return (
-    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+    <div className="bg-[#FCF9F2] min-h-screen flex flex-col overflow-x-hidden">
       <Header />
 
-      <main className="flex-grow">
-        <motion.header className="text-center py-16" style={{ y: headerY }}>
+      <main className="flex-grow overflow-x-hidden">
+        <motion.header className="text-center py-8 sm:py-16" style={{ y: headerY }}>
           <h1
             className="text-5xl text-center mb-12 text-[#111111]"
             style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
@@ -90,7 +90,7 @@ const AboutPage = () => {
             ))}
           </section>
         </motion.header>
-        <motion.section className="bg-[#FCF9F2] pt-0 pb-8 sm:pb-16 px-4 sm:px-6 md:px-20">
+        <motion.section className="bg-[#FCF9F2] pt-0 pb-8 sm:pb-16 px-4 sm:px-6 md:px-20 overflow-hidden">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-12">
             <motion.div
               className="relative w-full md:w-1/2"
