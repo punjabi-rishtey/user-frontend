@@ -11,6 +11,7 @@ const Header = () => {
 
   const handleProfileClick = () => {
     navigate("/profilepage");
+    setIsSidebarOpen(false);
   };
 
   const handleFindPartnerClick = () => {
@@ -59,73 +60,72 @@ const Header = () => {
               key={index}
               onClick={() => handleNavClick(item)}
               className="text-white hover:text-gray-400 transition duration-300 hover:underline"
-              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
               {item.label}
             </button>
           ))}
         </nav>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="md:hidden text-white p-2"
-          onClick={() => setIsSidebarOpen(true)}
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
-
-        {/* Profile/Auth Section */}
-        <div className="hidden md:block">
-          {isAuthenticated ? (
+        {/* Mobile Menu and Profile/Auth Buttons */}
+        <div className="flex items-center space-x-4">
+          {/* Profile Icon - Show on both mobile and desktop when authenticated */}
+          {isAuthenticated && (
             <img
               src={profileIcon}
               alt="Profile"
               className="h-10 w-10 rounded-full cursor-pointer"
               onClick={handleProfileClick}
             />
-          ) : (
-            <div className="flex space-x-4">
+          )}
+
+          {/* Auth Buttons - Only show on desktop when not authenticated */}
+          {!isAuthenticated && (
+            <div className="hidden md:flex space-x-4">
               <button
                 className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-[#4F2F1D] transition duration-300"
                 onClick={() => navigate("/login")}
-                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Login
               </button>
               <button
                 className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-[#4F2F1D] transition duration-300"
                 onClick={() => navigate("/signup")}
-                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Sign Up
               </button>
             </div>
           )}
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden text-white p-2"
+            onClick={() => setIsSidebarOpen(true)}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
         </div>
 
         {/* Mobile Sidebar */}
         {isSidebarOpen && (
           <>
-            {/* Overlay */}
             <div 
               className="fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm"
               onClick={() => setIsSidebarOpen(false)}
             />
             
-            {/* Sidebar */}
             <div 
               className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden"
               style={{
@@ -160,11 +160,12 @@ const Header = () => {
                     key={index}
                     onClick={() => handleNavClick(item)}
                     className="text-white hover:text-gray-400 transition duration-300 text-left py-2"
-                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                   >
                     {item.label}
                   </button>
                 ))}
+                
+                {/* Auth Buttons - Only show in mobile menu when not authenticated */}
                 {!isAuthenticated && (
                   <>
                     <button
@@ -173,7 +174,6 @@ const Header = () => {
                         navigate("/login");
                         setIsSidebarOpen(false);
                       }}
-                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       Login
                     </button>
@@ -183,7 +183,6 @@ const Header = () => {
                         navigate("/signup");
                         setIsSidebarOpen(false);
                       }}
-                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       Sign Up
                     </button>
