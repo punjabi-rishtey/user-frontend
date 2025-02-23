@@ -50,6 +50,7 @@ const FindPartner = () => {
 
   const handleProfileClick = (profile) => {
     navigate(`/profile/${profile.id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const filteredData = dummyData.filter((item) => {
@@ -118,26 +119,34 @@ const FindPartner = () => {
       <div className="flex flex-col md:flex-row flex-grow relative">
         {/* Sidebar for Filters - Mobile Overlay */}
         <div 
-          className={`${
-            showFilters ? 'fixed' : 'hidden'
-          } md:relative md:block z-30 w-full md:w-1/4 h-screen bg-[#FEEAEA] overflow-y-auto`}
+          className={`fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
+            showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
+          onClick={() => setShowFilters(false)}
+        />
+
+        <div 
+          className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 ${
+            showFilters ? 'translate-x-0' : '-translate-x-full'
+          }`}
         >
-          <div className="p-4 sm:p-8 bg-[#FEEAEA] shadow-lg border border-[#FFE5E5] h-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2
-                className="text-2xl text-[#111111]"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
-                Filters
-              </h2>
-              <button
-                className="md:hidden text-[#FF3D57]"
-                onClick={() => setShowFilters(false)}
-              >
-                ✕
-              </button>
-            </div>
-            
+          <div className="flex justify-between items-center mb-6">
+            <h2
+              className="text-2xl text-white"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Filters
+            </h2>
+            <button
+              className="text-white p-2"
+              onClick={() => setShowFilters(false)}
+            >
+              ✕
+            </button>
+          </div>
+          
+          {/* Filter options */}
+          <div className="space-y-4">
             {[
               {
                 label: "Gender",
@@ -163,7 +172,7 @@ const FindPartner = () => {
             ].map(({ label, name, options }, index) => (
               <div className="mb-4" key={index}>
                 <label 
-                  className="block text-[#333333] mb-2"
+                  className="block text-white mb-2"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {label}

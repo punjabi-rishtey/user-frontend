@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import dummyData from "./dummyData";
@@ -43,6 +43,10 @@ const ProfileDetail = () => {
   const [popupImage, setPopupImage] = useState(null);
   const { scrollYProgress } = useScroll();
   const { isAuthenticated, toggleLoginModal, login } = useAuth();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   if (!profile) {
     return (
