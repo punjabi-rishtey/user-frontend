@@ -38,10 +38,10 @@ const SuccessStories = () => {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "85%"]);
 
   return (
-    <div className="bg-[#FCF9F2] py-16 relative">
-      <div className="container mx-auto px-2 text-center relative" ref={containerRef}>
+    <div className="bg-[#FCF9F2] py-12 sm:py-16 relative overflow-hidden">
+      <div className="container mx-auto px-4 text-center relative" ref={containerRef}>
         <h2
-          className="text-4xl mb-12 text-[#111111]"
+          className="text-3xl sm:text-4xl mb-8 sm:mb-12 text-[#111111]"
           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           Success Stories
@@ -52,7 +52,7 @@ const SuccessStories = () => {
           className="absolute left-1/2 transform -translate-x-1/2 bg-[#FF3D57] w-[3px]"
         ></motion.div>
 
-        <div className="relative space-y-16 px-2 md:px-5">
+        <div className="relative space-y-8 sm:space-y-16">
           {stories.map((story, index) => (
             <motion.div
               key={index}
@@ -60,7 +60,7 @@ const SuccessStories = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               viewport={{ once: true, amount: 0.5 }}
-              className={`relative flex flex-col md:flex-row items-center ${
+              className={`relative flex flex-col md:flex-row items-center gap-4 md:gap-8 ${
                 index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
               }`}
             >

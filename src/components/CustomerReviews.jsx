@@ -35,22 +35,22 @@ const CustomerReviews = () => {
   };
 
   return (
-    <div className="bg-[#FCF9F2] py-12">
-      <div className="container mx-auto px-6 text-center">
+    <div className="bg-[#FCF9F2] py-12 overflow-hidden">
+      <div className="container mx-auto px-4 text-center">
         <h2
-          className="text-5xl text-center mb-12 text-[#111111]"
+          className="text-3xl sm:text-5xl mb-6 sm:mb-12 text-[#111111]"
           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           Everybody Loves Us
         </h2>
         <p
-          className="text-xl text-[#333333] mb-12"
+          className="text-lg sm:text-xl text-[#333333] mb-8 sm:mb-12"
           style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
         >
           Check out some of our recent product reviews.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-11 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-11 max-w-7xl mx-auto">
           {reviews.map((review, index) => (
             <motion.div
               key={index}
