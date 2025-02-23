@@ -44,7 +44,7 @@ const HeroWithHeader = () => {
   };
 
   return (
-    <div className="relative h-screen overflow-hidden bg-[#800000]">
+    <div className="relative h-screen overflow-hidden bg-[#800000] w-full">
       {/* Default maroon background */}
       {/* Loader */}
       {!isVideoLoaded && (
@@ -69,8 +69,8 @@ const HeroWithHeader = () => {
       {/* Black Translucent Overlay */}
       <div className="absolute inset-0 bg-black opacity-50"></div>
       {/* Translucent and Blurred Header */}
-      <div className="absolute top-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-md z-10">
-        <div className="container mx-auto flex justify-between items-center px-4">
+      <div className="absolute top-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-md z-10 w-full">
+        <div className="container mx-auto flex justify-between items-center px-4 max-w-full">
           {/* Logo */}
           <div>
             <img 
@@ -144,12 +144,12 @@ const HeroWithHeader = () => {
       {isSidebarOpen && (
         <>
           <div 
-            className="fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm"
+            className="fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm overflow-hidden"
             onClick={() => setIsSidebarOpen(false)}
           />
           
           <div 
-            className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden"
+            className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden overflow-y-auto"
             style={{
               transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
               transition: 'transform 0.3s ease-in-out'
@@ -213,27 +213,29 @@ const HeroWithHeader = () => {
         </>
       )}
       {/* Centered Slogan and Stylish Button */}
-      <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 text-center text-white px-4 z-10">
-        <h1
-          className="text-3xl sm:text-5xl font-bold mb-4"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          Together Forever
-        </h1>
-        <p
-          className="text-lg sm:text-2xl mb-8 max-w-3xl mx-auto"
-          style={{ fontFamily: "'Playfair Display', serif" }}
-        >
-          Join us in celebrating the journey of love and partnership, as we
-          forge connections that stand the test of time and create memories that
-          last a lifetime.
-        </p>
-        <button
-          className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-md transition duration-300 shadow-lg"
-          onClick={handleFindPartnerClick}
-        >
-          Find Your Partner!
-        </button>
+      <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 text-center text-white px-4 z-10 w-full">
+        <div className="max-w-7xl mx-auto">
+          <h1
+            className="text-3xl sm:text-5xl font-bold mb-4"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Together Forever
+          </h1>
+          <p
+            className="text-lg sm:text-2xl mb-8 max-w-3xl mx-auto"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Join us in celebrating the journey of love and partnership, as we
+            forge connections that stand the test of time and create memories that
+            last a lifetime.
+          </p>
+          <button
+            className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-md transition duration-300 shadow-lg"
+            onClick={handleFindPartnerClick}
+          >
+            Find Your Partner!
+          </button>
+        </div>
       </div>
     </div>
   );
