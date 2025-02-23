@@ -118,8 +118,21 @@ const Header = () => {
 
         {/* Mobile Sidebar */}
         {isSidebarOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
-            <div className="fixed right-0 top-0 h-full w-64 bg-[#3D0000] p-4 shadow-lg">
+          <>
+            {/* Overlay */}
+            <div 
+              className="fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm"
+              onClick={() => setIsSidebarOpen(false)}
+            />
+            
+            {/* Sidebar */}
+            <div 
+              className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden"
+              style={{
+                transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
+                transition: 'transform 0.3s ease-in-out'
+              }}
+            >
               <div className="flex justify-end">
                 <button
                   className="text-white p-2"
@@ -178,7 +191,7 @@ const Header = () => {
                 )}
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>
