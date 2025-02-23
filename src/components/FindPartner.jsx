@@ -21,6 +21,7 @@ const FindPartner = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -88,91 +89,115 @@ const FindPartner = () => {
   };
 
   return (
-    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+    <div className="bg-[#FCF9F2] min-h-screen flex flex-col overflow-hidden">
       <Header />
 
       {/* Profile Slider */}
       <ProfileSlider />
 
-      {/* Search Bar */}
-      <div className="container mx-auto px-8 my-4">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
-          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-        />
+      {/* Search Bar and Filter Toggle */}
+      <div className="container mx-auto px-4 sm:px-8 my-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <input
+            type="text"
+            placeholder="Search by name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+          />
+          <button
+            className="md:hidden bg-[#FF3D57] text-white px-4 py-2 rounded-lg"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            {showFilters ? 'Hide Filters' : 'Show Filters'}
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-grow">
-        {/* Sidebar for Filters */}
-        <div className="w-1/4 p-8 bg-[#FEEAEA] shadow-lg sticky top-0 h-screen overflow-y-auto ml-8 rounded-lg border border-[#FFE5E5]">
-          <h2
-            className="text-2xl mb-6 text-[#111111]"
-            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-          >
-            Filters
-          </h2>
-          {[
-            {
-              label: "Gender",
-              name: "gender",
-              options: uniqueValues("gender"),
-            },
-            { label: "Caste", name: "caste", options: uniqueValues("caste") },
-            {
-              label: "Manglik",
-              name: "manglik",
-              options: uniqueValues("manglik"),
-            },
-            {
-              label: "Marital Status",
-              name: "maritalStatus",
-              options: uniqueValues("maritalStatus"),
-            },
-            {
-              label: "Religion",
-              name: "religion",
-              options: uniqueValues("religion"),
-            },
-          ].map(({ label, name, options }, index) => (
-            <div className="mb-4" key={index}>
-              <label 
-                className="block text-[#333333] mb-2"
-                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+      <div className="flex flex-col md:flex-row flex-grow relative">
+        {/* Sidebar for Filters - Mobile Overlay */}
+        <div 
+          className={`${
+            showFilters ? 'fixed' : 'hidden'
+          } md:relative md:block z-30 w-full md:w-1/4 h-screen bg-[#FEEAEA] overflow-y-auto`}
+        >
+          <div className="p-4 sm:p-8 bg-[#FEEAEA] shadow-lg border border-[#FFE5E5] h-full">
+            <div className="flex justify-between items-center mb-6">
+              <h2
+                className="text-2xl text-[#111111]"
+                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
               >
-                {label}
-              </label>
-              <select
-                name={name}
-                value={filters[name]}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
-                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                Filters
+              </h2>
+              <button
+                className="md:hidden text-[#FF3D57]"
+                onClick={() => setShowFilters(false)}
               >
-                <option value="">Select {label}</option>
-                {options.map((option, idx) => (
-                  <option key={idx} value={option}>
-                    {formatOption(option)}
-                  </option>
-                ))}
-              </select>
+                ✕
+              </button>
             </div>
-          ))}
-          <button
-            className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-            onClick={handleClearFilters}
-          >
-            Clear Filters
-          </button>
+            
+            {[
+              {
+                label: "Gender",
+                name: "gender",
+                options: uniqueValues("gender"),
+              },
+              { label: "Caste", name: "caste", options: uniqueValues("caste") },
+              {
+                label: "Manglik",
+                name: "manglik",
+                options: uniqueValues("manglik"),
+              },
+              {
+                label: "Marital Status",
+                name: "maritalStatus",
+                options: uniqueValues("maritalStatus"),
+              },
+              {
+                label: "Religion",
+                name: "religion",
+                options: uniqueValues("religion"),
+              },
+            ].map(({ label, name, options }, index) => (
+              <div className="mb-4" key={index}>
+                <label 
+                  className="block text-[#333333] mb-2"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                >
+                  {label}
+                </label>
+                <select
+                  name={name}
+                  value={filters[name]}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                >
+                  <option value="">Select {label}</option>
+                  {options.map((option, idx) => (
+                    <option key={idx} value={option}>
+                      {formatOption(option)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+            
+            <button
+              className="w-full bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300 mt-4"
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              onClick={handleClearFilters}
+            >
+              Clear Filters
+            </button>
+          </div>
         </div>
 
         {/* Profile List */}
-        <div className="w-3/4 p-8">
-          <div className="grid grid-cols-2 gap-8">
+        <div className="w-full md:w-3/4 p-4 sm:p-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
             {filteredData.map((item) => (
               <motion.div
                 key={item.id}
@@ -180,36 +205,36 @@ const FindPartner = () => {
                 initial="initial"
                 animate="animate"
                 whileHover="hover"
-                className="bg-[#FEEAEA] p-6 rounded-lg shadow-lg cursor-pointer border border-[#FFE5E5]"
+                className="bg-[#FEEAEA] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#FFE5E5]"
                 onClick={() => handleProfileClick(item)}
               >
-                <div className="flex items-center">
+                <div className="flex items-center flex-col sm:flex-row">
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-24 h-24 rounded-full mr-6"
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6"
                   />
-                  <div>
+                  <div className="text-center sm:text-left">
                     <h3
-                      className="text-xl mb-2 text-[#111111]"
+                      className="text-lg sm:text-xl mb-2 text-[#111111]"
                       style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                     >
                       {item.name}
                     </h3>
                     <p 
-                      className="text-[#333333] mb-1"
+                      className="text-sm sm:text-base text-[#333333] mb-1"
                       style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       <strong>Age:</strong> {item.age}
                     </p>
                     <p 
-                      className="text-[#333333] mb-1"
+                      className="text-sm sm:text-base text-[#333333] mb-1"
                       style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       <strong>Religion:</strong> {item.religion}
                     </p>
                     <p 
-                      className="text-[#333333] mb-1"
+                      className="text-sm sm:text-base text-[#333333] mb-1"
                       style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       <strong>Marital Status:</strong> {item.maritalStatus}

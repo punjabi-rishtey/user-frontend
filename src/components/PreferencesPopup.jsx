@@ -43,6 +43,8 @@ const PreferencesPopup = ({ onClose, initialPreferences = null }) => {
       const success = await updatePreferences(preferences);
       if (success) {
         onClose();
+        // Scroll to top of page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (error) {
       console.error("Error updating preferences:", error);

@@ -144,7 +144,8 @@ const SignupPage = () => {
         <PreferencesPopup
           onClose={() => {
             setShowPreferences(false);
-            navigate("/");
+            navigate("/", { replace: true });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       )}
