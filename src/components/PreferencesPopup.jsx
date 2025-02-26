@@ -53,9 +53,9 @@ const PreferencesPopup = ({ onClose, initialPreferences = null }) => {
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay with blur effect similar to mobile sidebar */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40"
+        className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -204,7 +204,7 @@ const PreferencesPopup = ({ onClose, initialPreferences = null }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-[#4F2F1D] hover:bg-[#3A2217] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+              className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
               style={{
                 fontFamily: "'Modern Era', sans-serif",
                 fontWeight: 400,
