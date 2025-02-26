@@ -36,9 +36,9 @@ const LoginPage = () => {
       <div className="flex-grow flex items-center justify-center my-16">
         {" "}
         {/* Added margin */}
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+        <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg w-full max-w-md">
           <h2
-            className="text-3xl mb-6 text-[#111111]"
+            className="text-3xl mb-6 text-[#4F2F1D]"
             style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
           >
             Login
@@ -46,7 +46,7 @@ const LoginPage = () => {
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label 
-                className="block text-[#333333] mb-2"
+                className="block text-[#6B4132] mb-2"
                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Email
@@ -56,14 +56,14 @@ const LoginPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                className="w-full p-3 border border-[#6B4132] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 required
               />
             </div>
             <div className="mb-6">
               <label 
-                className="block text-[#333333] mb-2"
+                className="block text-[#6B4132] mb-2"
                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Password
@@ -73,7 +73,7 @@ const LoginPage = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                className="w-full p-3 border border-[#6B4132] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 required
               />
@@ -81,7 +81,7 @@ const LoginPage = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
                 Login
@@ -90,7 +90,7 @@ const LoginPage = () => {
           </form>
           <div className="mt-6 text-center space-y-2">
             <button
-              className="text-[#FF3D57] hover:text-[#FF6B80] transition duration-300"
+              className="text-[#4A4A4A] hover:text-[#2D2D2D] hover:underline transition duration-300"
               onClick={() => navigate("/signup")}
               style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
@@ -98,7 +98,7 @@ const LoginPage = () => {
             </button>
             <br />
             <button 
-              className="text-[#FF3D57] hover:text-[#FF6B80] transition duration-300"
+              className="text-[#4A4A4A] hover:text-[#2D2D2D] hover:underline transition duration-300"
               style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             >
               Forgot Password?
