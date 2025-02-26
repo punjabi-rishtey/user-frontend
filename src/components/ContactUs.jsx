@@ -50,13 +50,13 @@ const ContactUs = () => {
   };
 
   return (
-    <div className="bg-[#FCF9F4] min-h-screen flex flex-col">
+    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
       <main className="flex-grow">
         <section className="py-16 px-6 md:px-20 relative">
           <div className="max-w-6xl mx-auto">
             <h1
-              className="text-5xl text-center mb-12 text-[#111111]"
+              className="text-5xl text-center mb-12 text-[#4F2F1D]"
               style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
             >
               Contact Us
@@ -65,13 +65,13 @@ const ContactUs = () => {
               {/* Left Side - Contact Form */}
               <div className="w-full md:w-1/2">
                 <form
-                  className="bg-[#FEEAEA] p-8 rounded-lg shadow-lg"
+                  className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg"
                   onSubmit={handleSubmit}
                 >
                   {["name", "email", "mobile", "subject"].map((field) => (
                     <div key={field} className="mb-6">
                       <label
-                        className="block text-[#111111] mb-2"
+                        className="block text-[#4F2F1D] mb-2"
                         style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                       >
                         {field.charAt(0).toUpperCase() + field.slice(1)}
@@ -81,18 +81,18 @@ const ContactUs = () => {
                         name={field}
                         value={formData[field]}
                         onChange={handleChange}
-                        className="w-full p-3 border border-[#FF3D57] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                        className="w-full p-3 border border-[#6B4132] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
                         placeholder={`Your ${field}`}
                       />
                       {errors[field] && (
-                        <p className="text-[#FF3D57] text-sm mt-1">{errors[field]}</p>
+                        <p className="text-[#4F2F1D] text-sm mt-1">{errors[field]}</p>
                       )}
                     </div>
                   ))}
 
                   <div className="mb-6">
                     <label
-                      className="block text-[#111111] mb-2"
+                      className="block text-[#4F2F1D] mb-2"
                       style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       Message
@@ -101,18 +101,18 @@ const ContactUs = () => {
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      className="w-full p-3 border border-[#FF3D57] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                      className="w-full p-3 border border-[#6B4132] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
                       placeholder="Your message"
                       rows="5"
                     ></textarea>
                     {errors.message && (
-                      <p className="text-[#FF3D57] text-sm mt-1">{errors.message}</p>
+                      <p className="text-[#4F2F1D] text-sm mt-1">{errors.message}</p>
                     )}
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-3 rounded-lg transition-all duration-300 bg-[#FF3D57] text-white hover:bg-[#FF6B80]"
+                    className="w-full py-3 rounded-lg transition-all duration-300 bg-[#4F2F1D] text-[#E5D3C8] hover:bg-[#6B4132]"
                     style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                   >
                     Send Message
@@ -121,39 +121,39 @@ const ContactUs = () => {
               </div>
 
               {/* Right Side - Contact Info */}
-              <div className="w-full md:w-1/2 bg-[#FEEAEA] p-8 rounded-lg shadow-lg">
+              <div className="w-full md:w-1/2 bg-[#F5EDE7] p-8 rounded-lg shadow-lg">
                 <h2
-                  className="text-2xl mb-6 text-[#111111]"
+                  className="text-2xl mb-6 text-[#4F2F1D]"
                   style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   Get in Touch
                 </h2>
                 <p
-                  className="text-[#333333] mb-8"
+                  className="text-[#6B4132] mb-8"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   If you have any questions, feel free to reach out to us. We are here to help you.
                 </p>
 
-                <div className="space-y-6 " >
+                <div className="space-y-6">
                   {[
                     { icon: "📞", label: "Phone", value: "+91-73546-19960" },
                     { icon: "✉️", label: "Email", value: "support@punjabi-rishtey.com" },
                     { icon: "📍", label: "Address", value: "Mahalaxmi Nagar, Indore, M.P. 452010" }
                   ].map((item) => (
                     <div key={item.label} className="flex items-center space-x-4">
-                      <span className="bg-[#FCF9F2] text-white p-3 rounded-full">
+                      <span className="bg-[#FCF9F2] p-3 rounded-full hover:bg-[#E5D3C8] transition-all duration-300">
                         {item.icon}
                       </span>
                       <div>
                         <p
-                          className="text-[#666666] text-sm"
+                          className="text-[#8B7355] text-sm"
                           style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                         >
                           {item.label}
                         </p>
                         <p
-                          className="text-[#333333]"
+                          className="text-[#4F2F1D]"
                           style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                         >
                           {item.value}

@@ -58,7 +58,7 @@ const Testimonials = () => {
       <main className="flex-grow py-16 px-4">
         <div className="container mx-auto">
           <h2
-            className="text-5xl text-center mb-12 text-[#111111]"
+            className="text-5xl text-center mb-12 text-[#4F2F1D]"
             style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
           >
             Our Success Stories
@@ -74,7 +74,7 @@ const Testimonials = () => {
                   whileHover={{ scale: 1.05 }}
                   className={`cursor-pointer overflow-hidden rounded-lg shadow-lg ${
                     selectedClient === index 
-                      ? "ring-2 ring-[#FF3D57] bg-[#FEEAEA]" 
+                      ? "ring-2 ring-[#4F2F1D] bg-[#F5EDE7]" 
                       : "bg-[#FCF9F2]"
                   }`}
                   onClick={() => selectClient(index)}
@@ -88,49 +88,49 @@ const Testimonials = () => {
               ))}
             </div>
 
-{/* Right Side - Selected Client */}
-<div className="w-full md:w-1/2 flex flex-col items-center">
-  {/* Image Container - Outside blockquote */}
-  <motion.div
-    id="client-photo"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="w-64 h-64 mb-8"
-  >
-    <img
-      src={clientObj.photo}
-      alt={clientObj.name}
-      className="w-full h-full object-cover rounded-full shadow-lg ring-2 ring-[#FF3D57]"
-    />
-  </motion.div>
+            {/* Right Side - Selected Client */}
+            <div className="w-full md:w-1/2 flex flex-col items-center">
+              {/* Image Container - Outside blockquote */}
+              <motion.div
+                id="client-photo"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="w-64 h-64 mb-8"
+              >
+                <img
+                  src={clientObj.photo}
+                  alt={clientObj.name}
+                  className="w-full h-full object-cover rounded-full shadow-lg ring-2 ring-[#4F2F1D]"
+                />
+              </motion.div>
 
-  {/* Quote and Name Container */}
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="text-center bg-[#FEEAEA] p-6 rounded-lg shadow-lg w-full max-w-xl"
-  >
-    <motion.blockquote
-      id="client-quote"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="text-xl text-[#333333] mb-4 mx-auto px-4"
-      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-    >
-      "{clientObj.quote}"
-    </motion.blockquote>
+              {/* Quote and Name Container */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center bg-[#F5EDE7] p-6 rounded-lg shadow-lg w-full max-w-xl"
+              >
+                <motion.blockquote
+                  id="client-quote"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-xl text-[#6B4132] mb-4 mx-auto px-4"
+                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                >
+                  "{clientObj.quote}"
+                </motion.blockquote>
 
-    <motion.p
-      id="client-name"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="text-2xl text-[#FF3D57]"
-      style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-    >
-      {clientObj.name}
-    </motion.p>
-  </motion.div>
-</div>
+                <motion.p
+                  id="client-name"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-2xl text-[#4F2F1D]"
+                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                >
+                  {clientObj.name}
+                </motion.p>
+              </motion.div>
+            </div>
           </div>
         </div>
       </main>
