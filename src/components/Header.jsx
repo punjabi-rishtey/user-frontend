@@ -42,7 +42,7 @@ const Header = () => {
   };
 
   return (
-    <div className="w-full p-4 bg-gradient-to-b from-[#3D0000] to-[#B31312] shadow-md">
+    <div className="w-full p-4 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] shadow-md">
       <div className="container mx-auto flex justify-between items-center px-6">
         <div>
           <img 
@@ -59,7 +59,7 @@ const Header = () => {
             <button
               key={index}
               onClick={() => handleNavClick(item)}
-              className="text-white hover:text-gray-400 transition duration-300 hover:underline"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
             >
               {item.label}
             </button>
@@ -73,7 +73,7 @@ const Header = () => {
             <img
               src={profileIcon}
               alt="Profile"
-              className="h-10 w-10 rounded-full cursor-pointer"
+              className="h-10 w-10 rounded-full cursor-pointer border-2 border-[#E5D3C8]"
               onClick={handleProfileClick}
             />
           )}
@@ -82,13 +82,13 @@ const Header = () => {
           {!isAuthenticated && (
             <div className="hidden md:flex space-x-4">
               <button
-                className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-[#4F2F1D] transition duration-300"
+                className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
                 onClick={() => navigate("/login")}
               >
                 Login
               </button>
               <button
-                className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-[#4F2F1D] transition duration-300"
+                className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
                 onClick={() => navigate("/signup")}
               >
                 Sign Up
@@ -98,7 +98,7 @@ const Header = () => {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-white p-2"
+            className="md:hidden text-[#E5D3C8] p-2"
             onClick={() => setIsSidebarOpen(true)}
           >
             <svg
@@ -122,12 +122,12 @@ const Header = () => {
         {isSidebarOpen && (
           <>
             <div 
-              className="fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
               onClick={() => setIsSidebarOpen(false)}
             />
             
             <div 
-              className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden"
+              className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] p-4 shadow-lg z-50"
               style={{
                 transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
                 transition: 'transform 0.3s ease-in-out'
@@ -135,7 +135,7 @@ const Header = () => {
             >
               <div className="flex justify-end">
                 <button
-                  className="text-white p-2"
+                  className="text-[#E5D3C8] p-2"
                   onClick={() => setIsSidebarOpen(false)}
                 >
                   <svg
@@ -159,7 +159,7 @@ const Header = () => {
                   <button
                     key={index}
                     onClick={() => handleNavClick(item)}
-                    className="text-white hover:text-gray-400 transition duration-300 text-left py-2"
+                    className="text-[#E5D3C8] hover:text-white transition duration-300 text-left py-2"
                   >
                     {item.label}
                   </button>
@@ -169,7 +169,7 @@ const Header = () => {
                 {!isAuthenticated && (
                   <>
                     <button
-                      className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-[#4F2F1D] transition duration-300 mt-4"
+                      className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300 mt-4"
                       onClick={() => {
                         navigate("/login");
                         setIsSidebarOpen(false);
@@ -178,7 +178,7 @@ const Header = () => {
                       Login
                     </button>
                     <button
-                      className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-[#4F2F1D] transition duration-300"
+                      className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
                       onClick={() => {
                         navigate("/signup");
                         setIsSidebarOpen(false);

@@ -7,10 +7,11 @@ import {
   FaComments,
   FaMoneyBill,
 } from "react-icons/fa";
+import { Menu, X } from 'lucide-react';
 import AuthContext from "../context/AuthContext";
-import Header from "./Header"; // Import Header component
-import Footer from "./Footer"; // Import Footer component
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import Header from "./Header";
+import Footer from "./Footer";
+import { useNavigate } from "react-router-dom";
 import PreferencesPopup from "./PreferencesPopup";
 
 // Add the helper functions here
@@ -168,9 +169,10 @@ function InfoRow({
 
 export default function ProfileSettings() {
   const { user, updateUser, logout } = useContext(AuthContext);
-
   const navigate = useNavigate();
-
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Keep all your existing states
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
@@ -281,7 +283,13 @@ export default function ProfileSettings() {
     selectedLanguage: ""
   });
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const menuItems = [
+    { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches", path: "/matches" },
+    { icon: <FaComments className="text-[#B31312]" />, label: "Interests", path: "/interests" },
+    { icon: <FaComments className="text-[#B31312]" />, label: "Chat List", path: "/chats" },
+    { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan", path: "/plan" },
+    { icon: <FaCog className="text-[#B31312]" />, label: "Settings", path: "/settings", active: true }
+  ];
 
   if (!user) {
     return <div>Loading...</div>; // or redirect to login page
@@ -656,96 +664,123 @@ export default function ProfileSettings() {
     <div className="flex flex-col min-h-screen bg-[#FCF9F2]">
       <Header />
       
-      <div className="flex flex-col md:flex-row flex-grow">
-        {/* Mobile Menu Button */}
-        <div className="md:hidden p-4 bg-white">
-          <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="flex items-center space-x-2 text-[#FF3D57]"
-          >
-            <span className="text-lg">Menu</span>
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Sidebar - Mobile Overlay */}
-        <aside 
-          className={`${
-            isSidebarOpen ? 'fixed inset-0 z-50' : 'hidden'
-          } md:relative md:block md:w-64`}
+      {/* Mobile Menu Button */}
+      <div className="md:hidden px-4 py-2 border-b bg-white">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="flex items-center space-x-2 text-[#B31312]"
         >
-          {/* Backdrop */}
-          {isSidebarOpen && (
-            <div 
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm md:hidden"
-              onClick={() => setIsSidebarOpen(false)}
-            />
+          {isMobileMenuOpen ? (
+            <X className="w-6 h-6" />
+          ) : (
+            <Menu className="w-6 h-6" />
           )}
-          
-          {/* Sidebar Content */}
-          <div 
-            className={`fixed left-0 top-0 h-full w-64 bg-white shadow-lg p-5 rounded-r-lg transform transition-transform duration-300 ease-in-out ${
-              isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-            } md:transform-none md:static`}
-          >
-            <div className="flex justify-between items-center md:hidden">
-              <h2 className="text-xl font-semibold">Menu</h2>
-              <button 
-                onClick={() => setIsSidebarOpen(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
+          <span>Menu</span>
+        </button>
+      </div>
 
-            <div className="text-center mt-4">
+      <div className="flex-grow flex">
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:block w-64 bg-white shadow-lg m-4 rounded-lg">
+          <div className="p-5">
+            <div className="text-center">
               <img
-                src={user.profilePicture || "/profile.jpg"}
+                src={user?.profilePicture || "/profile.jpg"}
                 alt="Profile"
-                className="w-24 h-24 rounded-full mx-auto border-2 border-[#FF3D57]"
+                className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312]"
               />
-              <h2 
-                className="text-lg mt-3 text-[#111111]"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
-                {user.name}
+              <h2 className="text-lg mt-3 text-[#111111]">
+                {user?.name}
               </h2>
-              <p 
-                className="text-sm text-[#333333]"
-                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-              >
-                {user.profileType} User | {user.location?.city}
+              <p className="text-sm text-[#333333]">
+                {user?.profileType} User | {user?.location?.city}
               </p>
             </div>
-            <nav className="mt-6 space-y-4">
-              <NavItem icon={<FaHeart className="text-[#FF3D57]" />} label="My Matches" />
-              <NavItem icon={<FaComments className="text-[#FF3D57]" />} label="Interests" />
-              <NavItem icon={<FaComments className="text-[#FF3D57]" />} label="Chat list" />
-              <NavItem icon={<FaMoneyBill className="text-[#FF3D57]" />} label="Plan" />
-              <NavItem icon={<FaCog className="text-[#FF3D57]" />} label="Settings" active />
+            <nav className="mt-6 space-y-2">
+              {menuItems.map((item, index) => (
+                <button
+                  key={index}
+                  onClick={() => navigate(item.path)}
+                  className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition duration-300 ${
+                    item.active ? "bg-gray-100 font-semibold" : ""
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.label}</span>
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  logout();
+                  navigate("/");
+                }}
+                className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
+              >
+                <FaSignOutAlt />
+                <span>Sign Out</span>
+              </button>
             </nav>
           </div>
         </aside>
 
+        {/* Mobile Sidebar */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div 
+              className="absolute inset-0 bg-black bg-opacity-50"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <aside className="absolute left-0 top-0 h-full w-64 bg-white shadow-lg">
+              <div className="p-5">
+                {/* Same content as desktop sidebar */}
+                <div className="text-center">
+                  <img
+                    src={user?.profilePicture || "/profile.jpg"}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312]"
+                  />
+                  <h2 className="text-lg mt-3 text-[#111111]">
+                    {user?.name}
+                  </h2>
+                  <p className="text-sm text-[#333333]">
+                    {user?.profileType} User | {user?.location?.city}
+                  </p>
+                </div>
+                <nav className="mt-6 space-y-2">
+                  {menuItems.map((item, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        navigate(item.path);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition duration-300 ${
+                        item.active ? "bg-gray-100 font-semibold" : ""
+                      }`}
+                    >
+                      {item.icon}
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => {
+                      logout();
+                      navigate("/");
+                    }}
+                    className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
+                  >
+                    <FaSignOutAlt />
+                    <span>Sign Out</span>
+                  </button>
+                </nav>
+              </div>
+            </aside>
+          </div>
+        )}
+
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-          <h1 
-            className="text-2xl md:text-3xl text-[#111111] mb-6"
-            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-          >
+        <main className="flex-1 p-4 md:p-8">
+          <h1 className="text-2xl md:text-3xl text-[#111111] mb-6">
             Profile Settings
           </h1>
           
@@ -1587,28 +1622,15 @@ export default function ProfileSettings() {
           </div>
         </main>
       </div>
-      <Footer /> {/* Add Footer component */}
-
+      
+      <Footer />
+      
       {showPreferences && (
         <PreferencesPopup
+          initialPreferences={user?.preferences}
           onClose={() => setShowPreferences(false)}
-          initialPreferences={user.preferences}
         />
       )}
     </div>
-  );
-}
-
-function NavItem({ icon, label, active = false }) {
-  return (
-    <a
-      href="#"
-      className={`flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 ${
-        active ? "bg-gray-100 font-semibold" : ""
-      }`}
-    >
-      {icon}
-      <span>{label}</span>
-    </a>
   );
 }

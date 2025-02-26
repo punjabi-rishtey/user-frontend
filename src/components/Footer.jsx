@@ -17,7 +17,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-t from-[#3D0000] to-[#B31312] text-white">
+    <footer className="bg-gradient-to-t from-[#2B1810] to-[#4F2F1D] text-white">
       <div className="container mx-auto px-4 py-8">
         {/* Top Section */}
         <div className="flex flex-col space-y-8">
@@ -26,9 +26,9 @@ const Footer = () => {
             <img
               src={logoSrc}
               alt="Punjabi Matrimony Logo"
-              className="h-20 mb-4 mx-auto"
+              className="h-16 sm:h-20 mb-4 mx-auto"
             />
-            <p className="text-sm text-gray-300 max-w-md mx-auto">
+            <p className="text-sm text-[#E5D3C8] max-w-md mx-auto">
               Find your perfect life partner on our trusted platform. We bring
               love and connection closer for the Punjabi community.
             </p>
@@ -38,31 +38,31 @@ const Footer = () => {
           <div className="grid grid-cols-2 gap-4 text-center sm:flex sm:flex-row sm:justify-center sm:space-x-6">
             <button
               onClick={() => handleNavigation("/")}
-              className="hover:text-gray-400 transition duration-300 text-sm"
+              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
             >
               Home
             </button>
             <button
               onClick={() => handleNavigation("/about")}
-              className="hover:text-gray-400 transition duration-300 text-sm"
+              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
             >
               About Us
             </button>
             <button
               onClick={() => handleNavigation("/findpartner")}
-              className="hover:text-gray-400 transition duration-300 text-sm"
+              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
             >
               Find Partner
             </button>
             <button
               onClick={() => navigate("/testimonials")}
-              className="hover:text-gray-400 transition duration-300 text-sm"
+              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
             >
               Testimonials
             </button>
             <button
               onClick={() => handleNavigation("/contact")}
-              className="hover:text-gray-400 transition duration-300 text-sm"
+              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
             >
               Contact
             </button>
@@ -72,28 +72,28 @@ const Footer = () => {
           <div className="flex justify-center space-x-6">
             <a
               href="#"
-              className="text-gray-300 hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300"
               aria-label="Facebook"
             >
               <i className="fab fa-facebook-f"></i>
             </a>
             <a
               href="#"
-              className="text-gray-300 hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300"
               aria-label="Instagram"
             >
               <i className="fab fa-instagram"></i>
             </a>
             <a
               href="#"
-              className="text-gray-300 hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300"
               aria-label="Twitter"
             >
               <i className="fab fa-twitter"></i>
             </a>
             <a
               href="#"
-              className="text-gray-300 hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300"
               aria-label="LinkedIn"
             >
               <i className="fab fa-linkedin-in"></i>
@@ -102,10 +102,10 @@ const Footer = () => {
         </div>
 
         {/* Divider */}
-        <div className="my-6 border-t border-gray-500"></div>
+        <div className="my-6 border-t border-[#6B4132]"></div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col items-center space-y-4 text-sm text-gray-400">
+        <div className="flex flex-col items-center space-y-4 text-sm text-[#E5D3C8]">
           <p className="text-center">&copy; 2025 PunjabiMatrimony. All rights reserved.</p>
           <div className="flex space-x-4">
             <a href="#" className="hover:text-white transition duration-300">
