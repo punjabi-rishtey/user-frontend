@@ -284,11 +284,11 @@ export default function ProfileSettings() {
   });
 
   const menuItems = [
-    { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches", path: "/matches" },
-    { icon: <FaComments className="text-[#B31312]" />, label: "Interests", path: "/interests" },
-    { icon: <FaComments className="text-[#B31312]" />, label: "Chat List", path: "/chats" },
-    { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan", path: "/plan" },
-    { icon: <FaCog className="text-[#B31312]" />, label: "Settings", path: "/settings", active: true }
+    { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches"},
+    { icon: <FaComments className="text-[#B31312]" />, label: "Interests"},
+    { icon: <FaComments className="text-[#B31312]" />, label: "Chat List"},
+    { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan"},
+    { icon: <FaCog className="text-[#B31312]" />, label: "Settings", active: true }
   ];
 
   if (!user) {
@@ -725,14 +725,14 @@ export default function ProfileSettings() {
 
         {/* Mobile Sidebar */}
         {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 md:hidden">
+          <>
             <div 
-              className="absolute inset-0 bg-black bg-opacity-50"
+              className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(false)}
             />
-            <aside className="absolute left-0 top-0 h-full w-64 bg-white shadow-lg">
+            
+            <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-50">
               <div className="p-5">
-                {/* Same content as desktop sidebar */}
                 <div className="text-center">
                   <img
                     src={user?.profilePicture || "/profile.jpg"}
@@ -775,7 +775,7 @@ export default function ProfileSettings() {
                 </nav>
               </div>
             </aside>
-          </div>
+          </>
         )}
 
         {/* Main Content */}
@@ -881,14 +881,14 @@ export default function ProfileSettings() {
                   <>
                     <button
                       onClick={handleSave}
-                      className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg transition duration-300"
+                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
                       style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       Save Changes
                     </button>
                     <button
                       onClick={handleCancel}
-                      className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg transition duration-300"
+                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
                       style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                     >
                       Cancel
@@ -897,7 +897,7 @@ export default function ProfileSettings() {
                 ) : (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg transition duration-300"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
                     style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                   >
                     Edit
@@ -971,7 +971,7 @@ export default function ProfileSettings() {
                             }));
                           }
                         }}
-                        className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                       >
                         Add
                       </button>
@@ -1152,13 +1152,13 @@ export default function ProfileSettings() {
               {isEditingPersonal ? (
                 <div className="mt-4 flex space-x-4">
                   <button
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleSavePersonal}
                   >
                     Save
                   </button>
                   <button
-                    className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleCancelPersonal}
                   >
                     Cancel
@@ -1166,7 +1166,7 @@ export default function ProfileSettings() {
                 </div>
               ) : (
                 <button
-                  className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                   onClick={() => setIsEditingPersonal(true)}
                 >
                   Edit
@@ -1258,13 +1258,13 @@ export default function ProfileSettings() {
               {isEditingFamily ? (
                 <div className="mt-4 flex space-x-4">
                   <button
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleSaveFamily}
                   >
                     Save
                   </button>
                   <button
-                    className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleCancelFamily}
                   >
                     Cancel
@@ -1272,7 +1272,7 @@ export default function ProfileSettings() {
                 </div>
               ) : (
                 <button
-                  className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                   onClick={() => setIsEditingFamily(true)}
                 >
                   Edit
@@ -1370,13 +1370,13 @@ export default function ProfileSettings() {
               {isEditingEducation ? (
                 <div className="mt-4 flex space-x-4">
                   <button
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleSaveEducation}
                   >
                     Save
                   </button>
                   <button
-                    className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleCancelEducation}
                   >
                     Cancel
@@ -1384,7 +1384,7 @@ export default function ProfileSettings() {
                 </div>
               ) : (
                 <button
-                  className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                   onClick={() => setIsEditingEducation(true)}
                 >
                   Edit
@@ -1465,13 +1465,13 @@ export default function ProfileSettings() {
               {isEditingProfession ? (
                 <div className="mt-4 flex space-x-4">
                   <button
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleSaveProfession}
                   >
                     Save
                   </button>
                   <button
-                    className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleCancelProfession}
                   >
                     Cancel
@@ -1479,7 +1479,7 @@ export default function ProfileSettings() {
                 </div>
               ) : (
                 <button
-                  className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                   onClick={() => setIsEditingProfession(true)}
                 >
                   Edit
@@ -1514,13 +1514,13 @@ export default function ProfileSettings() {
               {isEditingAstrology ? (
                 <div className="mt-4 flex space-x-4">
                   <button
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleSaveAstrology}
                   >
                     Save
                   </button>
                   <button
-                    className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleCancelAstrology}
                   >
                     Cancel
@@ -1528,7 +1528,7 @@ export default function ProfileSettings() {
                 </div>
               ) : (
                 <button
-                  className="mt-4 px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                   onClick={() => setIsEditingAstrology(true)}
                 >
                   Edit
@@ -1548,13 +1548,13 @@ export default function ProfileSettings() {
                 {isEditingHobbies ? (
                   <div className="flex space-x-4">
                     <button
-                      className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                       onClick={handleSaveHobbies}
                     >
                       Save
                     </button>
                     <button
-                      className="px-4 py-2 bg-[#333333] hover:bg-[#444444] text-white rounded-lg"
+                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                       onClick={handleCancelHobbies}
                     >
                       Cancel
@@ -1562,7 +1562,7 @@ export default function ProfileSettings() {
                   </div>
                 ) : (
                   <button
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={() => setIsEditingHobbies(true)}
                   >
                     Edit
@@ -1588,7 +1588,7 @@ export default function ProfileSettings() {
                         }));
                       }
                     }}
-                    className="px-4 py-2 bg-[#FF3D57] hover:bg-[#FF6B80] text-white rounded-lg"
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                   >
                     Add
                   </button>
