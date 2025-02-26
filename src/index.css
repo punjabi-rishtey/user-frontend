@@ -20,3 +20,18 @@
   scrollbar-width: thin; /* For Firefox */
   scrollbar-color: #6B4226 #F4E3D0; /* For Firefox */
 }
+
+
+.bounce {
+  animation: bounce 1s infinite;
+  z-index: 50;
+}
+
+@keyframes bounce {
+  0%, 100% {
+      transform: translateY(0);
+  }
+  50% {
+      transform: translateY(-10px);
+  }
+}
