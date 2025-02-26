@@ -154,7 +154,7 @@ const HeroWithHeader = () => {
           />
           
           <div 
-            className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden overflow-y-auto"
+            className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] p-4 shadow-lg z-50 md:hidden overflow-y-auto"
             style={{
               transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
               transition: 'transform 0.3s ease-in-out'
@@ -162,7 +162,7 @@ const HeroWithHeader = () => {
           >
             <div className="flex justify-end">
               <button
-                className="text-white p-2"
+                className="text-[#E5D3C8] p-2"
                 onClick={() => setIsSidebarOpen(false)}
               >
                 <svg
@@ -186,7 +186,7 @@ const HeroWithHeader = () => {
                 <button
                   key={index}
                   onClick={() => handleNavClick(item)}
-                  className="text-white hover:text-gray-400 transition duration-300 text-left py-2"
+                  className="text-[#E5D3C8] hover:text-white transition duration-300 text-left py-2 hover:underline"
                 >
                   {item.label}
                 </button>
@@ -196,7 +196,7 @@ const HeroWithHeader = () => {
               {!isAuthenticated && (
                 <>
                   <button
-                    className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300 mt-4"
+                    className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300 mt-4"
                     onClick={() => {
                       navigate("/login");
                       setIsSidebarOpen(false);
@@ -205,7 +205,7 @@ const HeroWithHeader = () => {
                     Login
                   </button>
                   <button
-                    className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300"
+                    className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
                     onClick={() => {
                       navigate("/signup");
                       setIsSidebarOpen(false);
