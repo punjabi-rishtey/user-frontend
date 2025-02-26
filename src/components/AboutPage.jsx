@@ -36,8 +36,7 @@ const AboutPage = () => {
     animate: { opacity: 1, y: 0 },
     hover: {
       scale: 1.05,
-      backgroundColor: "#FFB6C1",
-      transition: { duration: 0.2 },
+      transition: { duration: 0.3 },
     },
   };
 
@@ -69,19 +68,19 @@ const AboutPage = () => {
                 animate="animate"
                 whileHover="hover"
                 transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="bg-[#FCF9F2] shadow-lg p-6 sm:p-8 rounded-lg text-center w-full sm:w-96 transition-all duration-300"
+                className="bg-[#F5EDE7] shadow-lg p-6 sm:p-8 rounded-lg text-center w-full sm:w-96 transition-all duration-300 hover:bg-[#E5D3C8]"
               >
-                <div className="text-6xl mb-6 text-[#FF3D57]">
+                <div className="text-6xl mb-6 text-[#4F2F1D]">
                   {feature.icon}
                 </div>
                 <h3
-                  className="text-2xl text-[#111111]"
+                  className="text-2xl text-[#4F2F1D]"
                   style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   {feature.title}
                 </h3>
                 <p
-                  className="text-lg text-[#333333] mt-4"
+                  className="text-lg text-[#6B4132] mt-4"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {feature.description}
@@ -125,7 +124,7 @@ const AboutPage = () => {
               <div className="mt-6">
                 <button
                   onClick={handleFindPartnerClick}
-                  className="bg-[#FEEAEA] text-[#FF3D57] font-semibold text-lg px-6 py-2 rounded-md hover:bg-[#FFB6C1] transition-all duration-300"
+                  className="bg-[#F5EDE7] text-[#4F2F1D] font-semibold text-lg px-6 py-2 rounded-md hover:bg-[#E5D3C8] transition-all duration-300"
                   style={{ fontFamily: "'Modern Era', sans-serif" }}
                 >
                   Click here
@@ -154,7 +153,7 @@ const AboutPage = () => {
                   className="flex items-center space-x-4"
                   whileHover={{ scale: 1.05 }}
                 >
-                  <span className="bg-[#FEEAEA] text-[#FF3D57] p-4 rounded-full text-2xl hover:bg-[#FFB6C1] transition-all duration-300">
+                  <span className="bg-[#F5EDE7] text-[#4F2F1D] p-4 rounded-full text-2xl hover:bg-[#E5D3C8] transition-all duration-300">
                     📞
                   </span>
                   <div>
@@ -177,7 +176,7 @@ const AboutPage = () => {
                   className="flex items-center space-x-4"
                   whileHover={{ scale: 1.05 }}
                 >
-                  <span className="bg-[#FEEAEA] text-[#FF3D57] p-4 rounded-full text-2xl hover:bg-[#FFB6C1] transition-all duration-300">
+                  <span className="bg-[#F5EDE7] text-[#4F2F1D] p-4 rounded-full text-2xl hover:bg-[#E5D3C8] transition-all duration-300">
                     ✉️
                   </span>
                   <div>
