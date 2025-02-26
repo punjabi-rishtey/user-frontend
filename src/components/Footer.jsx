@@ -38,31 +38,31 @@ const Footer = () => {
           <div className="grid grid-cols-2 gap-4 text-center sm:flex sm:flex-row sm:justify-center sm:space-x-6">
             <button
               onClick={() => handleNavigation("/")}
-              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
             >
               Home
             </button>
             <button
               onClick={() => handleNavigation("/about")}
-              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
             >
               About Us
             </button>
             <button
               onClick={() => handleNavigation("/findpartner")}
-              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
             >
               Find Partner
             </button>
             <button
               onClick={() => navigate("/testimonials")}
-              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
             >
               Testimonials
             </button>
             <button
               onClick={() => handleNavigation("/contact")}
-              className="hover:text-[#E5D3C8] transition duration-300 text-sm"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
             >
               Contact
             </button>
@@ -72,28 +72,28 @@ const Footer = () => {
           <div className="flex justify-center space-x-6">
             <a
               href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
               aria-label="Facebook"
             >
               <i className="fab fa-facebook-f"></i>
             </a>
             <a
               href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
               aria-label="Instagram"
             >
               <i className="fab fa-instagram"></i>
             </a>
             <a
               href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
               aria-label="Twitter"
             >
               <i className="fab fa-twitter"></i>
             </a>
             <a
               href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300"
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
               aria-label="LinkedIn"
             >
               <i className="fab fa-linkedin-in"></i>
@@ -108,10 +108,10 @@ const Footer = () => {
         <div className="flex flex-col items-center space-y-4 text-sm text-[#E5D3C8]">
           <p className="text-center">&copy; 2025 PunjabiMatrimony. All rights reserved.</p>
           <div className="flex space-x-4">
-            <a href="#" className="hover:text-white transition duration-300">
+            <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Privacy Policy
             </a>
-            <a href="#" className="hover:text-white transition duration-300">
+            <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Terms of Service
             </a>
           </div>
