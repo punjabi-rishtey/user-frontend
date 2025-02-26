@@ -50,7 +50,7 @@ const FindPartner = () => {
 
   const handleProfileClick = (profile) => {
     navigate(`/profile/${profile.id}`);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const filteredData = dummyData.filter((item) => {
@@ -89,14 +89,43 @@ const FindPartner = () => {
     },
   };
 
+  // Filter options configuration for reuse
+  const filterOptions = [
+    {
+      label: "Gender",
+      name: "gender",
+      options: uniqueValues("gender"),
+    },
+    {
+      label: "Caste",
+      name: "caste",
+      options: uniqueValues("caste"),
+    },
+    {
+      label: "Manglik",
+      name: "manglik",
+      options: uniqueValues("manglik"),
+    },
+    {
+      label: "Marital Status",
+      name: "maritalStatus",
+      options: uniqueValues("maritalStatus"),
+    },
+    {
+      label: "Religion",
+      name: "religion",
+      options: uniqueValues("religion"),
+    },
+  ];
+
   return (
-    <div className="bg-[#FCF9F2] min-h-screen flex flex-col overflow-hidden">
+    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
 
       {/* Profile Slider */}
       <ProfileSlider />
 
-      {/* Search Bar and Filter Toggle */}
+      {/* Search Bar and Filter Toggle for Mobile */}
       <div className="container mx-auto px-4 sm:px-8 my-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <input
@@ -111,29 +140,33 @@ const FindPartner = () => {
             className="md:hidden bg-[#FF3D57] text-white px-4 py-2 rounded-lg"
             onClick={() => setShowFilters(!showFilters)}
           >
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
+            {showFilters ? "Hide Filters" : "Show Filters"}
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row flex-grow relative">
-        {/* Sidebar for Filters - Mobile Overlay */}
-        <div 
+      <div className="flex flex-col md:flex-row flex-grow">
+        {/* Mobile Filter Overlay */}
+        <div
           className={`fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
-            showFilters ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            showFilters ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           onClick={() => setShowFilters(false)}
         />
 
-        <div 
-          className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 ${
-            showFilters ? 'translate-x-0' : '-translate-x-full'
+        {/* Mobile Filters Sidebar */}
+        <div
+          className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 overflow-y-auto ${
+            showFilters ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex justify-between items-center mb-6">
             <h2
               className="text-2xl text-white"
-              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
             >
               Filters
             </h2>
@@ -144,36 +177,17 @@ const FindPartner = () => {
               ✕
             </button>
           </div>
-          
-          {/* Filter options */}
+
+          {/* Mobile Filter options */}
           <div className="space-y-4">
-            {[
-              {
-                label: "Gender",
-                name: "gender",
-                options: uniqueValues("gender"),
-              },
-              { label: "Caste", name: "caste", options: uniqueValues("caste") },
-              {
-                label: "Manglik",
-                name: "manglik",
-                options: uniqueValues("manglik"),
-              },
-              {
-                label: "Marital Status",
-                name: "maritalStatus",
-                options: uniqueValues("maritalStatus"),
-              },
-              {
-                label: "Religion",
-                name: "religion",
-                options: uniqueValues("religion"),
-              },
-            ].map(({ label, name, options }, index) => (
+            {filterOptions.map(({ label, name, options }, index) => (
               <div className="mb-4" key={index}>
-                <label 
+                <label
                   className="block text-white mb-2"
-                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
                 >
                   {label}
                 </label>
@@ -182,7 +196,10 @@ const FindPartner = () => {
                   value={filters[name]}
                   onChange={handleChange}
                   className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
-                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
                 >
                   <option value="">Select {label}</option>
                   {options.map((option, idx) => (
@@ -193,10 +210,13 @@ const FindPartner = () => {
                 </select>
               </div>
             ))}
-            
+
             <button
               className="w-full bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300 mt-4"
-              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
               onClick={handleClearFilters}
             >
               Clear Filters
@@ -204,7 +224,56 @@ const FindPartner = () => {
           </div>
         </div>
 
-        {/* Profile List */}
+        {/* Desktop Filters Sidebar */}
+        <div className="hidden md:block w-1/4 p-6 bg-[#FEEAEA] shadow-lg md:sticky md:top-0 md:h-screen md:overflow-y-auto ml-8 rounded-lg border border-[#FFE5E5]">
+          <h2
+            className="text-2xl mb-6 text-[#111111]"
+            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+          >
+            Filters
+          </h2>
+
+          {filterOptions.map(({ label, name, options }, index) => (
+            <div className="mb-4" key={index}>
+              <label
+                className="block text-[#333333] mb-2"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                {label}
+              </label>
+              <select
+                name={name}
+                value={filters[name]}
+                onChange={handleChange}
+                className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                <option value="">Select {label}</option>
+                {options.map((option, idx) => (
+                  <option key={idx} value={option}>
+                    {formatOption(option)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+
+          <button
+            className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            onClick={handleClearFilters}
+          >
+            Clear Filters
+          </button>
+        </div>
+
+        {/* Profile List - Adjusted for both mobile and desktop */}
         <div className="w-full md:w-3/4 p-4 sm:p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
             {filteredData.map((item) => (
@@ -226,25 +295,37 @@ const FindPartner = () => {
                   <div className="text-center sm:text-left">
                     <h3
                       className="text-lg sm:text-xl mb-2 text-[#111111]"
-                      style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                      style={{
+                        fontFamily: "'Tiempos Headline', serif",
+                        fontWeight: 400,
+                      }}
                     >
                       {item.name}
                     </h3>
-                    <p 
+                    <p
                       className="text-sm sm:text-base text-[#333333] mb-1"
-                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
                     >
                       <strong>Age:</strong> {item.age}
                     </p>
-                    <p 
+                    <p
                       className="text-sm sm:text-base text-[#333333] mb-1"
-                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
                     >
                       <strong>Religion:</strong> {item.religion}
                     </p>
-                    <p 
+                    <p
                       className="text-sm sm:text-base text-[#333333] mb-1"
-                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
                     >
                       <strong>Marital Status:</strong> {item.maritalStatus}
                     </p>
