@@ -84,8 +84,8 @@ const FindPartner = () => {
     animate: { opacity: 1, y: 0 },
     hover: {
       scale: 1.05,
-      backgroundColor: "#FFB6C1", // Darker pink on hover
-      transition: { duration: 0.2 }, // Quicker transition for better responsiveness
+      backgroundColor: "#E5D3C8", // Brown/beige on hover (matches membership page)
+      transition: { duration: 0.3 }, // Match transition from membership page
     },
   };
 
@@ -133,11 +133,11 @@ const FindPartner = () => {
             placeholder="Search by name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+            className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
             style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
           />
           <button
-            className="md:hidden bg-[#FF3D57] text-white px-4 py-2 rounded-lg"
+            className="md:hidden bg-[#4F2F1D] text-[#E5D3C8] px-4 py-2 rounded-lg"
             onClick={() => setShowFilters(!showFilters)}
           >
             {showFilters ? "Hide Filters" : "Show Filters"}
@@ -156,13 +156,13 @@ const FindPartner = () => {
 
         {/* Mobile Filters Sidebar */}
         <div
-          className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#3D0000] to-[#B31312] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 overflow-y-auto ${
+          className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#6B4132] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 overflow-y-auto ${
             showFilters ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <div className="flex justify-between items-center mb-6">
             <h2
-              className="text-2xl text-white"
+              className="text-2xl text-[#E5D3C8]"
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
@@ -171,7 +171,7 @@ const FindPartner = () => {
               Filters
             </h2>
             <button
-              className="text-white p-2"
+              className="text-[#E5D3C8] p-2"
               onClick={() => setShowFilters(false)}
             >
               ✕
@@ -183,7 +183,7 @@ const FindPartner = () => {
             {filterOptions.map(({ label, name, options }, index) => (
               <div className="mb-4" key={index}>
                 <label
-                  className="block text-white mb-2"
+                  className="block text-[#E5D3C8] mb-2"
                   style={{
                     fontFamily: "'Modern Era', sans-serif",
                     fontWeight: 400,
@@ -195,7 +195,7 @@ const FindPartner = () => {
                   name={name}
                   value={filters[name]}
                   onChange={handleChange}
-                  className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                  className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
                   style={{
                     fontFamily: "'Modern Era', sans-serif",
                     fontWeight: 400,
@@ -212,7 +212,7 @@ const FindPartner = () => {
             ))}
 
             <button
-              className="w-full bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300 mt-4"
+              className="w-full bg-[#4F2F1D] hover:bg-[#6B4132] text-[#E5D3C8] font-bold py-2 px-4 rounded-lg transition duration-300 mt-4"
               style={{
                 fontFamily: "'Modern Era', sans-serif",
                 fontWeight: 400,
@@ -224,10 +224,10 @@ const FindPartner = () => {
           </div>
         </div>
 
-        {/* Desktop Filters Sidebar */}
-        <div className="hidden md:block w-1/4 p-6 bg-[#FEEAEA] shadow-lg md:sticky md:top-0 md:h-screen md:overflow-y-auto ml-8 rounded-lg border border-[#FFE5E5]">
+        {/* Desktop Filters Sidebar - Updated to match Membership style */}
+        <div className="hidden md:block w-1/4 p-6 bg-[#F5EDE7] shadow-lg md:sticky md:top-0 md:h-screen md:overflow-y-auto ml-8 rounded-lg border border-[#E5D3C8]">
           <h2
-            className="text-2xl mb-6 text-[#111111]"
+            className="text-2xl mb-6 text-[#4F2F1D]"
             style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
           >
             Filters
@@ -236,7 +236,7 @@ const FindPartner = () => {
           {filterOptions.map(({ label, name, options }, index) => (
             <div className="mb-4" key={index}>
               <label
-                className="block text-[#333333] mb-2"
+                className="block text-[#6B4132] mb-2"
                 style={{
                   fontFamily: "'Modern Era', sans-serif",
                   fontWeight: 400,
@@ -248,7 +248,7 @@ const FindPartner = () => {
                 name={name}
                 value={filters[name]}
                 onChange={handleChange}
-                className="w-full p-3 border border-[#FFE5E5] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF3D57] bg-white"
+                className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
                 style={{
                   fontFamily: "'Modern Era', sans-serif",
                   fontWeight: 400,
@@ -265,7 +265,7 @@ const FindPartner = () => {
           ))}
 
           <button
-            className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+            className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
             style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
             onClick={handleClearFilters}
           >
@@ -273,7 +273,7 @@ const FindPartner = () => {
           </button>
         </div>
 
-        {/* Profile List - Adjusted for both mobile and desktop */}
+        {/* Profile List - Updated to match Membership style */}
         <div className="w-full md:w-3/4 p-4 sm:p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
             {filteredData.map((item) => (
@@ -283,7 +283,7 @@ const FindPartner = () => {
                 initial="initial"
                 animate="animate"
                 whileHover="hover"
-                className="bg-[#FEEAEA] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#FFE5E5]"
+                className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
                 onClick={() => handleProfileClick(item)}
               >
                 <div className="flex items-center flex-col sm:flex-row">
@@ -294,7 +294,7 @@ const FindPartner = () => {
                   />
                   <div className="text-center sm:text-left">
                     <h3
-                      className="text-lg sm:text-xl mb-2 text-[#111111]"
+                      className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
                       style={{
                         fontFamily: "'Tiempos Headline', serif",
                         fontWeight: 400,
@@ -303,7 +303,7 @@ const FindPartner = () => {
                       {item.name}
                     </h3>
                     <p
-                      className="text-sm sm:text-base text-[#333333] mb-1"
+                      className="text-sm sm:text-base text-[#6B4132] mb-1"
                       style={{
                         fontFamily: "'Modern Era', sans-serif",
                         fontWeight: 400,
@@ -312,7 +312,7 @@ const FindPartner = () => {
                       <strong>Age:</strong> {item.age}
                     </p>
                     <p
-                      className="text-sm sm:text-base text-[#333333] mb-1"
+                      className="text-sm sm:text-base text-[#6B4132] mb-1"
                       style={{
                         fontFamily: "'Modern Era', sans-serif",
                         fontWeight: 400,
@@ -321,7 +321,7 @@ const FindPartner = () => {
                       <strong>Religion:</strong> {item.religion}
                     </p>
                     <p
-                      className="text-sm sm:text-base text-[#333333] mb-1"
+                      className="text-sm sm:text-base text-[#6B4132] mb-1"
                       style={{
                         fontFamily: "'Modern Era', sans-serif",
                         fontWeight: 400,

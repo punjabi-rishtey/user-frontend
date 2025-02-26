@@ -5,12 +5,18 @@ import dummyData from "./dummyData";
 import Footer from "./Footer";
 import Header from "./Header";
 import {
-  FaHeart, FaUser, FaGraduationCap, FaPhone, FaUsers, FaTimes, FaArrowLeft,
+  FaHeart,
+  FaUser,
+  FaGraduationCap,
+  FaPhone,
+  FaUsers,
+  FaTimes,
+  FaArrowLeft,
 } from "react-icons/fa";
 import Slider from "react-slick"; // Importing react-slick for the slideshow
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { useAuth } from '../context/AuthContext'; // Importing AuthContext
+import { useAuth } from "../context/AuthContext"; // Importing AuthContext
 
 // Custom Arrow Components
 const NextArrow = (props) => {
@@ -45,7 +51,7 @@ const ProfileDetail = () => {
   const { isAuthenticated, toggleLoginModal, login } = useAuth();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   if (!profile) {
@@ -56,10 +62,17 @@ const ProfileDetail = () => {
     );
   }
 
-  const { basicDetails, horoscopeDetails, educationAndWorking, contactDetails, familyDetails } = profile;
+  const {
+    basicDetails,
+    horoscopeDetails,
+    educationAndWorking,
+    contactDetails,
+    familyDetails,
+  } = profile;
 
   // Profile Image Fallback (Random Image if Missing)
-  const profileImage = profile.image || "https://randomuser.me/api/portraits/men/1.jpg";
+  const profileImage =
+    profile.image || "https://randomuser.me/api/portraits/men/1.jpg";
 
   // Dynamic Scroll Effects for Boxes
   const imageSize = useTransform(scrollYProgress, [0, 0.3], ["180px", "90px"]);
@@ -84,17 +97,17 @@ const ProfileDetail = () => {
           slidesToShow: 2,
           slidesToScroll: 1,
           infinite: true,
-          dots: true
-        }
+          dots: true,
+        },
       },
       {
         breakpoint: 600,
         settings: {
           slidesToShow: 1,
-          slidesToScroll: 1
-        }
-      }
-    ]
+          slidesToScroll: 1,
+        },
+      },
+    ],
   };
 
   const handleImageClick = (image) => {
@@ -105,11 +118,11 @@ const ProfileDetail = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#FCF9F2]">
       <Header />
-      
+
       {/* Back Button */}
       <div className="container mx-auto px-6 mt-8">
         <button
-          className="bg-[#FF3D57] hover:bg-[#FF6B80] text-white font-bold py-2 px-4 rounded-full transition duration-300 shadow-lg flex items-center"
+          className="bg-[#4F2F1D] hover:bg-[#6B4132] text-[#E5D3C8] font-bold py-2 px-4 rounded-full transition duration-300 shadow-lg flex items-center"
           onClick={() => navigate("/findpartner")}
           style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
         >
@@ -121,7 +134,7 @@ const ProfileDetail = () => {
       <motion.img
         src={profileImage}
         alt={profile.name}
-        className="rounded-full border-4 border-[#FF3D57] cursor-pointer mx-auto mt-12 mb-8 shadow-xl"
+        className="rounded-full border-4 border-[#4F2F1D] cursor-pointer mx-auto mt-12 mb-8 shadow-xl"
         style={{
           width: imageSize,
           height: imageSize,
@@ -134,17 +147,17 @@ const ProfileDetail = () => {
       {/* Enlarged Image Popup */}
       {isImagePopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#FEEAEA] p-4 rounded-lg shadow-2xl border border-[#FFE5E5] relative">
+          <div className="bg-[#F5EDE7] p-4 rounded-lg shadow-2xl border border-[#E5D3C8] relative">
             <button
-              className="absolute top-2 right-2 text-[#FF3D57] text-xl hover:text-[#FF6B80] transition-colors duration-300"
+              className="absolute top-2 right-2 text-[#4F2F1D] text-xl hover:text-[#6B4132] transition-colors duration-300"
               onClick={() => setIsImagePopupOpen(false)}
             >
               <FaTimes />
             </button>
-            <img 
-              src={popupImage} 
-              alt="Enlarged" 
-              className="rounded-lg w-[400px] h-auto shadow-lg" 
+            <img
+              src={popupImage}
+              alt="Enlarged"
+              className="rounded-lg w-[400px] h-auto shadow-lg"
             />
           </div>
         </div>
@@ -152,13 +165,13 @@ const ProfileDetail = () => {
 
       {/* Profile Name & About */}
       <h2
-        className="text-5xl font-bold text-center text-[#111111] mb-4"
+        className="text-5xl font-bold text-center text-[#4F2F1D] mb-4"
         style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
       >
         {profile.name}
       </h2>
       <p
-        className="text-center text-[#FF3D57] italic text-xl mb-16 px-6"
+        className="text-center text-[#6B4132] italic text-xl mb-16 px-6"
         style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
       >
         "{profile.aboutMe}"
@@ -182,8 +195,8 @@ const ProfileDetail = () => {
             </Slider>
           </div>
         ) : (
-          <p 
-            className="text-[#333333]"
+          <p
+            className="text-[#6B4132]"
             style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
           >
             No additional images available
@@ -194,43 +207,75 @@ const ProfileDetail = () => {
       {/* Profile Details Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 w-full px-16 mb-20">
         {[
-          { title: "Basic Details", icon: FaUser, data: basicDetails, bg: "bg-[#FEEAEA]" },
-          { title: "Horoscope", icon: FaHeart, data: horoscopeDetails, bg: "bg-[#FEEAEA]" },
-          { title: "Education & Work", icon: FaGraduationCap, data: educationAndWorking, bg: "bg-[#FEEAEA]" },
-          { title: "Contact Details", icon: FaPhone, data: contactDetails, bg: "bg-[#FEEAEA]" },
-          { title: "Family Details", icon: FaUsers, data: familyDetails, bg: "bg-[#FEEAEA]" },
+          {
+            title: "Basic Details",
+            icon: FaUser,
+            data: basicDetails,
+            bg: "bg-[#F5EDE7]",
+          },
+          {
+            title: "Horoscope",
+            icon: FaHeart,
+            data: horoscopeDetails,
+            bg: "bg-[#F5EDE7]",
+          },
+          {
+            title: "Education & Work",
+            icon: FaGraduationCap,
+            data: educationAndWorking,
+            bg: "bg-[#F5EDE7]",
+          },
+          {
+            title: "Contact Details",
+            icon: FaPhone,
+            data: contactDetails,
+            bg: "bg-[#F5EDE7]",
+          },
+          {
+            title: "Family Details",
+            icon: FaUsers,
+            data: familyDetails,
+            bg: "bg-[#F5EDE7]",
+          },
         ].map(({ title, icon: Icon, data, bg }, index) => (
-          <motion.div 
+          <motion.div
             key={index}
             variants={cardVariants}
             initial="initial"
             animate="animate"
-            whileHover="hover" 
-            className={`p-8 ${bg} rounded-xl shadow-lg border border-[#FFE5E5] transition-all`}
+            whileHover="hover"
+            className={`p-8 ${bg} rounded-xl shadow-lg border border-[#E5D3C8] transition-all`}
           >
-            <h3 
-              className="text-2xl mb-4 flex items-center text-[#111111]"
-              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            <h3
+              className="text-2xl mb-4 flex items-center text-[#4F2F1D]"
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
             >
-              <Icon className="mr-2 text-[#FF3D57]" /> {title}
+              <Icon className="mr-2 text-[#4F2F1D]" /> {title}
             </h3>
             <div className="space-y-2">
-              {Object.entries(data).map(([key, value]) => (
-                key !== "referenceId" && (
-                  <p 
-                    key={key} 
-                    className="text-lg"
-                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                  >
-                    <strong className="text-[#111111] capitalize">
-                      {key.replace(/([A-Z])/g, " $1")}:
-                    </strong> 
-                    <span className="text-[#333333] ml-2">
-                      {value || "N/A"}
-                    </span>
-                  </p>
-                )
-              ))}
+              {Object.entries(data).map(
+                ([key, value]) =>
+                  key !== "referenceId" && (
+                    <p
+                      key={key}
+                      className="text-lg"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
+                    >
+                      <strong className="text-[#4F2F1D] capitalize">
+                        {key.replace(/([A-Z])/g, " $1")}:
+                      </strong>
+                      <span className="text-[#6B4132] ml-2">
+                        {value || "N/A"}
+                      </span>
+                    </p>
+                  )
+              )}
             </div>
           </motion.div>
         ))}
@@ -247,8 +292,8 @@ const cardVariants = {
   animate: { opacity: 1, y: 0 },
   hover: {
     scale: 1.05,
-    backgroundColor: "#FFB6C1",
-    transition: { duration: 0.2 },
+    backgroundColor: "#E5D3C8", // Updated to match membership page hover color
+    transition: { duration: 0.3 }, // Updated to match membership page transition
   },
 };
 
