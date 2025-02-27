@@ -12,7 +12,6 @@ const ContactUs = () => {
   });
   const [errors, setErrors] = useState({});
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -54,20 +53,12 @@ const ContactUs = () => {
       <Header />
       <main className="flex-grow">
         <section className="py-16 px-6 md:px-20 relative">
-          <div className="max-w-6xl mx-auto">
-            <h1
-              className="text-5xl text-center mb-12 text-[#4F2F1D]"
-              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-            >
-              Contact Us
-            </h1>
-            <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start gap-8">
+            {/* Flex container for both side contents */}
+            <div className="flex flex-col md:flex-row w-full">
               {/* Left Side - Contact Form */}
-              <div className="w-full md:w-1/2">
-                <form
-                  className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg"
-                  onSubmit={handleSubmit}
-                >
+              <div className="flex flex-col flex-grow bg-[#F5EDE7] p-8 mr-6 rounded-lg ">
+                <form onSubmit={handleSubmit} className="flex-grow">
                   {["name", "email", "mobile", "subject"].map((field) => (
                     <div key={field} className="mb-6">
                       <label
@@ -120,62 +111,64 @@ const ContactUs = () => {
                 </form>
               </div>
 
-              {/* Right Side - Contact Info */}
-              <div className="w-full md:w-1/2 bg-[#F5EDE7] p-8 rounded-lg shadow-lg">
-                <h2
-                  className="text-2xl mb-6 text-[#4F2F1D]"
-                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-                >
-                  Get in Touch
-                </h2>
-                <p
-                  className="text-[#6B4132] mb-8"
-                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                >
-                  If you have any questions, feel free to reach out to us. We are here to help you.
-                </p>
+              {/* Right Side - Contact Info and Map */}
+              <div className="flex flex-col flex-grow bg-[#F5EDE7] p-8 rounded-lg">
+                <div className="flex-grow">
+                  <h2
+                    className="text-2xl mb-6 text-[#4F2F1D]"
+                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                  >
+                    Get in Touch
+                  </h2>
+                  <p
+                    className="text-[#6B4132] mb-8"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  >
+                    If you have any questions, feel free to reach out to us. We are here to help you.
+                  </p>
 
-                <div className="space-y-6">
-                  {[
-                    { icon: "📞", label: "Phone", value: "+91-73546-19960" },
-                    { icon: "✉️", label: "Email", value: "support@punjabi-rishtey.com" },
-                    { icon: "📍", label: "Address", value: "Mahalaxmi Nagar, Indore, M.P. 452010" }
-                  ].map((item) => (
-                    <div key={item.label} className="flex items-center space-x-4">
-                      <span className="bg-[#FCF9F2] p-3 rounded-full hover:bg-[#E5D3C8] transition-all duration-300">
-                        {item.icon}
-                      </span>
-                      <div>
-                        <p
-                          className="text-[#8B7355] text-sm"
-                          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                        >
-                          {item.label}
-                        </p>
-                        <p
-                          className="text-[#4F2F1D]"
-                          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                        >
-                          {item.value}
-                        </p>
+                  <div className="space-y-6">
+                    {[
+                      { icon: "📞", label: "Phone", value: "+91-73546-19960" },
+                      { icon: "✉️", label: "Email", value: "support@punjabi-rishtey.com" },
+                      { icon: "📍", label: "Address", value: "Mahalaxmi Nagar, Indore, M.P. 452010" }
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center space-x-4">
+                        <span className="bg-[#FCF9F2] p-3 rounded-full hover:bg-[#E5D3C8] transition-all duration-300">
+                          {item.icon}
+                        </span>
+                        <div>
+                          <p
+                            className="text-[#8B7355] text-sm"
+                            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                          >
+                            {item.label}
+                          </p>
+                          <p
+                            className="text-[#4F2F1D]"
+                            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                          >
+                            {item.value}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                {/* Map Section */}
+                <div className="mt-12 rounded-lg overflow-hidden shadow-lg">
+                  <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3679.1979448425536!2d75.90972427496939!3d22.75803417936002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39631dc98ba6d683%3A0x64f13661e6711e45!2sPunjabi%20Rishtey!5e0!3m2!1sen!2sin!4v1739554919003!5m2!1sen!2sin"
+                    width="100%"
+                    height="450"
+                    style={{ border: 0 }}
+                    allowFullScreen=""
+                    loading="lazy"
+                    title="Google Maps"
+                  ></iframe>
                 </div>
               </div>
-            </div>
-
-            {/* Map Section */}
-            <div className="mt-12 rounded-lg overflow-hidden shadow-lg">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3679.1979448425536!2d75.90972427496939!3d22.75803417936002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39631dc98ba6d683%3A0x64f13661e6711e45!2sPunjabi%20Rishtey!5e0!3m2!1sen!2sin!4v1739554919003!5m2!1sen!2sin"
-                width="100%"
-                height="450"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                title="Google Maps"
-              ></iframe>
             </div>
           </div>
         </section>
