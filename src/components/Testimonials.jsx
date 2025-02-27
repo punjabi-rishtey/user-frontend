@@ -5,50 +5,27 @@ import { motion } from "framer-motion";
 
 const Testimonials = () => {
   const [selectedClient, setSelectedClient] = useState(0);
-  const [clientObj, setClientObj] = useState({
-    name: "",
-    photo: "",
-    quote: "",
-  });
-
-  const clients = [
-    {
-      name: "Shalini & Vicky",
-      photo: "https://punjabi-rishtey.com/uploads/stories/20230329152147.jpg",
-      quote:
-        "Found our perfect match through Punjabi Rishtey. The platform made everything so seamless!",
-    },
-    {
-      name: "Taranjeet & Simran",
-      photo: "https://punjabi-rishtey.com/uploads/stories/20230329140724.jpg",
-      quote:
-        "Grateful to this platform for helping us find each other. Our journey has been beautiful!",
-    },
-    {
-      name: "Vivek & Sakshi",
-      photo: "https://punjabi-rishtey.com/uploads/stories/20221203124705.jpg",
-      quote:
-        "The perfect match! This platform made it incredibly easy to connect with someone who truly understands me.",
-    },
-    {
-      name: "Lakshita & Rachit",
-      photo: "https://punjabi-rishtey.com/uploads/stories/20221203124846.jpg",
-      quote:
-        "We never imagined finding someone so perfect. Thank you for bringing us together!",
-    },
-  ];
+  const [clients, setClients] = useState([]);
 
   useEffect(() => {
-    selectClient(selectedClient);
+    fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
+      .then(response => response.json())
+      .then(data => {
+        const formattedClients = data.map(client => ({
+          name: client.user_name,
+          photo: client.image_url || `https://backend-nm1z.onrender.com${client.image}`,
+          quote: client.message,
+        }));
+        setClients(formattedClients);
+        if (formattedClients.length > 0) {
+          selectClient(0);
+        }
+      })
+      .catch(error => console.error("Failed to fetch testimonials:", error));
   }, []);
 
   const selectClient = (index) => {
     setSelectedClient(index);
-    setClientObj({
-      name: clients[index].name,
-      photo: clients[index].photo,
-      quote: clients[index].quote,
-    });
   };
 
   return (
@@ -72,11 +49,7 @@ const Testimonials = () => {
                 <motion.div
                   key={index}
                   whileHover={{ scale: 1.05 }}
-                  className={`cursor-pointer overflow-hidden rounded-lg shadow-lg ${
-                    selectedClient === index 
-                      ? "ring-2 ring-[#4F2F1D] bg-[#F5EDE7]" 
-                      : "bg-[#FCF9F2]"
-                  }`}
+                  className={`cursor-pointer overflow-hidden rounded-lg shadow-lg ${selectedClient === index ? "ring-2 ring-[#4F2F1D] bg-[#F5EDE7]" : "bg-[#FCF9F2]"}`}
                   onClick={() => selectClient(index)}
                 >
                   <img
@@ -89,48 +62,50 @@ const Testimonials = () => {
             </div>
 
             {/* Right Side - Selected Client */}
-            <div className="w-full md:w-1/2 flex flex-col items-center">
-              {/* Image Container - Outside blockquote */}
-              <motion.div
-                id="client-photo"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="w-64 h-64 mb-8"
-              >
-                <img
-                  src={clientObj.photo}
-                  alt={clientObj.name}
-                  className="w-full h-full object-cover rounded-full shadow-lg ring-2 ring-[#4F2F1D]"
-                />
-              </motion.div>
-
-              {/* Quote and Name Container */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center bg-[#F5EDE7] p-6 rounded-lg shadow-lg w-full max-w-xl"
-              >
-                <motion.blockquote
-                  id="client-quote"
+            {clients.length > 0 && (
+              <div className="w-full md:w-1/2 flex flex-col items-center">
+                {/* Image Container - Outside blockquote */}
+                <motion.div
+                  id="client-photo"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-xl text-[#6B4132] mb-4 mx-auto px-4"
-                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  className="w-64 h-64 mb-8"
                 >
-                  "{clientObj.quote}"
-                </motion.blockquote>
+                  <img
+                    src={clients[selectedClient].photo}
+                    alt={clients[selectedClient].name}
+                    className="w-full h-full object-cover rounded-full shadow-lg ring-2 ring-[#4F2F1D]"
+                  />
+                </motion.div>
 
-                <motion.p
-                  id="client-name"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-2xl text-[#4F2F1D]"
-                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                {/* Quote and Name Container */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center bg-[#F5EDE7] p-6 rounded-lg shadow-lg w-full max-w-xl"
                 >
-                  {clientObj.name}
-                </motion.p>
-              </motion.div>
-            </div>
+                  <motion.blockquote
+                    id="client-quote"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xl text-[#6B4132] mb-4 mx-auto px-4"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  >
+                    "{clients[selectedClient].quote}"
+                  </motion.blockquote>
+
+                  <motion.p
+                    id="client-name"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-2xl text-[#4F2F1D]"
+                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                  >
+                    {clients[selectedClient].name}
+                  </motion.p>
+                </motion.div>
+              </div>
+            )}
           </div>
         </div>
       </main>

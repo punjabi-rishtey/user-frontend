@@ -1,29 +1,26 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
 
-const reviews = [
-    {
-      rating: 5,
-      title: "Found My Perfect Match",
-      text: "Punjabi Rishtey made my search for a life partner so easy. Their verification process gave me confidence, and within months I found my perfect match...",
-      author: "Harpreet K.",
-    },
-    {
-      rating: 5,
-      title: "Excellent Support Team",
-      text: "The support team was incredibly helpful throughout my journey. They understood my preferences and helped me connect with compatible matches...",
-      author: "Gurpreet S.",
-    },
-    {
-      rating: 5,
-      title: "Trustworthy Platform",
-      text: "As a parent, I was worried about online matrimony sites, but Punjabi Rishtey proved to be very reliable. My daughter found a wonderful match...",
-      author: "Amarjeet K.",
-    },
-  ];
-  
 const CustomerReviews = () => {
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
+      .then(response => response.json())
+      .then(data => {
+        const formattedReviews = data.map(item => ({
+          rating: 5,  // Assuming a static rating as the API response does not include a rating
+          title: "Featured Review",
+          text: item.message,
+          author: item.user_name,
+          image: item.image_url || `https://backend-nm1z.onrender.com${item.image}`, // Handling different image key scenarios
+        }));
+        setReviews(formattedReviews);
+      })
+      .catch(error => console.error("Failed to fetch reviews:", error));
+  }, []);
+
   const cardVariants = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
