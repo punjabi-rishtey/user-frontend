@@ -32,7 +32,7 @@ const LoginModal = ({ onClose, onLogin, onSignup, isSignup: initialIsSignup }) =
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50 overflow-y-auto">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md max-h-screen overflow-y-auto relative">
+            {/* <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md max-h-screen overflow-y-auto relative">
                 <button
                     className="absolute top-2 right-2 text-gray-600 text-xl"
                     onClick={onClose}
@@ -173,7 +173,7 @@ const LoginModal = ({ onClose, onLogin, onSignup, isSignup: initialIsSignup }) =
                         {isSignup ? 'Already have an account? Login' : 'Don\'t have an account? Sign Up'}
                     </button>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 };
