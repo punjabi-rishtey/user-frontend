@@ -183,6 +183,7 @@ export default function ProfileSettings() {
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingFamily, setIsEditingFamily] = useState(false);
+  const [loadingFamily, setLoadingFamily] = useState(false);
   const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [loadingAstrology, setLoadingAstrology] = useState(false);
   const [isEditingAstrology, setIsEditingAstrology] = useState(false);
@@ -333,7 +334,130 @@ export default function ProfileSettings() {
   };
   
   
+  useEffect(() => {
+    if (user?._id) {
+      fetchProfessionDetails();
+    }
+  }, [user]);
   
+  const fetchProfessionDetails = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        logout();
+        return;
+      }
+  
+      const response = await axios.get(
+        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      setProfessionData(response.data);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert("Session expired. Please log in again.");
+        logout();
+      } else {
+        console.error("Error fetching profession details:", error);
+        alert("Failed to fetch profession details.");
+      }
+    }
+  };
+
+  const handleSaveProfession = async () => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      await axios.put(
+        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
+        professionData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      setIsEditingProfession(false);
+      alert("Profession details updated successfully!");
+    } catch (error) {
+      console.error("Error saving profession details:", error);
+      alert("Failed to update profession details. Please try again.");
+    }
+  };
+
+  
+  
+  useEffect(() => {
+    if (user?._id) {
+      fetchFamilyDetails();
+    }
+  }, [user]);
+  
+  const fetchFamilyDetails = async () => {
+    setLoadingFamily(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        logout();
+        return;
+      }
+  
+      const response = await axios.get(
+        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      setFamilyData(response.data);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert("Session expired. Please log in again.");
+        logout();
+      } else {
+        console.error("Error fetching family details:", error);
+        alert("Failed to fetch family details.");
+      }
+    }
+    setLoadingFamily(false);
+  };
+
+
+  const handleFamilyChange = (e) => {
+    const { name, value } = e.target;
+    setFamilyData((prev) => {
+      if (name.includes(".")) {
+        const [section, field] = name.split(".");
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value,
+          },
+        };
+      }
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  };
+  
+
+
 
   const [languageData, setLanguageData] = useState({
     languages: user?.languages || [],
@@ -489,31 +613,24 @@ export default function ProfileSettings() {
 
   const handleProfessionChange = (e) => {
     const { name, value } = e.target;
-    setProfessionData({
-      ...professionData,
-      [name]: value,
-    });
-  };
-
-  const handleSaveProfession = () => {
-    try {
-      const updatedUser = {
-        ...user,
-        ...professionData,
-      };
-
-      const success = updateUser(updatedUser);
-
-      if (success) {
-        setIsEditingProfession(false);
-        alert("Profession details updated successfully!");
-      } else {
-        alert("Failed to update profession details. Please try again.");
+  
+    setProfessionData((prev) => {
+      // Handle nested fields for work_address
+      if (name.startsWith("work_address.")) {
+        return {
+          ...prev,
+          work_address: {
+            ...prev.work_address,
+            [name.split(".")[1]]: value,
+          },
+        };
       }
-    } catch (error) {
-      console.error("Error saving profession details:", error);
-      alert("An error occurred while saving your profession details.");
-    }
+  
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
   };
 
   const handleCancelProfession = () => {
@@ -530,58 +647,39 @@ export default function ProfileSettings() {
     setIsEditingProfession(false);
   };
 
-  const handleFamilyChange = (e) => {
-    const { name, value } = e.target;
-    setFamilyData((prev) => {
-      if (name.includes(".")) {
-        const [section, field] = name.split(".");
-        return {
-          ...prev,
-          [section]: {
-            ...prev[section],
-            [field]: value,
-          },
-        };
-      }
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
 
-  const handleSaveFamily = () => {
+
+
+  const handleSaveFamily = async () => {
+    setLoadingFamily(true);
     try {
-      const updatedUser = {
-        ...user,
-        ...familyData,
-        mother: {
-          ...user.mother,
-          ...familyData.mother,
-        },
-        father: {
-          ...user.father,
-          ...familyData.father,
-        },
-        siblings: {
-          ...user.siblings,
-          ...familyData.siblings,
-        }
-      };
-
-      const success = updateUser(updatedUser);
-
-      if (success) {
-        setIsEditingFamily(false);
-        alert("Family details updated successfully!");
-      } else {
-        alert("Failed to update family details. Please try again.");
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        logout();
+        return;
       }
+  
+      await axios.put(
+        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
+        familyData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      setIsEditingFamily(false);
+      alert("Family details updated successfully!");
     } catch (error) {
       console.error("Error saving family details:", error);
-      alert("An error occurred while saving your family details.");
+      alert("Failed to update family details. Please try again.");
     }
+    setLoadingFamily(false);
   };
+  
 
   const handleCancelFamily = () => {
     setFamilyData({
@@ -602,6 +700,12 @@ export default function ProfileSettings() {
     });
     setIsEditingFamily(false);
   };
+
+
+  // const handleCancelFamily = () => {
+  //   fetchFamilyDetails(); // Fetch latest data from API instead of relying on old state
+  //   setIsEditingFamily(false);
+  // };
 
   const handleEducationChange = (e) => {
     const { name, value } = e.target;
@@ -1254,112 +1358,115 @@ export default function ProfileSettings() {
               )}
             </div>
 
-            {/* Family Details Section */}
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <h3 
-                className="text-lg md:text-xl text-[#111111] mb-4"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
-                Family Details
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow
-                  label="Family Value"
-                  value={familyData.family_value}
-                  isEditing={isEditingFamily}
-                  name="family_value"
-                  onChange={handleFamilyChange}
-                  type="select"
-                  options={[
-                    { value: "orthodox", label: "Orthodox" },
-                    { value: "traditional", label: "Traditional" },
-                    { value: "moderate", label: "Moderate" },
-                    { value: "liberal", label: "Liberal" },
-                    { value: "modern", label: "Modern" }
-                  ]}
-                />
-                <InfoRow
-                  label="Family Type"
-                  value={familyData.family_type}
-                  isEditing={isEditingFamily}
-                  name="family_type"
-                  onChange={handleFamilyChange}
-                  type="select"
-                  options={[
-                    { value: "nuclear", label: "Nuclear Family" },
-                    { value: "joint", label: "Joint Family" },
-                    { value: "extended", label: "Extended Family" },
-                    { value: "living_alone", label: "Living Alone" }
-                  ]}
-                />
-                <InfoRow
-                  label="Mother's Name"
-                  value={familyData.mother?.name}
-                  isEditing={isEditingFamily}
-                  name="mother.name"
-                  onChange={handleFamilyChange}
-                />
-                <InfoRow
-                  label="Mother's Occupation"
-                  value={familyData.mother?.occupation}
-                  isEditing={isEditingFamily}
-                  name="mother.occupation"
-                  onChange={handleFamilyChange}
-                />
-                <InfoRow
-                  label="Father's Name"
-                  value={familyData.father?.name}
-                  isEditing={isEditingFamily}
-                  name="father.name"
-                  onChange={handleFamilyChange}
-                />
-                <InfoRow
-                  label="Father's Occupation"
-                  value={familyData.father?.occupation}
-                  isEditing={isEditingFamily}
-                  name="father.occupation"
-                  onChange={handleFamilyChange}
-                />
-                <InfoRow
-                  label="Brother Count"
-                  value={familyData.siblings?.brother_count}
-                  isEditing={isEditingFamily}
-                  name="siblings.brother_count"
-                  onChange={handleFamilyChange}
-                />
-                <InfoRow
-                  label="Sister Count"
-                  value={familyData.siblings?.sister_count}
-                  isEditing={isEditingFamily}
-                  name="siblings.sister_count"
-                  onChange={handleFamilyChange}
-                />
-              </div>
-              {isEditingFamily ? (
-                <div className="mt-4 flex space-x-4">
-                  <button
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleSaveFamily}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleCancelFamily}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                  onClick={() => setIsEditingFamily(true)}
-                >
-                  Edit
-                </button>
-              )}
-            </div>
+      {/* Family Details Section */}
+<div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+  <h3 className="text-lg md:text-xl text-[#111111] mb-4">
+    Family Details
+  </h3>
 
+  {loadingFamily ? (
+    <p className="text-gray-600">Loading...</p>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <InfoRow
+        label="Family Value"
+        value={familyData.family_value}
+        isEditing={isEditingFamily}
+        name="family_value"
+        onChange={handleFamilyChange}
+        type="select"
+        options={[
+          { value: "orthodox", label: "Orthodox" },
+          { value: "traditional", label: "Traditional" },
+          { value: "moderate", label: "Moderate" },
+          { value: "liberal", label: "Liberal" },
+          { value: "modern", label: "Modern" }
+        ]}
+      />
+      <InfoRow
+        label="Family Type"
+        value={familyData.family_type}
+        isEditing={isEditingFamily}
+        name="family_type"
+        onChange={handleFamilyChange}
+        type="select"
+        options={[
+          { value: "nuclear", label: "Nuclear Family" },
+          { value: "joint", label: "Joint Family" },
+          { value: "extended", label: "Extended Family" },
+          { value: "living_alone", label: "Living Alone" }
+        ]}
+      />
+      <InfoRow
+        label="Mother's Name"
+        value={familyData.mother?.name}
+        isEditing={isEditingFamily}
+        name="mother.name"
+        onChange={handleFamilyChange}
+      />
+      <InfoRow
+        label="Mother's Occupation"
+        value={familyData.mother?.occupation}
+        isEditing={isEditingFamily}
+        name="mother.occupation"
+        onChange={handleFamilyChange}
+      />
+      <InfoRow
+        label="Father's Name"
+        value={familyData.father?.name}
+        isEditing={isEditingFamily}
+        name="father.name"
+        onChange={handleFamilyChange}
+      />
+      <InfoRow
+        label="Father's Occupation"
+        value={familyData.father?.occupation}
+        isEditing={isEditingFamily}
+        name="father.occupation"
+        onChange={handleFamilyChange}
+      />
+      <InfoRow
+        label="Brother Count"
+        value={familyData.siblings?.brother_count}
+        isEditing={isEditingFamily}
+        name="siblings.brother_count"
+        onChange={handleFamilyChange}
+      />
+      <InfoRow
+        label="Sister Count"
+        value={familyData.siblings?.sister_count}
+        isEditing={isEditingFamily}
+        name="siblings.sister_count"
+        onChange={handleFamilyChange}
+      />
+    </div>
+  )}
+
+  {isEditingFamily ? (
+    <div className="mt-4 flex space-x-4">
+      <button
+        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+        onClick={handleSaveFamily}
+        disabled={loadingFamily}
+      >
+        {loadingFamily ? "Saving..." : "Save"}
+      </button>
+      <button
+        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+        onClick={handleCancelFamily}
+      >
+        Cancel
+      </button>
+    </div>
+  ) : (
+    <button
+      className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+      onClick={() => setIsEditingFamily(true)}
+    >
+      Edit
+    </button>
+  )}
+</div>
             {/* Education Details Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
               <h3 
@@ -1473,99 +1580,97 @@ export default function ProfileSettings() {
             </div>
 
             {/* Professional Details Section */}
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <h3 
-                className="text-lg md:text-xl text-[#111111] mb-4"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
-                Professional Details
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow
-                  label="Occupation"
-                  value={professionData.occupation}
-                  isEditing={isEditingProfession}
-                  name="occupation"
-                  onChange={handleProfessionChange}
-                />
-                <InfoRow
-                  label="Designation"
-                  value={professionData.designation}
-                  isEditing={isEditingProfession}
-                  name="designation"
-                  onChange={handleProfessionChange}
-                />
-                <InfoRow
-                  label="Working With"
-                  value={professionData.working_with}
-                  isEditing={isEditingProfession}
-                  name="working_with"
-                  onChange={handleProfessionChange}
-                />
-                <InfoRow
-                  label="Annual Income"
-                  value={professionData.income}
-                  isEditing={isEditingProfession}
-                  name="income"
-                  onChange={handleProfessionChange}
-                  type="select"
-                  options={[
-                    { value: "0-3", label: "Up to 3 Lakhs" },
-                    { value: "3-5", label: "3-5 Lakhs" },
-                    { value: "5-7", label: "5-7 Lakhs" },
-                    { value: "7-10", label: "7-10 Lakhs" },
-                    { value: "10-15", label: "10-15 Lakhs" },
-                    { value: "15-20", label: "15-20 Lakhs" },
-                    { value: "20-25", label: "20-25 Lakhs" },
-                    { value: "25-35", label: "25-35 Lakhs" },
-                    { value: "35-50", label: "35-50 Lakhs" },
-                    { value: "50-75", label: "50-75 Lakhs" },
-                    { value: "75-100", label: "75 Lakhs - 1 Crore" },
-                    { value: "100+", label: "1 Crore+" }
-                  ]}
-                />
-                <div className="col-span-2">
-                  <h4 className="text-md font-semibold mb-2 mt-4">Work Address</h4>
-                </div>
-                <InfoRow
-                  label="Address"
-                  value={professionData.work_address.address}
-                  isEditing={isEditingProfession}
-                  name="work_address.address"
-                  onChange={handleProfessionChange}
-                />
-                <InfoRow
-                  label="City"
-                  value={professionData.work_address.city}
-                  isEditing={isEditingProfession}
-                  name="work_address.city"
-                  onChange={handleProfessionChange}
-                />
-              </div>
-              {isEditingProfession ? (
-                <div className="mt-4 flex space-x-4">
-                  <button
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleSaveProfession}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleCancelProfession}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                  onClick={() => setIsEditingProfession(true)}
-                >
-                  Edit
-                </button>
-              )}
-            </div>
+<div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+  <h3 className="text-lg md:text-xl text-[#111111] mb-4">Professional Details</h3>
+  
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <InfoRow
+      label="Occupation"
+      value={professionData.occupation}
+      isEditing={isEditingProfession}
+      name="occupation"
+      onChange={handleProfessionChange}
+    />
+    <InfoRow
+      label="Designation"
+      value={professionData.designation}
+      isEditing={isEditingProfession}
+      name="designation"
+      onChange={handleProfessionChange}
+    />
+    <InfoRow
+      label="Working With"
+      value={professionData.working_with}
+      isEditing={isEditingProfession}
+      name="working_with"
+      onChange={handleProfessionChange}
+    />
+    <InfoRow
+      label="Annual Income"
+      value={professionData.income}
+      isEditing={isEditingProfession}
+      name="income"
+      onChange={handleProfessionChange}
+      type="select"
+      options={[
+        { value: "0-3", label: "Up to 3 Lakhs" },
+        { value: "3-5", label: "3-5 Lakhs" },
+        { value: "5-7", label: "5-7 Lakhs" },
+        { value: "7-10", label: "7-10 Lakhs" },
+        { value: "10-15", label: "10-15 Lakhs" },
+        { value: "15-20", label: "15-20 Lakhs" },
+        { value: "20-25", label: "20-25 Lakhs" },
+        { value: "25-35", label: "25-35 Lakhs" },
+        { value: "35-50", label: "35-50 Lakhs" },
+        { value: "50-75", label: "50-75 Lakhs" },
+        { value: "75-100", label: "75 Lakhs - 1 Crore" },
+        { value: "100+", label: "1 Crore+" }
+      ]}
+    />
+    
+    <div className="col-span-2">
+      <h4 className="text-md font-semibold mb-2 mt-4">Work Address</h4>
+    </div>
+    <InfoRow
+      label="Address"
+      value={professionData.work_address?.address || ""}
+      isEditing={isEditingProfession}
+      name="work_address.address"
+      onChange={handleProfessionChange}
+    />
+    <InfoRow
+      label="City"
+      value={professionData.work_address?.city || ""}
+      isEditing={isEditingProfession}
+      name="work_address.city"
+      onChange={handleProfessionChange}
+    />
+  </div>
+
+  {isEditingProfession ? (
+    <div className="mt-4 flex space-x-4">
+      <button
+        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+        onClick={handleSaveProfession}
+      >
+        Save
+      </button>
+      <button
+        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+        onClick={handleCancelProfession}
+      >
+        Cancel
+      </button>
+    </div>
+  ) : (
+    <button
+      className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+      onClick={() => setIsEditingProfession(true)}
+    >
+      Edit
+    </button>
+  )}
+</div>
 
             {/* Astrology Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
