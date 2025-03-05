@@ -1,4 +1,5 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import axios from "axios";
 import {
   FaCog,
   FaSignOutAlt,
@@ -8,11 +9,12 @@ import {
   FaMoneyBill,
 } from "react-icons/fa";
 import { Menu, X } from 'lucide-react';
-import AuthContext from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 import PreferencesPopup from "./PreferencesPopup";
+
 
 // Add the helper functions here
 const generateFeetOptions = () => {
@@ -168,9 +170,13 @@ function InfoRow({
 }
 
 export default function ProfileSettings() {
-  const { user, updateUser, logout } = useContext(AuthContext);
+  const { user, updateUser, logout } = useAuth(); // ✅ Correct way
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  if (!user) {
+    return <div>Loading...</div>; // ✅ Prevents errors when `user` is null
+  }
   
   // Keep all your existing states
   const [isEditing, setIsEditing] = useState(false);
@@ -178,9 +184,13 @@ export default function ProfileSettings() {
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingFamily, setIsEditingFamily] = useState(false);
   const [isEditingEducation, setIsEditingEducation] = useState(false);
+  const [loadingAstrology, setLoadingAstrology] = useState(false);
   const [isEditingAstrology, setIsEditingAstrology] = useState(false);
   const [isEditingHobbies, setIsEditingHobbies] = useState(false);
   const [showPreferences, setShowPreferences] = useState(false);
+
+  const token = localStorage.getItem("token"); // Retrieve token
+  console.log(localStorage.getItem("token"));
 
   // Ensure `user` is not null before accessing properties
 
@@ -274,9 +284,56 @@ export default function ProfileSettings() {
   });
 
   const [astrologyData, setAstrologyData] = useState({
-    rashi_nakshatra: user?.rashi_nakshatra || "",
-    gotra: user?.gotra || "",
+    rashi_nakshatra: "",
+    gotra: "",
   });
+
+  
+  useEffect(() => {
+    if (user && user._id) {
+      fetchAstrologyDetails();
+    }
+  }, [user?._id]); // ✅ Depend only on `user._id`
+  
+  
+  const fetchAstrologyDetails = async () => {
+    if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
+  
+    setLoadingAstrology(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        logout();
+        return;
+      }
+  
+      const response = await axios.get(
+        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
+  
+      setAstrologyData(response.data);
+    } catch (error) {
+      console.error("Error fetching astrology details:", error);
+      if (error.response?.status === 401) {
+        alert("Session expired. Please log in again.");
+        logout();
+      } else {
+        alert("Failed to fetch astrology details.");
+      }
+    }
+    setLoadingAstrology(false);
+  };
+  
+  
+  
 
   const [languageData, setLanguageData] = useState({
     languages: user?.languages || [],
@@ -612,34 +669,57 @@ export default function ProfileSettings() {
     });
   };
 
-  const handleSaveAstrology = () => {
+  const handleSaveAstrology = async () => {
+    setLoadingAstrology(true);
     try {
-      const updatedUser = {
-        ...user,
-        ...astrologyData,
-      };
-
-      const success = updateUser(updatedUser);
-
-      if (success) {
-        setIsEditingAstrology(false);
+      const token = localStorage.getItem("token");
+  
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        logout();  // Log out user if token is missing
+        return;
+      }
+  
+      const response = await axios.put(
+        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
+        astrologyData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      if (response.status === 200) {
         alert("Astrology details updated successfully!");
+        setIsEditingAstrology(false);
       } else {
+        alert("Unexpected response from server. Please try again.");
+      }
+  
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert("Session expired. Please log in again.");
+        logout();
+      } else if (error.response?.status === 500) {
+        alert("Server error! Please try again later.");
+      } else {
+        console.error("Error saving astrology details:", error);
         alert("Failed to update astrology details. Please try again.");
       }
-    } catch (error) {
-      console.error("Error saving astrology details:", error);
-      alert("An error occurred while saving your astrology details.");
     }
+    setLoadingAstrology(false);
   };
+  
+    
+
 
   const handleCancelAstrology = () => {
-    setAstrologyData({
-      rashi_nakshatra: user.rashi_nakshatra || "",
-      gotra: user.gotra || "",
-    });
+    fetchAstrologyDetails(); // Re-fetch from API instead of using old user data
     setIsEditingAstrology(false);
   };
+  
 
   const handleSaveHobbies = () => {
     const updatedUser = {
@@ -1489,35 +1569,39 @@ export default function ProfileSettings() {
 
             {/* Astrology Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <h3 
-                className="text-lg md:text-xl text-[#111111] mb-4"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
+              <h3 className="text-lg md:text-xl text-[#111111] mb-4">
                 Astrology Details
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow
-                  label="Rashi/Nakshatra"
-                  value={astrologyData.rashi_nakshatra}
-                  isEditing={isEditingAstrology}
-                  name="rashi_nakshatra"
-                  onChange={handleAstrologyChange}
-                />
-                <InfoRow
-                  label="Gotra"
-                  value={astrologyData.gotra}
-                  isEditing={isEditingAstrology}
-                  name="gotra"
-                  onChange={handleAstrologyChange}
-                />
-              </div>
+
+              {loadingAstrology ? (
+                <p className="text-gray-600">Loading...</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoRow
+                    label="Rashi/Nakshatra"
+                    value={astrologyData.rashi_nakshatra}
+                    isEditing={isEditingAstrology}
+                    name="rashi_nakshatra"
+                    onChange={handleAstrologyChange}
+                  />
+                  <InfoRow
+                    label="Gotra"
+                    value={astrologyData.gotra}
+                    isEditing={isEditingAstrology}
+                    name="gotra"
+                    onChange={handleAstrologyChange}
+                  />
+                </div>
+              )}
+
               {isEditingAstrology ? (
                 <div className="mt-4 flex space-x-4">
                   <button
                     className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
                     onClick={handleSaveAstrology}
+                    disabled={loadingAstrology}
                   >
-                    Save
+                    {loadingAstrology ? "Saving..." : "Save"}
                   </button>
                   <button
                     className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
@@ -1535,6 +1619,7 @@ export default function ProfileSettings() {
                 </button>
               )}
             </div>
+
 
             {/* Hobbies Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
