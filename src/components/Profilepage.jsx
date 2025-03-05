@@ -169,20 +169,24 @@ function InfoRow({
   }
 }
 
+
+
+
 export default function ProfileSettings() {
   const { user, updateUser, logout } = useAuth(); // ✅ Correct way
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  if (!user) {
-    return <div>Loading...</div>; // ✅ Prevents errors when `user` is null
-  }
+  if (!user) return <div>Loading...</div>; // ✅ Prevents errors when `user` is null
   
+
   // Keep all your existing states
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingFamily, setIsEditingFamily] = useState(false);
+  const [loadingEducation, setLoadingEducation] = useState(false);
+
   const [loadingFamily, setLoadingFamily] = useState(false);
   const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [loadingAstrology, setLoadingAstrology] = useState(false);
@@ -271,6 +275,8 @@ export default function ProfileSettings() {
   });
 
   const [educationData, setEducationData] = useState({
+    education_level: user?.education_level || "",
+    education_field: user?.education_field || "",
     school: {
       name: user?.school?.name || "",
       city: user?.school?.city || "",
@@ -280,8 +286,6 @@ export default function ProfileSettings() {
       city: user?.college?.city || "",
       passout_year: user?.college?.passout_year || "",
     },
-    education_level: user?.education_level || "",
-    education_field: user?.education_field || "",
   });
 
   const [astrologyData, setAstrologyData] = useState({
@@ -395,7 +399,6 @@ export default function ProfileSettings() {
   };
 
   
-  
   useEffect(() => {
     if (user?._id) {
       fetchFamilyDetails();
@@ -456,6 +459,73 @@ export default function ProfileSettings() {
     });
   };
   
+  useEffect(() => {
+    if (user?._id) {
+      fetchEducationDetails();
+    }
+  }, [user]);
+  
+  const fetchEducationDetails = async () => {
+    setLoadingEducation(true); // ✅ Start loading before API call
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Session expired. Please log in again.");
+        logout();
+        return;
+      }
+  
+      const response = await axios.get(
+        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      setEducationData(response.data);
+    } catch (error) {
+      if (error.response?.status === 401) {
+        alert("Session expired. Please log in again.");
+        logout();
+      } else {
+        console.error("Error fetching education details:", error);
+        alert("Failed to fetch education details.");
+      }
+    }
+    setLoadingEducation(false); // ✅ Stop loading after API call (both success & error cases)
+  };
+  
+  const handleSaveEducation = async () => {
+    setLoadingEducation(true); // ✅ Show loading when saving
+    try {
+      const token = localStorage.getItem("token");
+  
+      await axios.put(
+        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
+        educationData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      setIsEditingEducation(false);
+      alert("Education details updated successfully!");
+    } catch (error) {
+      console.error("Error saving education details:", error);
+      alert("Failed to update education details. Please try again.");
+    }
+    setLoadingEducation(false); // ✅ Stop loading after saving
+  };
+
+
+
+
 
 
 
@@ -706,7 +776,6 @@ export default function ProfileSettings() {
   //   fetchFamilyDetails(); // Fetch latest data from API instead of relying on old state
   //   setIsEditingFamily(false);
   // };
-
   const handleEducationChange = (e) => {
     const { name, value } = e.target;
     setEducationData((prev) => {
@@ -720,44 +789,20 @@ export default function ProfileSettings() {
           },
         };
       }
-      return {
-        ...prev,
-        [name]: value,
-      };
+      return { ...prev, [name]: value };
     });
-  };
-
-  const handleSaveEducation = () => {
-    try {
-      const updatedUser = {
-        ...user,
-        ...educationData,
-      };
-
-      const success = updateUser(updatedUser);
-
-      if (success) {
-        setIsEditingEducation(false);
-        alert("Education details updated successfully!");
-      } else {
-        alert("Failed to update education details. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error saving education details:", error);
-      alert("An error occurred while saving your education details.");
-    }
   };
 
   const handleCancelEducation = () => {
     setEducationData({
-      school: {
-        name: user?.school?.name || "",
-        city: user?.school?.city || "",
+      school_details: {
+        name: user?.school_details?.name || "",
+        city: user?.school_details?.city || "",
       },
-      college: {
-        name: user?.college?.name || "",
-        city: user?.college?.city || "",
-        passout_year: user?.college?.passout_year || "",
+      college_details: {
+        name: user?.college_details?.name || "",
+        city: user?.college_details?.city || "",
+        passout_year: user?.college_details?.passout_year || "",
       },
       education_level: user?.education_level || "",
       education_field: user?.education_field || "",
@@ -1467,117 +1512,126 @@ export default function ProfileSettings() {
     </button>
   )}
 </div>
-            {/* Education Details Section */}
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <h3 
-                className="text-lg md:text-xl text-[#111111] mb-4"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
-                Education Details
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InfoRow
-                  label="Education Level"
-                  value={educationData.education_level}
-                  isEditing={isEditingEducation}
-                  name="education_level"
-                  onChange={handleEducationChange}
-                  type="select"
-                  options={[
-                    { value: "high_school", label: "High School" },
-                    { value: "undergraduate", label: "Undergraduate" },
-                    { value: "graduate", label: "Graduate" },
-                    { value: "post_graduate", label: "Post Graduate" },
-                    { value: "doctorate", label: "Doctorate" },
-                  ]}
-                />
-                <InfoRow
-                  label="Education Field"
-                  value={educationData.education_field}
-                  isEditing={isEditingEducation}
-                  name="education_field"
-                  onChange={handleEducationChange}
-                  type="select"
-                  options={[
-                    { value: "engineering", label: "Engineering" },
-                    { value: "medical", label: "Medical" },
-                    { value: "commerce", label: "Commerce" },
-                    { value: "arts", label: "Arts" },
-                    { value: "science", label: "Science" },
-                    { value: "other", label: "Other" },
-                  ]}
-                />
-                
-                {/* School Details */}
-                <div className="col-span-2">
-                  <h4 className="text-md font-semibold mb-2 mt-4">School Details</h4>
-                </div>
-                <InfoRow
-                  label="School Name"
-                  value={educationData.school.name}
-                  isEditing={isEditingEducation}
-                  name="school.name"
-                  onChange={handleEducationChange}
-                />
-                <InfoRow
-                  label="School City"
-                  value={educationData.school.city}
-                  isEditing={isEditingEducation}
-                  name="school.city"
-                  onChange={handleEducationChange}
-                />
 
-                {/* College Details */}
-                <div className="col-span-2">
-                  <h4 className="text-md font-semibold mb-2 mt-4">College Details</h4>
-                </div>
-                <InfoRow
-                  label="College Name"
-                  value={educationData.college.name}
-                  isEditing={isEditingEducation}
-                  name="college.name"
-                  onChange={handleEducationChange}
-                />
-                <InfoRow
-                  label="College City"
-                  value={educationData.college.city}
-                  isEditing={isEditingEducation}
-                  name="college.city"
-                  onChange={handleEducationChange}
-                />
-                <InfoRow
-                  label="Passout Year"
-                  value={educationData.college.passout_year}
-                  isEditing={isEditingEducation}
-                  name="college.passout_year"
-                  onChange={handleEducationChange}
-                  type="number"
-                />
-              </div>
-              {isEditingEducation ? (
-                <div className="mt-4 flex space-x-4">
-                  <button
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleSaveEducation}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleCancelEducation}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                  onClick={() => setIsEditingEducation(true)}
-                >
-                  Edit
-                </button>
-              )}
-            </div>
+{/* Education Details Section */}
+<div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+  <h3 
+    className="text-lg md:text-xl text-[#111111] mb-4"
+    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+  >
+    Education Details
+  </h3>
+
+  {loadingEducation ? (
+    <p className="text-gray-600">Loading education details...</p>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <InfoRow
+        label="Education Level"
+        value={educationData.education_level || ""}
+        isEditing={isEditingEducation}
+        name="education_level"
+        onChange={handleEducationChange}
+        type="select"
+        options={[
+          { value: "high_school", label: "High School" },
+          { value: "undergraduate", label: "Undergraduate" },
+          { value: "graduate", label: "Graduate" },
+          { value: "post_graduate", label: "Post Graduate" },
+          { value: "doctorate", label: "Doctorate" },
+        ]}
+      />
+      <InfoRow
+        label="Education Field"
+        value={educationData.education_field || ""}
+        isEditing={isEditingEducation}
+        name="education_field"
+        onChange={handleEducationChange}
+        type="select"
+        options={[
+          { value: "engineering", label: "Engineering" },
+          { value: "medical", label: "Medical" },
+          { value: "commerce", label: "Commerce" },
+          { value: "arts", label: "Arts" },
+          { value: "science", label: "Science" },
+          { value: "other", label: "Other" },
+        ]}
+      />
+
+      {/* School Details */}
+      <div className="col-span-2">
+        <h4 className="text-md font-semibold mb-2 mt-4">School Details</h4>
+      </div>
+      <InfoRow
+        label="School Name"
+        value={educationData?.school_details?.name || ""}
+        isEditing={isEditingEducation}
+        name="school_details.name"
+        onChange={handleEducationChange}
+      />
+      <InfoRow
+        label="School City"
+        value={educationData?.school_details?.city || ""}
+        isEditing={isEditingEducation}
+        name="school_details.city"
+        onChange={handleEducationChange}
+      />
+
+      {/* College Details */}
+      <div className="col-span-2">
+        <h4 className="text-md font-semibold mb-2 mt-4">College Details</h4>
+      </div>
+      <InfoRow
+        label="College Name"
+        value={educationData?.college_details?.name || ""}
+        isEditing={isEditingEducation}
+        name="college_details.name"
+        onChange={handleEducationChange}
+      />
+      <InfoRow
+        label="College City"
+        value={educationData?.college_details?.city || ""}
+        isEditing={isEditingEducation}
+        name="college_details.city"
+        onChange={handleEducationChange}
+      />
+      <InfoRow
+        label="Passout Year"
+        value={educationData?.college_details?.passout_year || ""}
+        isEditing={isEditingEducation}
+        name="college_details.passout_year"
+        onChange={handleEducationChange}
+        type="number"
+      />
+    </div>
+  )}
+
+  {isEditingEducation ? (
+    <div className="mt-4 flex space-x-4">
+      <button
+        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+        onClick={handleSaveEducation}
+        disabled={loadingEducation} // ✅ Disabled while saving
+      >
+        {loadingEducation ? "Saving..." : "Save"}
+      </button>
+      <button
+        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+        onClick={handleCancelEducation}
+      >
+        Cancel
+      </button>
+    </div>
+  ) : (
+    <button
+      className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+      onClick={() => setIsEditingEducation(true)}
+    >
+      Edit
+    </button>
+  )}
+</div>
+
 
             {/* Professional Details Section */}
 <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
