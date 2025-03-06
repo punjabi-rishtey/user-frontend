@@ -1005,6 +1005,53 @@ export default function ProfileSettings() {
     setIsEditingHobbies(false);
   };
 
+  const calculateProfileCompletion = () => {
+    let filledFields = 0;
+    let totalFields = 0;
+
+    const checkFields = (obj) => {
+      Object.values(obj).forEach((value) => {
+        if (typeof value === "object" && value !== null) {
+          checkFields(value);
+        } else {
+          totalFields++;
+          if (value && value !== "") {
+            filledFields++;
+          }
+        }
+      });
+    };
+
+    checkFields(formData);
+    checkFields(personalData);
+    checkFields(hobbiesData);
+    checkFields(professionData);
+    checkFields(familyData);
+    checkFields(educationData);
+    checkFields(astrologyData);
+
+    // Ensure at least one profile image is added
+    if (userImages.length > 0 && userImages[0] !== "/profile.jpg") {
+      filledFields++;
+    }
+    totalFields++;
+
+    // Calculate percentage
+    return Math.round((filledFields / totalFields) * 100);
+  };
+
+  useEffect(() => {
+    calculateProfileCompletion();
+  }, [
+    formData,
+    personalData,
+    hobbiesData,
+    professionData,
+    familyData,
+    educationData,
+    astrologyData,
+    userImages,
+  ]);
   return (
     <div className="flex flex-col min-h-screen bg-[#FCF9F2]">
       <Header />
@@ -1127,6 +1174,30 @@ export default function ProfileSettings() {
             onRemoveImage={handleRemoveImage}
             onEditImage={handleEditImage}
           />
+
+          {/* Profile Completion Progress Card */}
+          <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg mb-6">
+            <h3 className="text-md md:text-lg text-[#111111] mb-2">
+              Profile Completion
+            </h3>
+            <div className="relative w-full bg-gray-200 h-4 rounded-lg overflow-hidden">
+              <div
+                className="h-4 transition-all duration-500"
+                style={{
+                  width: `${calculateProfileCompletion()}%`,
+                  backgroundColor:
+                    calculateProfileCompletion() < 34
+                      ? "#B31312" // Red (Low completion)
+                      : calculateProfileCompletion() < 67
+                      ? "#A05A2C" // Brown (Medium completion)
+                      : "#168821", // Green (High completion)
+                }}
+              />
+            </div>
+            <p className="text-sm text-gray-600 mt-2">
+              {calculateProfileCompletion()}% completed
+            </p>
+          </div>
 
           <h1 className="text-2xl md:text-3xl text-[#111111] mb-6">
             Profile Settings
