@@ -5,7 +5,6 @@
 // import Header from "./Header";
 // import PreferencesPopup from "./PreferencesPopup";
 
-
 // const SignupPage = () => {
 //   const [formData, setFormData] = useState({
 //     name: "",
@@ -259,31 +258,6 @@
 
 // export default SignupPage;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -346,7 +320,12 @@ const SignupPage = () => {
       setLoading(false);
 
       if (response.ok) {
-        setShowPreferences(true);
+        // Show success message
+        alert("Registration successful! Please login to continue.");
+
+        // Redirect to login page and scroll to top
+        navigate("/login", { replace: true });
+        window.scrollTo(0, 0);
       } else {
         alert(data.message || "Registration failed. Please try again.");
       }
@@ -363,10 +342,16 @@ const SignupPage = () => {
       {/* Signup Form */}
       <div className="flex-grow flex items-center justify-center my-16">
         <div className="flex space-x-10">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg" style={{ width: "450px" }}>
+          <div
+            className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg"
+            style={{ width: "450px" }}
+          >
             <h2
               className="text-3xl mb-6 text-[#4F2F1D]"
-              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
             >
               Sign Up
             </h2>
@@ -448,7 +433,9 @@ const SignupPage = () => {
                 <button
                   type="submit"
                   className={`bg-[#990000] text-white font-bold py-2 px-6 rounded-lg transition duration-300 ${
-                    loading ? "opacity-50 cursor-not-allowed" : "hover:bg-[#800000]"
+                    loading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-[#800000]"
                   }`}
                   disabled={loading}
                 >
@@ -466,29 +453,36 @@ const SignupPage = () => {
             </div>
           </div>
 
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg" style={{ width: "450px", height: "450px" }}>
+          <div
+            className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg"
+            style={{ width: "450px", height: "450px" }}
+          >
             <h2 className="text-3xl mb-6 text-[#4F2F1D]">Preferences</h2>
             <form className="space-y-4">
-              {["preference1", "preference2", "preference3"].map((pref, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <div>
-                    <label className="block text-[#6B4132] mb-2">Preference {index + 1}</label>
-                    <select
-                      name={pref}
-                      value={preferences[pref]}
-                      onChange={handlePreferenceChange}
-                      className="w-full p-3 border border-[#6B4132] rounded-lg"
-                      required
-                    >
-                      <option value="">Select Preference</option>
-                      <option value="age">Age</option>
-                      <option value="caste">Caste</option>
-                      <option value="height">Height</option>
-                      <option value="marital_status">Marital Status</option>
-                    </select>
+              {["preference1", "preference2", "preference3"].map(
+                (pref, index) => (
+                  <div key={index} className="flex items-center space-x-4">
+                    <div>
+                      <label className="block text-[#6B4132] mb-2">
+                        Preference {index + 1}
+                      </label>
+                      <select
+                        name={pref}
+                        value={preferences[pref]}
+                        onChange={handlePreferenceChange}
+                        className="w-full p-3 border border-[#6B4132] rounded-lg"
+                        required
+                      >
+                        <option value="">Select Preference</option>
+                        <option value="age">Age</option>
+                        <option value="caste">Caste</option>
+                        <option value="height">Height</option>
+                        <option value="marital_status">Marital Status</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </form>
           </div>
         </div>

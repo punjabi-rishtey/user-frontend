@@ -187,7 +187,7 @@ export default function ProfileSettings() {
   const [loadingAstrology, setLoadingAstrology] = useState(false);
   const [isEditingAstrology, setIsEditingAstrology] = useState(false);
   const [isEditingHobbies, setIsEditingHobbies] = useState(false);
-  const [showPreferences, setShowPreferences] = useState(false);
+  // const [showPreferences, setShowPreferences] = useState(false);
 
   const token = localStorage.getItem("token"); // Retrieve token
   console.log(localStorage.getItem("token"));
@@ -1855,12 +1855,12 @@ export default function ProfileSettings() {
 
       <Footer />
 
-      {showPreferences && (
+      {/* {showPreferences && (
         <PreferencesPopup
           initialPreferences={user?.preferences}
           onClose={() => setShowPreferences(false)}
         />
-      )}
+      )} */}
     </div>
   );
 }
