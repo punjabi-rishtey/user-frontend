@@ -177,6 +177,7 @@ export default function ProfileSettings() {
   const [userImages, setUserImages] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [loadingProfession, setLoadingProfession] = useState(false);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingFamily, setIsEditingFamily] = useState(false);
   const [loadingEducation, setLoadingEducation] = useState(false);
@@ -412,7 +413,7 @@ export default function ProfileSettings() {
   });
 
   useEffect(() => {
-    if (user && user._id) {
+    if (user?._id) {
       fetchAstrologyDetails();
     }
   }, [user?._id]); // ✅ Depend only on `user._id`
@@ -460,6 +461,10 @@ export default function ProfileSettings() {
   }, [user]);
 
   const fetchProfessionDetails = async () => {
+    if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
+
+    setLoadingProfession(true); // ✅ Start loading before API call
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -488,9 +493,13 @@ export default function ProfileSettings() {
         alert("Failed to fetch profession details.");
       }
     }
+
+    setLoadingProfession(false); // ✅ Stop loading after API call
   };
 
   const handleSaveProfession = async () => {
+    setLoadingProfession(true); // ✅ Start loading before API call
+
     try {
       const token = localStorage.getItem("token");
 
@@ -511,6 +520,8 @@ export default function ProfileSettings() {
       console.error("Error saving profession details:", error);
       alert("Failed to update profession details. Please try again.");
     }
+
+    setLoadingProfession(false); // ✅ Stop loading after API call
   };
 
   useEffect(() => {
@@ -520,6 +531,8 @@ export default function ProfileSettings() {
   }, [user]);
 
   const fetchFamilyDetails = async () => {
+    if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
+
     setLoadingFamily(true);
     try {
       const token = localStorage.getItem("token");
@@ -579,6 +592,8 @@ export default function ProfileSettings() {
   }, [user]);
 
   const fetchEducationDetails = async () => {
+    if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
+
     setLoadingEducation(true); // ✅ Start loading before API call
     try {
       const token = localStorage.getItem("token");
