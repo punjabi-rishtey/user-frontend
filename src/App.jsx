@@ -17,6 +17,7 @@ import Profilepage from "./components/Profilepage";
 import Testimonials from "./components/Testimonials";
 import MembershipPage from "./components/membershipPage";
 import CustomerReviews from "./components/CustomerReviews";
+import ResetPasswordPage from "./components/ResetPasswordPage";
 function App() {
   return (
     <AuthProvider>
@@ -41,6 +42,10 @@ function App() {
           <Route path="/profile/:id" element={<ProfileDetail />} />
           <Route path="/profilepage" element={<Profilepage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/reset-password/:token"
+            element={<ResetPasswordPage />}
+          />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactUs />} />
