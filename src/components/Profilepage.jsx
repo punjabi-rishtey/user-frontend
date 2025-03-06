@@ -13,8 +13,7 @@ import { useAuth } from "../context/AuthContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
-import PreferencesPopup from "./PreferencesPopup";
-
+import ProfileImageGallery from "./ProfileImageGallery";
 // Add the helper functions here
 const generateFeetOptions = () => {
   const options = [];
@@ -169,30 +168,153 @@ function InfoRow({
 }
 
 export default function ProfileSettings() {
-  const { user, updateUser, logout } = useAuth(); // ✅ Correct way
+  const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  if (!user) return <div>Loading...</div>; // ✅ Prevents errors when `user` is null
+  const [isUploading, setIsUploading] = useState(false);
 
   // Keep all your existing states
+  const [userImages, setUserImages] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingFamily, setIsEditingFamily] = useState(false);
   const [loadingEducation, setLoadingEducation] = useState(false);
-
   const [loadingFamily, setLoadingFamily] = useState(false);
   const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [loadingAstrology, setLoadingAstrology] = useState(false);
   const [isEditingAstrology, setIsEditingAstrology] = useState(false);
   const [isEditingHobbies, setIsEditingHobbies] = useState(false);
-  // const [showPreferences, setShowPreferences] = useState(false);
+
+  // Initialize userImages when user data changes
+  useEffect(() => {
+    if (user) {
+      setUserImages(
+        user?.profilePictures?.length > 0
+          ? user.profilePictures
+          : [user?.profilePicture || "/profile.jpg"]
+      );
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.profilePicture) {
+      const sidebarImages = document.querySelectorAll(".sidebar-profile-image");
+      sidebarImages.forEach((img) => {
+        img.src = user.profilePicture;
+      });
+    }
+  }, [user?.profilePicture]);
+
+  if (!user) return <div>Loading...</div>;
+
+  const handleAddImage = async (file) => {
+    setIsUploading(true);
+    try {
+      const imageUrl = URL.createObjectURL(file);
+
+      const updatedUser = {
+        ...user,
+        profilePicture: imageUrl,
+      };
+
+      updateUser(updatedUser); // ✅ Update user context
+
+      setUserImages((prev) => {
+        if (prev.length === 1 && prev[0] === "/profile.jpg") {
+          return [imageUrl];
+        }
+        return [...prev, imageUrl];
+      });
+
+      // ✅ Update the sidebar profile picture immediately
+      const sidebarImages = document.querySelectorAll(".sidebar-profile-image");
+      sidebarImages.forEach((img) => {
+        img.src = imageUrl;
+      });
+
+      alert("Image added successfully!");
+    } catch (error) {
+      console.error("Error adding image:", error);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    if (window.confirm("Are you sure you want to remove this image?")) {
+      // Remove the selected image
+      const newImages = [...userImages];
+      newImages.splice(index, 1);
+
+      let updatedUser = { ...user };
+
+      if (index === 0) {
+        // ✅ If first image (profile picture) is deleted, update profile picture
+        if (newImages.length > 0) {
+          updatedUser.profilePicture = newImages[0]; // Set next image as profile picture
+        } else {
+          updatedUser.profilePicture = "/profile.jpg"; // Default fallback
+        }
+      }
+
+      // ✅ Update state and user context
+      setUserImages(newImages);
+      updateUser(updatedUser);
+
+      // ✅ Update sidebar profile picture
+      const sidebarImages = document.querySelectorAll(".sidebar-profile-image");
+      sidebarImages.forEach((img) => {
+        img.src = updatedUser.profilePicture;
+      });
+
+      alert("Image removed successfully!");
+    }
+  };
+
+  const handleEditImage = (index) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async (e) => {
+      if (e.target.files && e.target.files[0]) {
+        setIsUploading(true);
+        try {
+          const file = e.target.files[0];
+          const imageUrl = URL.createObjectURL(file);
+
+          const newImages = [...userImages];
+          newImages[index] = imageUrl;
+          setUserImages(newImages);
+
+          if (index === 0) {
+            const updatedUser = { ...user, profilePicture: imageUrl };
+            updateUser(updatedUser);
+
+            // ✅ Update sidebar profile picture
+            const sidebarImages = document.querySelectorAll(
+              ".sidebar-profile-image"
+            );
+            sidebarImages.forEach((img) => {
+              img.src = imageUrl;
+            });
+          }
+
+          alert("Image updated successfully!");
+        } catch (error) {
+          console.error("Error updating image:", error);
+          alert("Failed to update image. Please try again.");
+        } finally {
+          setIsUploading(false);
+        }
+      }
+    };
+    input.click();
+  };
 
   const token = localStorage.getItem("token"); // Retrieve token
   console.log(localStorage.getItem("token"));
-
-  // Ensure `user` is not null before accessing properties
 
   const [formData, setFormData] = useState({
     fullName: user?.name || "",
@@ -543,7 +665,7 @@ export default function ProfileSettings() {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
       const updatedUser = {
         ...user,
@@ -556,19 +678,18 @@ export default function ProfileSettings() {
         marital_status: formData.marital_status,
       };
 
-      const success = updateUser(updatedUser);
+      const success = await updateUser(updatedUser); // ✅ Ensure this returns a value
 
-      if (success) {
+      if (success !== false) {
+        // ✅ Check if update was successful
         setIsEditing(false);
-        // Show success message (optional)
         alert("Profile updated successfully!");
       } else {
-        // Show error message (optional)
         alert("Failed to update profile. Please try again.");
       }
     } catch (error) {
       console.error("Error saving profile:", error);
-      alert("An error occurred while saving your profile.");
+      alert("An unexpected error occurred while saving your profile.");
     }
   };
 
@@ -896,7 +1017,7 @@ export default function ProfileSettings() {
               <img
                 src={user?.profilePicture || "/profile.jpg"}
                 alt="Profile"
-                className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312]"
+                className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312] sidebar-profile-image"
               />
               <h2 className="text-lg mt-3 text-[#111111]">{user?.name}</h2>
               <p className="text-sm text-[#333333]">
@@ -944,7 +1065,7 @@ export default function ProfileSettings() {
                   <img
                     src={user?.profilePicture || "/profile.jpg"}
                     alt="Profile"
-                    className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312]"
+                    className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312] sidebar-profile-image"
                   />
                   <h2 className="text-lg mt-3 text-[#111111]">{user?.name}</h2>
                   <p className="text-sm text-[#333333]">
@@ -985,6 +1106,13 @@ export default function ProfileSettings() {
 
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-8">
+          <ProfileImageGallery
+            images={userImages}
+            onAddImage={handleAddImage}
+            onRemoveImage={handleRemoveImage}
+            onEditImage={handleEditImage}
+          />
+
           <h1 className="text-2xl md:text-3xl text-[#111111] mb-6">
             Profile Settings
           </h1>
