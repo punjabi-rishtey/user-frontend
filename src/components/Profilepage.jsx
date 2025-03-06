@@ -8,13 +8,12 @@ import {
   FaComments,
   FaMoneyBill,
 } from "react-icons/fa";
-import { Menu, X } from 'lucide-react';
+import { Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 import PreferencesPopup from "./PreferencesPopup";
-
 
 // Add the helper functions here
 const generateFeetOptions = () => {
@@ -96,7 +95,7 @@ function InfoRow({
   onChange,
   type = "text",
   options,
-  isPassword
+  isPassword,
 }) {
   const getDisplayValue = () => {
     if (type === "select" && options) {
@@ -107,7 +106,7 @@ function InfoRow({
       if (value === undefined || value === null || value === "") {
         return "";
       }
-      const option = options.find(opt => opt.value === value.toString());
+      const option = options.find((opt) => opt.value === value.toString());
       return option ? option.label : value;
     }
     if (isPassword) {
@@ -169,16 +168,12 @@ function InfoRow({
   }
 }
 
-
-
-
 export default function ProfileSettings() {
   const { user, updateUser, logout } = useAuth(); // ✅ Correct way
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (!user) return <div>Loading...</div>; // ✅ Prevents errors when `user` is null
-  
 
   // Keep all your existing states
   const [isEditing, setIsEditing] = useState(false);
@@ -214,7 +209,7 @@ export default function ProfileSettings() {
   const [personalData, setPersonalData] = useState({
     height: {
       feet: user?.height?.feet || "5",
-      inches: user?.height?.inches || "0"
+      inches: user?.height?.inches || "0",
     },
     caste: user?.caste || "",
     language: user?.language || "",
@@ -226,7 +221,8 @@ export default function ProfileSettings() {
     physical_attributes: {
       skin_tone: user?.physical_attributes?.skin_tone || "wheatish",
       body_type: user?.physical_attributes?.body_type || "",
-      physical_disability: user?.physical_attributes?.physical_disability || "false",
+      physical_disability:
+        user?.physical_attributes?.physical_disability || "false",
       disability_reason: user?.physical_attributes?.disability_reason || "",
     },
     lifestyle: {
@@ -243,7 +239,7 @@ export default function ProfileSettings() {
 
   const [hobbiesData, setHobbiesData] = useState({
     hobbies: user?.hobbies || [],
-    newHobby: ""
+    newHobby: "",
   });
 
   const [professionData, setProfessionData] = useState({
@@ -254,7 +250,7 @@ export default function ProfileSettings() {
     work_address: {
       address: user?.work_address?.address || "",
       city: user?.work_address?.city || "",
-    }
+    },
   });
 
   const [familyData, setFamilyData] = useState({
@@ -293,17 +289,15 @@ export default function ProfileSettings() {
     gotra: "",
   });
 
-  
   useEffect(() => {
     if (user && user._id) {
       fetchAstrologyDetails();
     }
   }, [user?._id]); // ✅ Depend only on `user._id`
-  
-  
+
   const fetchAstrologyDetails = async () => {
     if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
-  
+
     setLoadingAstrology(true);
     try {
       const token = localStorage.getItem("token");
@@ -312,7 +306,7 @@ export default function ProfileSettings() {
         logout();
         return;
       }
-  
+
       const response = await axios.get(
         `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
         {
@@ -323,7 +317,7 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       setAstrologyData(response.data);
     } catch (error) {
       console.error("Error fetching astrology details:", error);
@@ -336,14 +330,13 @@ export default function ProfileSettings() {
     }
     setLoadingAstrology(false);
   };
-  
-  
+
   useEffect(() => {
     if (user?._id) {
       fetchProfessionDetails();
     }
   }, [user]);
-  
+
   const fetchProfessionDetails = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -352,7 +345,7 @@ export default function ProfileSettings() {
         logout();
         return;
       }
-  
+
       const response = await axios.get(
         `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
         {
@@ -362,7 +355,7 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       setProfessionData(response.data);
     } catch (error) {
       if (error.response?.status === 401) {
@@ -378,7 +371,7 @@ export default function ProfileSettings() {
   const handleSaveProfession = async () => {
     try {
       const token = localStorage.getItem("token");
-  
+
       await axios.put(
         `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
         professionData,
@@ -389,7 +382,7 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       setIsEditingProfession(false);
       alert("Profession details updated successfully!");
     } catch (error) {
@@ -398,13 +391,12 @@ export default function ProfileSettings() {
     }
   };
 
-  
   useEffect(() => {
     if (user?._id) {
       fetchFamilyDetails();
     }
   }, [user]);
-  
+
   const fetchFamilyDetails = async () => {
     setLoadingFamily(true);
     try {
@@ -414,7 +406,7 @@ export default function ProfileSettings() {
         logout();
         return;
       }
-  
+
       const response = await axios.get(
         `https://backend-nm1z.onrender.com/api/families/${user._id}`,
         {
@@ -424,7 +416,7 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       setFamilyData(response.data);
     } catch (error) {
       if (error.response?.status === 401) {
@@ -437,7 +429,6 @@ export default function ProfileSettings() {
     }
     setLoadingFamily(false);
   };
-
 
   const handleFamilyChange = (e) => {
     const { name, value } = e.target;
@@ -458,13 +449,13 @@ export default function ProfileSettings() {
       };
     });
   };
-  
+
   useEffect(() => {
     if (user?._id) {
       fetchEducationDetails();
     }
   }, [user]);
-  
+
   const fetchEducationDetails = async () => {
     setLoadingEducation(true); // ✅ Start loading before API call
     try {
@@ -474,7 +465,7 @@ export default function ProfileSettings() {
         logout();
         return;
       }
-  
+
       const response = await axios.get(
         `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
         {
@@ -484,7 +475,7 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       setEducationData(response.data);
     } catch (error) {
       if (error.response?.status === 401) {
@@ -497,12 +488,12 @@ export default function ProfileSettings() {
     }
     setLoadingEducation(false); // ✅ Stop loading after API call (both success & error cases)
   };
-  
+
   const handleSaveEducation = async () => {
     setLoadingEducation(true); // ✅ Show loading when saving
     try {
       const token = localStorage.getItem("token");
-  
+
       await axios.put(
         `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
         educationData,
@@ -513,7 +504,7 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       setIsEditingEducation(false);
       alert("Education details updated successfully!");
     } catch (error) {
@@ -523,23 +514,21 @@ export default function ProfileSettings() {
     setLoadingEducation(false); // ✅ Stop loading after saving
   };
 
-
-
-
-
-
-
   const [languageData, setLanguageData] = useState({
     languages: user?.languages || [],
-    selectedLanguage: ""
+    selectedLanguage: "",
   });
 
   const menuItems = [
-    { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches"},
-    { icon: <FaComments className="text-[#B31312]" />, label: "Interests"},
-    { icon: <FaComments className="text-[#B31312]" />, label: "Chat List"},
-    { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan"},
-    { icon: <FaCog className="text-[#B31312]" />, label: "Settings", active: true }
+    { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches" },
+    { icon: <FaComments className="text-[#B31312]" />, label: "Interests" },
+    { icon: <FaComments className="text-[#B31312]" />, label: "Chat List" },
+    { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan" },
+    {
+      icon: <FaCog className="text-[#B31312]" />,
+      label: "Settings",
+      active: true,
+    },
   ];
 
   if (!user) {
@@ -627,7 +616,7 @@ export default function ProfileSettings() {
       const updatedUser = {
         ...user,
         ...personalData,
-        languages: languageData.languages
+        languages: languageData.languages,
       };
 
       const success = updateUser(updatedUser);
@@ -648,7 +637,7 @@ export default function ProfileSettings() {
     setPersonalData({
       height: {
         feet: user.height?.feet || "5",
-        inches: user.height?.inches || "0"
+        inches: user.height?.inches || "0",
       },
       caste: user.caste || "",
       language: user.language || "",
@@ -660,7 +649,8 @@ export default function ProfileSettings() {
       physical_attributes: {
         skin_tone: user.physical_attributes?.skin_tone || "wheatish",
         body_type: user.physical_attributes?.body_type || "",
-        physical_disability: user.physical_attributes?.physical_disability || "false",
+        physical_disability:
+          user.physical_attributes?.physical_disability || "false",
         disability_reason: user.physical_attributes?.disability_reason || "",
       },
       lifestyle: {
@@ -676,14 +666,14 @@ export default function ProfileSettings() {
     });
     setLanguageData({
       languages: user?.languages || [],
-      selectedLanguage: ""
+      selectedLanguage: "",
     });
     setIsEditingPersonal(false);
   };
 
   const handleProfessionChange = (e) => {
     const { name, value } = e.target;
-  
+
     setProfessionData((prev) => {
       // Handle nested fields for work_address
       if (name.startsWith("work_address.")) {
@@ -695,7 +685,7 @@ export default function ProfileSettings() {
           },
         };
       }
-  
+
       return {
         ...prev,
         [name]: value,
@@ -712,13 +702,10 @@ export default function ProfileSettings() {
       work_address: {
         address: user?.work_address?.address || "",
         city: user?.work_address?.city || "",
-      }
+      },
     });
     setIsEditingProfession(false);
   };
-
-
-
 
   const handleSaveFamily = async () => {
     setLoadingFamily(true);
@@ -729,7 +716,7 @@ export default function ProfileSettings() {
         logout();
         return;
       }
-  
+
       await axios.put(
         `https://backend-nm1z.onrender.com/api/families/${user._id}`,
         familyData,
@@ -740,7 +727,7 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       setIsEditingFamily(false);
       alert("Family details updated successfully!");
     } catch (error) {
@@ -749,7 +736,6 @@ export default function ProfileSettings() {
     }
     setLoadingFamily(false);
   };
-  
 
   const handleCancelFamily = () => {
     setFamilyData({
@@ -770,7 +756,6 @@ export default function ProfileSettings() {
     });
     setIsEditingFamily(false);
   };
-
 
   // const handleCancelFamily = () => {
   //   fetchFamilyDetails(); // Fetch latest data from API instead of relying on old state
@@ -822,13 +807,13 @@ export default function ProfileSettings() {
     setLoadingAstrology(true);
     try {
       const token = localStorage.getItem("token");
-  
+
       if (!token) {
         alert("Session expired. Please log in again.");
-        logout();  // Log out user if token is missing
+        logout(); // Log out user if token is missing
         return;
       }
-  
+
       const response = await axios.put(
         `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
         astrologyData,
@@ -839,14 +824,13 @@ export default function ProfileSettings() {
           },
         }
       );
-  
+
       if (response.status === 200) {
         alert("Astrology details updated successfully!");
         setIsEditingAstrology(false);
       } else {
         alert("Unexpected response from server. Please try again.");
       }
-  
     } catch (error) {
       if (error.response?.status === 401) {
         alert("Session expired. Please log in again.");
@@ -860,20 +844,16 @@ export default function ProfileSettings() {
     }
     setLoadingAstrology(false);
   };
-  
-    
-
 
   const handleCancelAstrology = () => {
     fetchAstrologyDetails(); // Re-fetch from API instead of using old user data
     setIsEditingAstrology(false);
   };
-  
 
   const handleSaveHobbies = () => {
     const updatedUser = {
       ...user,
-      hobbies: hobbiesData.hobbies
+      hobbies: hobbiesData.hobbies,
     };
     const success = updateUser(updatedUser);
     if (success) {
@@ -884,7 +864,7 @@ export default function ProfileSettings() {
   const handleCancelHobbies = () => {
     setHobbiesData({
       hobbies: user?.hobbies || [],
-      newHobby: ""
+      newHobby: "",
     });
     setIsEditingHobbies(false);
   };
@@ -892,7 +872,7 @@ export default function ProfileSettings() {
   return (
     <div className="flex flex-col min-h-screen bg-[#FCF9F2]">
       <Header />
-      
+
       {/* Mobile Menu Button */}
       <div className="md:hidden px-4 py-2 border-b bg-white">
         <button
@@ -918,9 +898,7 @@ export default function ProfileSettings() {
                 alt="Profile"
                 className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312]"
               />
-              <h2 className="text-lg mt-3 text-[#111111]">
-                {user?.name}
-              </h2>
+              <h2 className="text-lg mt-3 text-[#111111]">{user?.name}</h2>
               <p className="text-sm text-[#333333]">
                 {user?.profileType} User | {user?.location?.city}
               </p>
@@ -955,11 +933,11 @@ export default function ProfileSettings() {
         {/* Mobile Sidebar */}
         {isMobileMenuOpen && (
           <>
-            <div 
+            <div
               className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(false)}
             />
-            
+
             <aside className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-50">
               <div className="p-5">
                 <div className="text-center">
@@ -968,9 +946,7 @@ export default function ProfileSettings() {
                     alt="Profile"
                     className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312]"
                   />
-                  <h2 className="text-lg mt-3 text-[#111111]">
-                    {user?.name}
-                  </h2>
+                  <h2 className="text-lg mt-3 text-[#111111]">{user?.name}</h2>
                   <p className="text-sm text-[#333333]">
                     {user?.profileType} User | {user?.location?.city}
                   </p>
@@ -1012,18 +988,76 @@ export default function ProfileSettings() {
           <h1 className="text-2xl md:text-3xl text-[#111111] mb-6">
             Profile Settings
           </h1>
-          
+
           {/* Profile Sections */}
           <div className="space-y-6">
-            {/* Basic Info Section */}
+            {/* Combined Basic Info, Personal Details, and Hobbies Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <h3 
-                className="text-lg md:text-xl text-[#111111] mb-4"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
-                Basic Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3
+                  className="text-lg md:text-xl text-[#111111]"
+                  style={{
+                    fontFamily: "'Tiempos Headline', serif",
+                    fontWeight: 400,
+                  }}
+                >
+                  Profile Information
+                </h3>
+                {isEditing || isEditingPersonal || isEditingHobbies ? (
+                  <div className="flex space-x-4">
+                    <button
+                      onClick={() => {
+                        handleSave();
+                        handleSavePersonal();
+                        handleSaveHobbies();
+                      }}
+                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
+                    >
+                      Save Changes
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleCancel();
+                        handleCancelPersonal();
+                        handleCancelHobbies();
+                        setIsEditing(false);
+                        setIsEditingPersonal(false);
+                        setIsEditingHobbies(false);
+                      }}
+                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsEditing(true);
+                      setIsEditingPersonal(true);
+                      setIsEditingHobbies(true);
+                    }}
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+
+              {/* Basic Info Section */}
+              <h4 className="text-md font-semibold mb-4">Basic Information</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <InfoRow
                   label="Full name"
                   value={formData.fullName}
@@ -1105,46 +1139,11 @@ export default function ProfileSettings() {
                 />
               </div>
 
-              <div className="flex justify-end space-x-4 mt-6">
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={handleSave}
-                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                    >
-                      Save Changes
-                    </button>
-                    <button
-                      onClick={handleCancel}
-                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                      style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                  >
-                    Edit
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Personal Details Section */}
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <h3 
-                className="text-lg md:text-xl text-[#111111] mb-4"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-              >
+              {/* Personal Details Section */}
+              <h4 className="text-md font-semibold mb-4 border-t pt-6">
                 Personal Details
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <InfoRow
                   label="Height"
                   value={personalData.height}
@@ -1167,12 +1166,19 @@ export default function ProfileSettings() {
                   ]}
                 />
                 <div className="col-span-2">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">Languages</label>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Languages
+                  </label>
                   {isEditingPersonal ? (
                     <div className="flex gap-2 mb-2">
                       <select
                         value={languageData.selectedLanguage}
-                        onChange={(e) => setLanguageData(prev => ({ ...prev, selectedLanguage: e.target.value }))}
+                        onChange={(e) =>
+                          setLanguageData((prev) => ({
+                            ...prev,
+                            selectedLanguage: e.target.value,
+                          }))
+                        }
                         className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                       >
                         <option value="">Select a language</option>
@@ -1193,10 +1199,18 @@ export default function ProfileSettings() {
                       </select>
                       <button
                         onClick={() => {
-                          if (languageData.selectedLanguage && !languageData.languages.includes(languageData.selectedLanguage)) {
-                            setLanguageData(prev => ({
-                              languages: [...prev.languages, prev.selectedLanguage],
-                              selectedLanguage: ""
+                          if (
+                            languageData.selectedLanguage &&
+                            !languageData.languages.includes(
+                              languageData.selectedLanguage
+                            )
+                          ) {
+                            setLanguageData((prev) => ({
+                              languages: [
+                                ...prev.languages,
+                                prev.selectedLanguage,
+                              ],
+                              selectedLanguage: "",
                             }));
                           }
                         }}
@@ -1216,9 +1230,11 @@ export default function ProfileSettings() {
                         {isEditingPersonal && (
                           <button
                             onClick={() => {
-                              setLanguageData(prev => ({
+                              setLanguageData((prev) => ({
                                 ...prev,
-                                languages: prev.languages.filter((_, i) => i !== index)
+                                languages: prev.languages.filter(
+                                  (_, i) => i !== index
+                                ),
                               }));
                             }}
                             className="ml-2 text-gray-500 hover:text-red-500"
@@ -1273,7 +1289,7 @@ export default function ProfileSettings() {
                     { value: "wheatish_brown", label: "Wheatish Brown" },
                     { value: "medium", label: "Medium" },
                     { value: "brown", label: "Brown" },
-                    { value: "dark", label: "Dark" }
+                    { value: "dark", label: "Dark" },
                   ]}
                 />
                 <InfoRow
@@ -1298,7 +1314,7 @@ export default function ProfileSettings() {
                   type="select"
                   options={[
                     { value: "true", label: "Yes" },
-                    { value: "false", label: "No" }
+                    { value: "false", label: "No" },
                   ]}
                 />
                 <InfoRow
@@ -1318,7 +1334,7 @@ export default function ProfileSettings() {
                   options={[
                     { value: "yes", label: "Yes" },
                     { value: "no", label: "No" },
-                    { value: "occasionally", label: "Occasionally" }
+                    { value: "occasionally", label: "Occasionally" },
                   ]}
                 />
                 <InfoRow
@@ -1331,7 +1347,7 @@ export default function ProfileSettings() {
                   options={[
                     { value: "yes", label: "Yes" },
                     { value: "no", label: "No" },
-                    { value: "occasionally", label: "Occasionally" }
+                    { value: "occasionally", label: "Occasionally" },
                   ]}
                 />
                 <InfoRow
@@ -1344,7 +1360,10 @@ export default function ProfileSettings() {
                   options={[
                     { value: "veg", label: "Vegetarian" },
                     { value: "nonveg", label: "Non-Vegetarian" },
-                    { value: "occasionally_nonveg", label: "Occasionally Non-Vegetarian" },
+                    {
+                      value: "occasionally_nonveg",
+                      label: "Occasionally Non-Vegetarian",
+                    },
                   ]}
                 />
                 <InfoRow
@@ -1359,9 +1378,12 @@ export default function ProfileSettings() {
                     { value: "false", label: "No" },
                   ]}
                 />
-                {/* Move Home Address section to the end */}
+
+                {/* Home Address section */}
                 <div className="col-span-2">
-                  <h4 className="text-md font-semibold mb-2 mt-4">Home Address</h4>
+                  <h4 className="text-md font-semibold mb-2 mt-4">
+                    Home Address
+                  </h4>
                 </div>
                 <InfoRow
                   label="Address"
@@ -1378,17 +1400,166 @@ export default function ProfileSettings() {
                   onChange={handlePersonalChange}
                 />
               </div>
-              {isEditingPersonal ? (
+
+              {/* Hobbies Section */}
+              <h4 className="text-md font-semibold mb-4 border-t pt-6">
+                Hobbies
+              </h4>
+              <div className="mb-4">
+                {isEditingHobbies && (
+                  <div className="flex gap-2 mb-4">
+                    <input
+                      type="text"
+                      value={hobbiesData.newHobby}
+                      onChange={(e) =>
+                        setHobbiesData((prev) => ({
+                          ...prev,
+                          newHobby: e.target.value,
+                        }))
+                      }
+                      className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      placeholder="Enter a hobby"
+                    />
+                    <button
+                      onClick={() => {
+                        if (hobbiesData.newHobby.trim()) {
+                          setHobbiesData((prev) => ({
+                            hobbies: [...prev.hobbies, prev.newHobby.trim()],
+                            newHobby: "",
+                          }));
+                        }
+                      }}
+                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+                    >
+                      Add
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  {hobbiesData.hobbies.map((hobby, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center bg-gray-100 rounded-full px-4 py-2"
+                    >
+                      <span>{hobby}</span>
+                      {isEditingHobbies && (
+                        <button
+                          onClick={() => {
+                            setHobbiesData((prev) => ({
+                              ...prev,
+                              hobbies: prev.hobbies.filter(
+                                (_, i) => i !== index
+                              ),
+                            }));
+                          }}
+                          className="ml-2 text-gray-500 hover:text-red-500"
+                        >
+                          ×
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Family Details Section */}
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg md:text-xl text-[#111111] mb-4">
+                Family Details
+              </h3>
+
+              {loadingFamily ? (
+                <p className="text-gray-600">Loading...</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoRow
+                    label="Family Value"
+                    value={familyData.family_value}
+                    isEditing={isEditingFamily}
+                    name="family_value"
+                    onChange={handleFamilyChange}
+                    type="select"
+                    options={[
+                      { value: "orthodox", label: "Orthodox" },
+                      { value: "traditional", label: "Traditional" },
+                      { value: "moderate", label: "Moderate" },
+                      { value: "liberal", label: "Liberal" },
+                      { value: "modern", label: "Modern" },
+                    ]}
+                  />
+                  <InfoRow
+                    label="Family Type"
+                    value={familyData.family_type}
+                    isEditing={isEditingFamily}
+                    name="family_type"
+                    onChange={handleFamilyChange}
+                    type="select"
+                    options={[
+                      { value: "nuclear", label: "Nuclear Family" },
+                      { value: "joint", label: "Joint Family" },
+                      { value: "extended", label: "Extended Family" },
+                      { value: "living_alone", label: "Living Alone" },
+                    ]}
+                  />
+                  <InfoRow
+                    label="Mother's Name"
+                    value={familyData.mother?.name}
+                    isEditing={isEditingFamily}
+                    name="mother.name"
+                    onChange={handleFamilyChange}
+                  />
+                  <InfoRow
+                    label="Mother's Occupation"
+                    value={familyData.mother?.occupation}
+                    isEditing={isEditingFamily}
+                    name="mother.occupation"
+                    onChange={handleFamilyChange}
+                  />
+                  <InfoRow
+                    label="Father's Name"
+                    value={familyData.father?.name}
+                    isEditing={isEditingFamily}
+                    name="father.name"
+                    onChange={handleFamilyChange}
+                  />
+                  <InfoRow
+                    label="Father's Occupation"
+                    value={familyData.father?.occupation}
+                    isEditing={isEditingFamily}
+                    name="father.occupation"
+                    onChange={handleFamilyChange}
+                  />
+                  <InfoRow
+                    label="Brother Count"
+                    value={familyData.siblings?.brother_count}
+                    isEditing={isEditingFamily}
+                    name="siblings.brother_count"
+                    onChange={handleFamilyChange}
+                  />
+                  <InfoRow
+                    label="Sister Count"
+                    value={familyData.siblings?.sister_count}
+                    isEditing={isEditingFamily}
+                    name="siblings.sister_count"
+                    onChange={handleFamilyChange}
+                  />
+                </div>
+              )}
+
+              {isEditingFamily ? (
                 <div className="mt-4 flex space-x-4">
                   <button
                     className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleSavePersonal}
+                    onClick={handleSaveFamily}
+                    disabled={loadingFamily}
                   >
-                    Save
+                    {loadingFamily ? "Saving..." : "Save"}
                   </button>
                   <button
                     className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={handleCancelPersonal}
+                    onClick={handleCancelFamily}
                   >
                     Cancel
                   </button>
@@ -1396,335 +1567,235 @@ export default function ProfileSettings() {
               ) : (
                 <button
                   className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                  onClick={() => setIsEditingPersonal(true)}
+                  onClick={() => setIsEditingFamily(true)}
                 >
                   Edit
                 </button>
               )}
             </div>
 
-      {/* Family Details Section */}
-<div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-  <h3 className="text-lg md:text-xl text-[#111111] mb-4">
-    Family Details
-  </h3>
+            {/* Education Details Section */}
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+              <h3
+                className="text-lg md:text-xl text-[#111111] mb-4"
+                style={{
+                  fontFamily: "'Tiempos Headline', serif",
+                  fontWeight: 400,
+                }}
+              >
+                Education Details
+              </h3>
 
-  {loadingFamily ? (
-    <p className="text-gray-600">Loading...</p>
-  ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <InfoRow
-        label="Family Value"
-        value={familyData.family_value}
-        isEditing={isEditingFamily}
-        name="family_value"
-        onChange={handleFamilyChange}
-        type="select"
-        options={[
-          { value: "orthodox", label: "Orthodox" },
-          { value: "traditional", label: "Traditional" },
-          { value: "moderate", label: "Moderate" },
-          { value: "liberal", label: "Liberal" },
-          { value: "modern", label: "Modern" }
-        ]}
-      />
-      <InfoRow
-        label="Family Type"
-        value={familyData.family_type}
-        isEditing={isEditingFamily}
-        name="family_type"
-        onChange={handleFamilyChange}
-        type="select"
-        options={[
-          { value: "nuclear", label: "Nuclear Family" },
-          { value: "joint", label: "Joint Family" },
-          { value: "extended", label: "Extended Family" },
-          { value: "living_alone", label: "Living Alone" }
-        ]}
-      />
-      <InfoRow
-        label="Mother's Name"
-        value={familyData.mother?.name}
-        isEditing={isEditingFamily}
-        name="mother.name"
-        onChange={handleFamilyChange}
-      />
-      <InfoRow
-        label="Mother's Occupation"
-        value={familyData.mother?.occupation}
-        isEditing={isEditingFamily}
-        name="mother.occupation"
-        onChange={handleFamilyChange}
-      />
-      <InfoRow
-        label="Father's Name"
-        value={familyData.father?.name}
-        isEditing={isEditingFamily}
-        name="father.name"
-        onChange={handleFamilyChange}
-      />
-      <InfoRow
-        label="Father's Occupation"
-        value={familyData.father?.occupation}
-        isEditing={isEditingFamily}
-        name="father.occupation"
-        onChange={handleFamilyChange}
-      />
-      <InfoRow
-        label="Brother Count"
-        value={familyData.siblings?.brother_count}
-        isEditing={isEditingFamily}
-        name="siblings.brother_count"
-        onChange={handleFamilyChange}
-      />
-      <InfoRow
-        label="Sister Count"
-        value={familyData.siblings?.sister_count}
-        isEditing={isEditingFamily}
-        name="siblings.sister_count"
-        onChange={handleFamilyChange}
-      />
-    </div>
-  )}
+              {loadingEducation ? (
+                <p className="text-gray-600">Loading education details...</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <InfoRow
+                    label="Education Level"
+                    value={educationData.education_level || ""}
+                    isEditing={isEditingEducation}
+                    name="education_level"
+                    onChange={handleEducationChange}
+                    type="select"
+                    options={[
+                      { value: "high_school", label: "High School" },
+                      { value: "undergraduate", label: "Undergraduate" },
+                      { value: "graduate", label: "Graduate" },
+                      { value: "post_graduate", label: "Post Graduate" },
+                      { value: "doctorate", label: "Doctorate" },
+                    ]}
+                  />
+                  <InfoRow
+                    label="Education Field"
+                    value={educationData.education_field || ""}
+                    isEditing={isEditingEducation}
+                    name="education_field"
+                    onChange={handleEducationChange}
+                    type="select"
+                    options={[
+                      { value: "engineering", label: "Engineering" },
+                      { value: "medical", label: "Medical" },
+                      { value: "commerce", label: "Commerce" },
+                      { value: "arts", label: "Arts" },
+                      { value: "science", label: "Science" },
+                      { value: "other", label: "Other" },
+                    ]}
+                  />
 
-  {isEditingFamily ? (
-    <div className="mt-4 flex space-x-4">
-      <button
-        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-        onClick={handleSaveFamily}
-        disabled={loadingFamily}
-      >
-        {loadingFamily ? "Saving..." : "Save"}
-      </button>
-      <button
-        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-        onClick={handleCancelFamily}
-      >
-        Cancel
-      </button>
-    </div>
-  ) : (
-    <button
-      className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-      onClick={() => setIsEditingFamily(true)}
-    >
-      Edit
-    </button>
-  )}
-</div>
+                  {/* School Details */}
+                  <div className="col-span-2">
+                    <h4 className="text-md font-semibold mb-2 mt-4">
+                      School Details
+                    </h4>
+                  </div>
+                  <InfoRow
+                    label="School Name"
+                    value={educationData?.school_details?.name || ""}
+                    isEditing={isEditingEducation}
+                    name="school_details.name"
+                    onChange={handleEducationChange}
+                  />
+                  <InfoRow
+                    label="School City"
+                    value={educationData?.school_details?.city || ""}
+                    isEditing={isEditingEducation}
+                    name="school_details.city"
+                    onChange={handleEducationChange}
+                  />
 
-{/* Education Details Section */}
-<div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-  <h3 
-    className="text-lg md:text-xl text-[#111111] mb-4"
-    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-  >
-    Education Details
-  </h3>
+                  {/* College Details */}
+                  <div className="col-span-2">
+                    <h4 className="text-md font-semibold mb-2 mt-4">
+                      College Details
+                    </h4>
+                  </div>
+                  <InfoRow
+                    label="College Name"
+                    value={educationData?.college_details?.name || ""}
+                    isEditing={isEditingEducation}
+                    name="college_details.name"
+                    onChange={handleEducationChange}
+                  />
+                  <InfoRow
+                    label="College City"
+                    value={educationData?.college_details?.city || ""}
+                    isEditing={isEditingEducation}
+                    name="college_details.city"
+                    onChange={handleEducationChange}
+                  />
+                  <InfoRow
+                    label="Passout Year"
+                    value={educationData?.college_details?.passout_year || ""}
+                    isEditing={isEditingEducation}
+                    name="college_details.passout_year"
+                    onChange={handleEducationChange}
+                    type="number"
+                  />
+                </div>
+              )}
 
-  {loadingEducation ? (
-    <p className="text-gray-600">Loading education details...</p>
-  ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <InfoRow
-        label="Education Level"
-        value={educationData.education_level || ""}
-        isEditing={isEditingEducation}
-        name="education_level"
-        onChange={handleEducationChange}
-        type="select"
-        options={[
-          { value: "high_school", label: "High School" },
-          { value: "undergraduate", label: "Undergraduate" },
-          { value: "graduate", label: "Graduate" },
-          { value: "post_graduate", label: "Post Graduate" },
-          { value: "doctorate", label: "Doctorate" },
-        ]}
-      />
-      <InfoRow
-        label="Education Field"
-        value={educationData.education_field || ""}
-        isEditing={isEditingEducation}
-        name="education_field"
-        onChange={handleEducationChange}
-        type="select"
-        options={[
-          { value: "engineering", label: "Engineering" },
-          { value: "medical", label: "Medical" },
-          { value: "commerce", label: "Commerce" },
-          { value: "arts", label: "Arts" },
-          { value: "science", label: "Science" },
-          { value: "other", label: "Other" },
-        ]}
-      />
-
-      {/* School Details */}
-      <div className="col-span-2">
-        <h4 className="text-md font-semibold mb-2 mt-4">School Details</h4>
-      </div>
-      <InfoRow
-        label="School Name"
-        value={educationData?.school_details?.name || ""}
-        isEditing={isEditingEducation}
-        name="school_details.name"
-        onChange={handleEducationChange}
-      />
-      <InfoRow
-        label="School City"
-        value={educationData?.school_details?.city || ""}
-        isEditing={isEditingEducation}
-        name="school_details.city"
-        onChange={handleEducationChange}
-      />
-
-      {/* College Details */}
-      <div className="col-span-2">
-        <h4 className="text-md font-semibold mb-2 mt-4">College Details</h4>
-      </div>
-      <InfoRow
-        label="College Name"
-        value={educationData?.college_details?.name || ""}
-        isEditing={isEditingEducation}
-        name="college_details.name"
-        onChange={handleEducationChange}
-      />
-      <InfoRow
-        label="College City"
-        value={educationData?.college_details?.city || ""}
-        isEditing={isEditingEducation}
-        name="college_details.city"
-        onChange={handleEducationChange}
-      />
-      <InfoRow
-        label="Passout Year"
-        value={educationData?.college_details?.passout_year || ""}
-        isEditing={isEditingEducation}
-        name="college_details.passout_year"
-        onChange={handleEducationChange}
-        type="number"
-      />
-    </div>
-  )}
-
-  {isEditingEducation ? (
-    <div className="mt-4 flex space-x-4">
-      <button
-        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-        onClick={handleSaveEducation}
-        disabled={loadingEducation} // ✅ Disabled while saving
-      >
-        {loadingEducation ? "Saving..." : "Save"}
-      </button>
-      <button
-        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-        onClick={handleCancelEducation}
-      >
-        Cancel
-      </button>
-    </div>
-  ) : (
-    <button
-      className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-      onClick={() => setIsEditingEducation(true)}
-    >
-      Edit
-    </button>
-  )}
-</div>
-
+              {isEditingEducation ? (
+                <div className="mt-4 flex space-x-4">
+                  <button
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+                    onClick={handleSaveEducation}
+                    disabled={loadingEducation} // ✅ Disabled while saving
+                  >
+                    {loadingEducation ? "Saving..." : "Save"}
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+                    onClick={handleCancelEducation}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+                  onClick={() => setIsEditingEducation(true)}
+                >
+                  Edit
+                </button>
+              )}
+            </div>
 
             {/* Professional Details Section */}
-<div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-  <h3 className="text-lg md:text-xl text-[#111111] mb-4">Professional Details</h3>
-  
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <InfoRow
-      label="Occupation"
-      value={professionData.occupation}
-      isEditing={isEditingProfession}
-      name="occupation"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="Designation"
-      value={professionData.designation}
-      isEditing={isEditingProfession}
-      name="designation"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="Working With"
-      value={professionData.working_with}
-      isEditing={isEditingProfession}
-      name="working_with"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="Annual Income"
-      value={professionData.income}
-      isEditing={isEditingProfession}
-      name="income"
-      onChange={handleProfessionChange}
-      type="select"
-      options={[
-        { value: "0-3", label: "Up to 3 Lakhs" },
-        { value: "3-5", label: "3-5 Lakhs" },
-        { value: "5-7", label: "5-7 Lakhs" },
-        { value: "7-10", label: "7-10 Lakhs" },
-        { value: "10-15", label: "10-15 Lakhs" },
-        { value: "15-20", label: "15-20 Lakhs" },
-        { value: "20-25", label: "20-25 Lakhs" },
-        { value: "25-35", label: "25-35 Lakhs" },
-        { value: "35-50", label: "35-50 Lakhs" },
-        { value: "50-75", label: "50-75 Lakhs" },
-        { value: "75-100", label: "75 Lakhs - 1 Crore" },
-        { value: "100+", label: "1 Crore+" }
-      ]}
-    />
-    
-    <div className="col-span-2">
-      <h4 className="text-md font-semibold mb-2 mt-4">Work Address</h4>
-    </div>
-    <InfoRow
-      label="Address"
-      value={professionData.work_address?.address || ""}
-      isEditing={isEditingProfession}
-      name="work_address.address"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="City"
-      value={professionData.work_address?.city || ""}
-      isEditing={isEditingProfession}
-      name="work_address.city"
-      onChange={handleProfessionChange}
-    />
-  </div>
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg md:text-xl text-[#111111] mb-4">
+                Professional Details
+              </h3>
 
-  {isEditingProfession ? (
-    <div className="mt-4 flex space-x-4">
-      <button
-        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-        onClick={handleSaveProfession}
-      >
-        Save
-      </button>
-      <button
-        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-        onClick={handleCancelProfession}
-      >
-        Cancel
-      </button>
-    </div>
-  ) : (
-    <button
-      className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-      onClick={() => setIsEditingProfession(true)}
-    >
-      Edit
-    </button>
-  )}
-</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InfoRow
+                  label="Occupation"
+                  value={professionData.occupation}
+                  isEditing={isEditingProfession}
+                  name="occupation"
+                  onChange={handleProfessionChange}
+                />
+                <InfoRow
+                  label="Designation"
+                  value={professionData.designation}
+                  isEditing={isEditingProfession}
+                  name="designation"
+                  onChange={handleProfessionChange}
+                />
+                <InfoRow
+                  label="Working With"
+                  value={professionData.working_with}
+                  isEditing={isEditingProfession}
+                  name="working_with"
+                  onChange={handleProfessionChange}
+                />
+                <InfoRow
+                  label="Annual Income"
+                  value={professionData.income}
+                  isEditing={isEditingProfession}
+                  name="income"
+                  onChange={handleProfessionChange}
+                  type="select"
+                  options={[
+                    { value: "0-3", label: "Up to 3 Lakhs" },
+                    { value: "3-5", label: "3-5 Lakhs" },
+                    { value: "5-7", label: "5-7 Lakhs" },
+                    { value: "7-10", label: "7-10 Lakhs" },
+                    { value: "10-15", label: "10-15 Lakhs" },
+                    { value: "15-20", label: "15-20 Lakhs" },
+                    { value: "20-25", label: "20-25 Lakhs" },
+                    { value: "25-35", label: "25-35 Lakhs" },
+                    { value: "35-50", label: "35-50 Lakhs" },
+                    { value: "50-75", label: "50-75 Lakhs" },
+                    { value: "75-100", label: "75 Lakhs - 1 Crore" },
+                    { value: "100+", label: "1 Crore+" },
+                  ]}
+                />
+
+                <div className="col-span-2">
+                  <h4 className="text-md font-semibold mb-2 mt-4">
+                    Work Address
+                  </h4>
+                </div>
+                <InfoRow
+                  label="Address"
+                  value={professionData.work_address?.address || ""}
+                  isEditing={isEditingProfession}
+                  name="work_address.address"
+                  onChange={handleProfessionChange}
+                />
+                <InfoRow
+                  label="City"
+                  value={professionData.work_address?.city || ""}
+                  isEditing={isEditingProfession}
+                  name="work_address.city"
+                  onChange={handleProfessionChange}
+                />
+              </div>
+
+              {isEditingProfession ? (
+                <div className="mt-4 flex space-x-4">
+                  <button
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+                    onClick={handleSaveProfession}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+                    onClick={handleCancelProfession}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="mt-4 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+                  onClick={() => setIsEditingProfession(true)}
+                >
+                  Edit
+                </button>
+              )}
+            </div>
 
             {/* Astrology Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
@@ -1778,97 +1849,12 @@ export default function ProfileSettings() {
                 </button>
               )}
             </div>
-
-
-            {/* Hobbies Section */}
-            <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <div className="flex justify-between items-center">
-                <h3 
-                  className="text-lg md:text-xl text-[#111111] mb-4"
-                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-                >
-                  Hobbies
-                </h3>
-                {isEditingHobbies ? (
-                  <div className="flex space-x-4">
-                    <button
-                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                      onClick={handleSaveHobbies}
-                    >
-                      Save
-                    </button>
-                    <button
-                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                      onClick={handleCancelHobbies}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    onClick={() => setIsEditingHobbies(true)}
-                  >
-                    Edit
-                  </button>
-                )}
-              </div>
-
-              {isEditingHobbies && (
-                <div className="flex gap-2 mt-4">
-                  <input
-                    type="text"
-                    value={hobbiesData.newHobby}
-                    onChange={(e) => setHobbiesData(prev => ({ ...prev, newHobby: e.target.value }))}
-                    className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    placeholder="Enter a hobby"
-                  />
-                  <button
-                    onClick={() => {
-                      if (hobbiesData.newHobby.trim()) {
-                        setHobbiesData(prev => ({
-                          hobbies: [...prev.hobbies, prev.newHobby.trim()],
-                          newHobby: ""
-                        }));
-                      }
-                    }}
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                  >
-                    Add
-                  </button>
-                </div>
-              )}
-
-              <div className="flex flex-wrap gap-2 mt-4">
-                {hobbiesData.hobbies.map((hobby, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center bg-gray-100 rounded-full px-4 py-2"
-                  >
-                    <span>{hobby}</span>
-                    {isEditingHobbies && (
-                      <button
-                        onClick={() => {
-                          setHobbiesData(prev => ({
-                            ...prev,
-                            hobbies: prev.hobbies.filter((_, i) => i !== index)
-                          }));
-                        }}
-                        className="ml-2 text-gray-500 hover:text-red-500"
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </main>
       </div>
-      
+
       <Footer />
-      
+
       {showPreferences && (
         <PreferencesPopup
           initialPreferences={user?.preferences}
