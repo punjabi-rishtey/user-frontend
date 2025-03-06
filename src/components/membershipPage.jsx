@@ -16,7 +16,6 @@ const MembershipPage = () => {
         { text: "Send interest", available: false },
         { text: "Start Chat", available: false },
       ],
-      buttonText: "Get Started",
     },
     {
       title: "Gold",
@@ -29,7 +28,6 @@ const MembershipPage = () => {
         { text: "Send interest", available: true },
         { text: "Start Chat", available: true },
       ],
-      buttonText: "Get Started",
       badge: "Most Popular",
     },
     {
@@ -43,29 +41,28 @@ const MembershipPage = () => {
         { text: "Send interest", available: true },
         { text: "Start Chat", available: true },
       ],
-      buttonText: "Get Started",
     },
   ];
 
   const cardVariants = {
-    initial: { 
-      opacity: 0, 
-      y: 20 
+    initial: {
+      opacity: 0,
+      y: 20,
     },
-    animate: { 
-      opacity: 1, 
-      y: 0 
+    animate: {
+      opacity: 1,
+      y: 0,
     },
     hover: {
       scale: 1.05,
       transition: { duration: 0.3 },
-    }
+    },
   };
 
   return (
     <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
-      
+
       <main className="flex-grow py-16 px-6">
         <h2
           className="text-5xl text-center mb-12 text-[#4F2F1D]"
@@ -86,11 +83,11 @@ const MembershipPage = () => {
               className={`relative w-full md:w-[380px] p-8 rounded-lg shadow-lg hover:ring-2 hover:ring-[#4F2F1D] bg-[#F5EDE7]`}
             >
               {plan.badge && (
-                <div 
+                <div
                   className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#4F2F1D] text-[#E5D3C8] px-4 py-1 rounded-full z-10"
-                  style={{ 
-                    fontFamily: "'Modern Era', sans-serif", 
-                    fontWeight: 400
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
                   }}
                 >
                   {plan.badge}
@@ -99,18 +96,27 @@ const MembershipPage = () => {
 
               <h3
                 className="text-2xl mb-4 text-[#4F2F1D]"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                style={{
+                  fontFamily: "'Tiempos Headline', serif",
+                  fontWeight: 400,
+                }}
               >
                 {plan.title}
               </h3>
               <p
                 className="text-3xl mb-2 text-[#4F2F1D]"
-                style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                style={{
+                  fontFamily: "'Tiempos Headline', serif",
+                  fontWeight: 400,
+                }}
               >
                 {plan.price}
-                <span 
+                <span
                   className="text-[#6B4132] text-lg ml-1"
-                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
                 >
                   {plan.perMonth}
                 </span>
@@ -118,10 +124,13 @@ const MembershipPage = () => {
 
               <ul className="space-y-4 mb-8">
                 {plan.features.map((feature, i) => (
-                  <li 
-                    key={i} 
+                  <li
+                    key={i}
                     className="flex items-center text-[#6B4132]"
-                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
                   >
                     {feature.available ? (
                       <span className="text-[#4F2F1D] mr-2">✓</span>
@@ -132,13 +141,6 @@ const MembershipPage = () => {
                   </li>
                 ))}
               </ul>
-
-              <button
-                className="w-full py-3 rounded-lg transition-all duration-300 bg-[#4F2F1D] text-[#E5D3C8] hover:bg-[#6B4132]"
-                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-              >
-                {plan.buttonText}
-              </button>
             </motion.div>
           ))}
         </div>
