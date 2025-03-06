@@ -183,6 +183,7 @@ export default function ProfileSettings() {
   // Keep all your existing states
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
+  const [loadingProfession, setLoadingProfession] = useState(false);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
   const [isEditingFamily, setIsEditingFamily] = useState(false);
   const [loadingEducation, setLoadingEducation] = useState(false);
@@ -295,10 +296,10 @@ export default function ProfileSettings() {
 
   
   useEffect(() => {
-    if (user && user._id) {
+    if (user?._id) {
       fetchAstrologyDetails();
     }
-  }, [user?._id]); // ✅ Depend only on `user._id`
+  }, [user]); // ✅ More consistent
   
   
   const fetchAstrologyDetails = async () => {
@@ -345,6 +346,10 @@ export default function ProfileSettings() {
   }, [user]);
   
   const fetchProfessionDetails = async () => {
+    if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
+  
+    setLoadingProfession(true); // ✅ Start loading before API call
+  
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -373,9 +378,13 @@ export default function ProfileSettings() {
         alert("Failed to fetch profession details.");
       }
     }
+  
+    setLoadingProfession(false); // ✅ Stop loading after API call
   };
-
+  
   const handleSaveProfession = async () => {
+    setLoadingProfession(true); // ✅ Start loading before API call
+  
     try {
       const token = localStorage.getItem("token");
   
@@ -396,8 +405,10 @@ export default function ProfileSettings() {
       console.error("Error saving profession details:", error);
       alert("Failed to update profession details. Please try again.");
     }
+  
+    setLoadingProfession(false); // ✅ Stop loading after API call
   };
-
+  
   
   useEffect(() => {
     if (user?._id) {
@@ -406,6 +417,8 @@ export default function ProfileSettings() {
   }, [user]);
   
   const fetchFamilyDetails = async () => {
+    if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
+
     setLoadingFamily(true);
     try {
       const token = localStorage.getItem("token");
@@ -466,6 +479,8 @@ export default function ProfileSettings() {
   }, [user]);
   
   const fetchEducationDetails = async () => {
+    if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
+
     setLoadingEducation(true); // ✅ Start loading before API call
     try {
       const token = localStorage.getItem("token");
@@ -522,9 +537,6 @@ export default function ProfileSettings() {
     }
     setLoadingEducation(false); // ✅ Stop loading after saving
   };
-
-
-
 
 
 
@@ -1631,87 +1643,94 @@ export default function ProfileSettings() {
     </button>
   )}
 </div>
-
-
-            {/* Professional Details Section */}
+{/* Professional Details Section */}
 <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
   <h3 className="text-lg md:text-xl text-[#111111] mb-4">Professional Details</h3>
-  
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <InfoRow
-      label="Occupation"
-      value={professionData.occupation}
-      isEditing={isEditingProfession}
-      name="occupation"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="Designation"
-      value={professionData.designation}
-      isEditing={isEditingProfession}
-      name="designation"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="Working With"
-      value={professionData.working_with}
-      isEditing={isEditingProfession}
-      name="working_with"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="Annual Income"
-      value={professionData.income}
-      isEditing={isEditingProfession}
-      name="income"
-      onChange={handleProfessionChange}
-      type="select"
-      options={[
-        { value: "0-3", label: "Up to 3 Lakhs" },
-        { value: "3-5", label: "3-5 Lakhs" },
-        { value: "5-7", label: "5-7 Lakhs" },
-        { value: "7-10", label: "7-10 Lakhs" },
-        { value: "10-15", label: "10-15 Lakhs" },
-        { value: "15-20", label: "15-20 Lakhs" },
-        { value: "20-25", label: "20-25 Lakhs" },
-        { value: "25-35", label: "25-35 Lakhs" },
-        { value: "35-50", label: "35-50 Lakhs" },
-        { value: "50-75", label: "50-75 Lakhs" },
-        { value: "75-100", label: "75 Lakhs - 1 Crore" },
-        { value: "100+", label: "1 Crore+" }
-      ]}
-    />
-    
-    <div className="col-span-2">
-      <h4 className="text-md font-semibold mb-2 mt-4">Work Address</h4>
-    </div>
-    <InfoRow
-      label="Address"
-      value={professionData.work_address?.address || ""}
-      isEditing={isEditingProfession}
-      name="work_address.address"
-      onChange={handleProfessionChange}
-    />
-    <InfoRow
-      label="City"
-      value={professionData.work_address?.city || ""}
-      isEditing={isEditingProfession}
-      name="work_address.city"
-      onChange={handleProfessionChange}
-    />
-  </div>
 
+  {/* Show Loading State */}
+  {loadingProfession ? (
+    <p className="text-gray-600">Loading...</p>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <InfoRow
+        label="Occupation"
+        value={professionData.occupation}
+        isEditing={isEditingProfession}
+        name="occupation"
+        onChange={handleProfessionChange}
+      />
+      <InfoRow
+        label="Designation"
+        value={professionData.designation}
+        isEditing={isEditingProfession}
+        name="designation"
+        onChange={handleProfessionChange}
+      />
+      <InfoRow
+        label="Working With"
+        value={professionData.working_with}
+        isEditing={isEditingProfession}
+        name="working_with"
+        onChange={handleProfessionChange}
+      />
+      <InfoRow
+        label="Annual Income"
+        value={professionData.income}
+        isEditing={isEditingProfession}
+        name="income"
+        onChange={handleProfessionChange}
+        type="select"
+        options={[
+          { value: "0-3", label: "Up to 3 Lakhs" },
+          { value: "3-5", label: "3-5 Lakhs" },
+          { value: "5-7", label: "5-7 Lakhs" },
+          { value: "7-10", label: "7-10 Lakhs" },
+          { value: "10-15", label: "10-15 Lakhs" },
+          { value: "15-20", label: "15-20 Lakhs" },
+          { value: "20-25", label: "20-25 Lakhs" },
+          { value: "25-35", label: "25-35 Lakhs" },
+          { value: "35-50", label: "35-50 Lakhs" },
+          { value: "50-75", label: "50-75 Lakhs" },
+          { value: "75-100", label: "75 Lakhs - 1 Crore" },
+          { value: "100+", label: "1 Crore+" }
+        ]}
+      />
+
+      {/* Work Address Section */}
+      <div className="col-span-2">
+        <h4 className="text-md font-semibold mb-2 mt-4">Work Address</h4>
+      </div>
+      <InfoRow
+        label="Address"
+        value={professionData.work_address?.address || ""}
+        isEditing={isEditingProfession}
+        name="work_address.address"
+        onChange={handleProfessionChange}
+      />
+      <InfoRow
+        label="City"
+        value={professionData.work_address?.city || ""}
+        isEditing={isEditingProfession}
+        name="work_address.city"
+        onChange={handleProfessionChange}
+      />
+    </div>
+  )}
+
+  {/* Buttons Section */}
   {isEditingProfession ? (
     <div className="mt-4 flex space-x-4">
       <button
         className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
         onClick={handleSaveProfession}
+        disabled={loadingProfession} // Disable while saving
       >
-        Save
+        {loadingProfession ? "Saving..." : "Save"}
       </button>
       <button
         className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
         onClick={handleCancelProfession}
+        disabled={loadingProfession}
       >
         Cancel
       </button>
@@ -1725,6 +1744,7 @@ export default function ProfileSettings() {
     </button>
   )}
 </div>
+
 
             {/* Astrology Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
