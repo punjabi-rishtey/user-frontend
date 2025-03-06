@@ -993,67 +993,15 @@ export default function ProfileSettings() {
           <div className="space-y-6">
             {/* Combined Basic Info, Personal Details, and Hobbies Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <div className="flex justify-between items-center mb-4">
-                <h3
-                  className="text-lg md:text-xl text-[#111111]"
-                  style={{
-                    fontFamily: "'Tiempos Headline', serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  Profile Information
-                </h3>
-                {isEditing || isEditingPersonal || isEditingHobbies ? (
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => {
-                        handleSave();
-                        handleSavePersonal();
-                        handleSaveHobbies();
-                      }}
-                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                      }}
-                    >
-                      Save Changes
-                    </button>
-                    <button
-                      onClick={() => {
-                        handleCancel();
-                        handleCancelPersonal();
-                        handleCancelHobbies();
-                        setIsEditing(false);
-                        setIsEditingPersonal(false);
-                        setIsEditingHobbies(false);
-                      }}
-                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setIsEditing(true);
-                      setIsEditingPersonal(true);
-                      setIsEditingHobbies(true);
-                    }}
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    Edit
-                  </button>
-                )}
-              </div>
+              <h3
+                className="text-lg md:text-xl text-[#111111] mb-4"
+                style={{
+                  fontFamily: "'Tiempos Headline', serif",
+                  fontWeight: 400,
+                }}
+              >
+                Profile Information
+              </h3>
 
               {/* Basic Info Section */}
               <h4 className="text-md font-semibold mb-4">Basic Information</h4>
@@ -1462,6 +1410,58 @@ export default function ProfileSettings() {
                   ))}
                 </div>
               </div>
+
+              {/* Action buttons at the bottom */}
+              {isEditing || isEditingPersonal || isEditingHobbies ? (
+                <div className="mt-6 flex space-x-4">
+                  <button
+                    onClick={() => {
+                      handleSave();
+                      handleSavePersonal();
+                      handleSaveHobbies();
+                    }}
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleCancel();
+                      handleCancelPersonal();
+                      handleCancelHobbies();
+                      setIsEditing(false);
+                      setIsEditingPersonal(false);
+                      setIsEditingHobbies(false);
+                    }}
+                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsEditing(true);
+                    setIsEditingPersonal(true);
+                    setIsEditingHobbies(true);
+                  }}
+                  className="mt-6 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
+                >
+                  Edit
+                </button>
+              )}
             </div>
 
             {/* Family Details Section */}
