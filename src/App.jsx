@@ -42,9 +42,7 @@ function App() {
           <Route path="/profile/:id" element={<ProfileDetail />} />
           <Route path="/profilepage" element={<Profilepage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/reset-password/:token"
-            element={<ResetPasswordPage />}
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />}
           />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/about" element={<AboutPage />} />

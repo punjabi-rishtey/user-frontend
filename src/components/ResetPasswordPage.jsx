@@ -31,6 +31,7 @@ const ResetPasswordPage = () => {
         }
       );
       const data = await response.json();
+      console.log("Extracted token from URL:", token);
 
       if (response.ok) {
         setMessage("Password reset successfully! Redirecting...");
