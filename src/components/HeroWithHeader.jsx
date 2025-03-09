@@ -10,7 +10,7 @@ const HeroWithHeader = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth(); // ✅ Get user details
 
   const handleFindPartnerClick = () => {
     if (isAuthenticated) {
@@ -56,7 +56,9 @@ const HeroWithHeader = () => {
         loop
         muted
         playsInline
-        className={`absolute w-full h-full object-cover transition-opacity duration-500 ${isVideoLoaded ? "opacity-100" : "opacity-0"}`}
+        className={`absolute w-full h-full object-cover transition-opacity duration-500 ${
+          isVideoLoaded ? "opacity-100" : "opacity-0"
+        }`}
         onCanPlayThrough={() => setIsVideoLoaded(true)}
       >
         <source src={videoSrc} type="video/mp4" />
@@ -70,34 +72,67 @@ const HeroWithHeader = () => {
           </div>
           <nav className="hidden md:flex space-x-6">
             {navItems.map((item, index) => (
-              <button key={index} onClick={() => handleNavClick(item)} className="text-white hover:text-gray-400 transition duration-300 hover:underline">
+              <button
+                key={index}
+                onClick={() => handleNavClick(item)}
+                className="text-white hover:text-gray-400 transition duration-300 hover:underline"
+              >
                 {item.label}
               </button>
             ))}
           </nav>
+          
           <div className="flex items-center space-x-4">
             {isAuthenticated && (
-              <img src={profileIcon} alt="Profile" className="h-10 w-10 rounded-full cursor-pointer" onClick={handleProfileClick} />
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white cursor-pointer">
+                <img
+                  src={user?.profile_pictures?.[0] || profileIcon}
+                  alt="Profile"
+                  className="w-full h-full object-cover object-top"
+                  onClick={handleProfileClick}
+                />
+              </div>
             )}
             {!isAuthenticated && (
               <div className="hidden md:flex space-x-4">
-                <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => navigate("/login")}>Login</button>
-                <button className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300" onClick={() => navigate("/signup")}>Sign Up</button>
+                <button
+                  className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </button>
+                <button
+                  className="bg-transparent border-2 border-white text-white px-4 py-2 rounded hover:bg-white hover:text-black transition duration-300"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign Up
+                </button>
               </div>
             )}
             <button className="md:hidden text-white p-2" onClick={() => setIsSidebarOpen(true)}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"></path></svg>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
             </button>
           </div>
         </div>
       </div>
+      
       {isSidebarOpen && (
         <>
-          <div className="fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm overflow-hidden" onClick={() => setIsSidebarOpen(false)}></div>
-          <div className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] p-4 shadow-lg z-50 md:hidden overflow-y-auto" style={{ transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s ease-in-out' }}>
+          <div className="fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm" onClick={() => setIsSidebarOpen(false)}></div>
+          <div
+            className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] p-4 shadow-lg z-50 md:hidden"
+            style={{
+              transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
+              transition: "transform 0.3s ease-in-out",
+            }}
+          >
             <div className="flex justify-end">
               <button className="text-[#E5D3C8] p-2" onClick={() => setIsSidebarOpen(false)}>
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"></path></svg>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
               </button>
             </div>
             <div className="flex flex-col space-y-4 mt-8">
@@ -110,64 +145,21 @@ const HeroWithHeader = () => {
                   {item.label}
                 </button>
               ))}
-              {!isAuthenticated && (
-                <>
-                  <button
-                    className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300 mt-4"
-                    onClick={() => {
-                      navigate("/login");
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    Login
-                  </button>
-                  <button
-                    className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
-                    onClick={() => {
-                      navigate("/signup");
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    Sign Up
-                  </button>
-                </>
-              )}
             </div>
           </div>
         </>
       )}
+
       <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 text-center text-white px-4 z-10 w-full">
-        <div className="max-w-7xl mx-auto">
-          <h1
-            className="text-3xl sm:text-5xl font-bold mb-4"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            Together Forever
-          </h1>
-          <p
-            className="text-lg sm:text-2xl mb-8 max-w-3xl mx-auto"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            Join us in celebrating the journey of love and partnership, as we
-            forge connections that stand the test of time and create memories that
-            last a lifetime.
-          </p>
-          <button
-            className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-md transition duration-300 shadow-lg"
-            onClick={handleFindPartnerClick}
-          >
-            Find Your Partner!
-          </button>
-        </div>
-      </div>
-      {/* Floating Info Icon */}
-      <div className="absolute top-40 right-4 z-50 cursor-pointer bounce" onClick={() => setShowInfo(!showInfo)}>
-        <i className="fas fa-info-circle text-3xl text-white"></i>
-        {showInfo && (
-          <div className="absolute right-0 mt-2 w-100 p-2 bg-white text-black rounded shadow-lg z-50">
-            <p>Get a 20% discount on bookings this month!</p>
-          </div>
-        )}
+        <h1 className="text-3xl sm:text-5xl font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          Together Forever
+        </h1>
+        <p className="text-lg sm:text-2xl mb-8 max-w-3xl mx-auto" style={{ fontFamily: "'Playfair Display', serif" }}>
+          Join us in celebrating the journey of love and partnership, as we forge connections that stand the test of time and create memories that last a lifetime.
+        </p>
+        <button className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-md transition duration-300 shadow-lg" onClick={handleFindPartnerClick}>
+          Find Your Partner!
+        </button>
       </div>
     </div>
   );

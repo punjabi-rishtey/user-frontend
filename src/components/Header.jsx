@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth(); // ✅ Get user details
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleProfileClick = () => {
@@ -70,12 +70,14 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           {/* Profile Icon - Show on both mobile and desktop when authenticated */}
           {isAuthenticated && (
-            <img
-              src={profileIcon}
-              alt="Profile"
-              className="h-10 w-10 rounded-full cursor-pointer border-2 border-[#E5D3C8]"
-              onClick={handleProfileClick}
-            />
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E5D3C8] cursor-pointer">
+              <img
+                src={user?.profile_pictures?.[0] || profileIcon} 
+                alt="Profile"
+                className="w-full h-full object-cover object-top"
+                onClick={handleProfileClick}
+              />
+            </div>
           )}
 
           {/* Auth Buttons - Only show on desktop when not authenticated */}
