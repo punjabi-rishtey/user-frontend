@@ -1077,9 +1077,9 @@ export default function ProfileSettings() {
           <div className="p-5">
             <div className="text-center">
               <img
-                src={user?.profilePicture || "/profile.jpg"}
+                src={user?.profile_pictures?.length > 0 ? user.profile_pictures[0] : "/profile.jpg"}
                 alt="Profile"
-                className="w-24 h-24 rounded-full mx-auto border-2 border-[#B31312] sidebar-profile-image"
+                className="w-32 h-32 rounded-full mx-auto border-2 border-[#B31312] object-cover object-top"
               />
               <h2 className="text-lg mt-3 text-[#111111]">{user?.name}</h2>
               <p className="text-sm text-[#333333]">
