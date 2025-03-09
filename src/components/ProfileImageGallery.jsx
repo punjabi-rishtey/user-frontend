@@ -1,27 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAuth } from "../context/AuthContext"; // ✅ Import AuthContext
+import { useAuth } from "../context/AuthContext"; // ✅ Import Auth Context
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-const API_URL = "https://backend-nm1z.onrender.com/api/users"; // Backend API base URL
+const API_URL = "https://backend-nm1z.onrender.com/api/users"; // ✅ Backend API
 
 const ProfileImageGallery = () => {
-  const { user, isAuthenticated } = useAuth(); // ✅ Get user info from AuthContext
+  const { user, isAuthenticated } = useAuth(); // ✅ Get user details from AuthContext
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const sliderRef = useRef(null);
 
   useEffect(() => {
-    if (user && isAuthenticated) {
+    if (user?._id && isAuthenticated) {
       fetchImages();
     }
   }, [user, isAuthenticated]);
 
   const fetchImages = async () => {
-    if (!user?._id) return; // Wait until user ID is available
-
+    if (!user?._id) return;
+  
     try {
       const response = await fetch(`${API_URL}/${user._id}`, {
         headers: {
@@ -30,12 +30,12 @@ const ProfileImageGallery = () => {
       });
       const data = await response.json();
       if (data.profile_pictures) {
-        setImages(data.profile_pictures);
+        setImages(data.profile_pictures); // ✅ Directly use correct URLs from backend
       }
     } catch (error) {
       console.error("Error fetching profile images:", error);
     }
-  };
+  };  
 
   const handleFileInputChange = async (e) => {
     const file = e.target.files[0];
@@ -56,7 +56,7 @@ const ProfileImageGallery = () => {
 
       const data = await response.json();
       if (data.profile_pictures) {
-        setImages(data.profile_pictures);
+        setImages(data.profile_pictures.map(img => img.startsWith("http") ? img : `https://${img}`));
       }
     } catch (error) {
       console.error("Error uploading image:", error);
@@ -72,7 +72,7 @@ const ProfileImageGallery = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/${user._id}/delete-profile-picture`, {
+      const response = await fetch(`${API_URL}/${user._id}/delete-picture`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -82,7 +82,7 @@ const ProfileImageGallery = () => {
       });
 
       if (response.ok) {
-        setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+        setImages(prevImages => prevImages.filter((_, i) => i !== index));
       }
     } catch (error) {
       console.error("Error deleting image:", error);
@@ -128,7 +128,11 @@ const ProfileImageGallery = () => {
             {images.map((image, index) => (
               <div key={index} className="px-2">
                 <div className="relative group h-[280px] mx-auto w-[220px] overflow-hidden rounded-md border border-gray-200">
-                  <img src={image} alt={`Profile image ${index + 1}`} className="w-full h-full object-cover" />
+                <img 
+                  src={image} 
+                  alt={`Profile image ${index + 1}`} 
+                  className="w-full h-full object-cover" 
+                />
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="flex space-x-3">
                       <button
