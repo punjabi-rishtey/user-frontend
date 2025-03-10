@@ -18,6 +18,7 @@ import Testimonials from "./components/Testimonials";
 import MembershipPage from "./components/membershipPage";
 import CustomerReviews from "./components/CustomerReviews";
 import ResetPasswordPage from "./components/ResetPasswordPage";
+import BlockingPage from "./components/BlockingPage";
 function App() {
   return (
     <AuthProvider>
@@ -48,6 +49,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/testimonials" element={<Testimonials />} />
+          <Route path="/membership-expired" element={<BlockingPage />} />
         </Routes>
       </div>
     </AuthProvider>
