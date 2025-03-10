@@ -176,6 +176,7 @@ export default function ProfileSettings() {
   // Keep all your existing states
   const [userImages, setUserImages] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [loadingProfession, setLoadingProfession] = useState(false);
   const [isEditingProfession, setIsEditingProfession] = useState(false);
@@ -317,51 +318,57 @@ export default function ProfileSettings() {
   const token = localStorage.getItem("token"); // Retrieve token
   console.log(localStorage.getItem("token"));
 
-  const [formData, setFormData] = useState({
-    fullName: user?.name || "",
-    mobile: user?.mobile || "",
-    email: user?.email || "",
-    password: "",
-    gender: user?.gender || "",
-    dob: user?.dob || "",
-    religion: user?.religion || "",
-    marital_status: user?.marital_status || "",
-    age: user?.age || 0,
-  });
+  // const [formData, setFormData] = useState({
+  //   fullName: user?.name || "",
+  //   mobile: user?.mobile || "",
+  //   email: user?.email || "",
+  //   password: "",
+  //   gender: user?.gender || "",
+  //   dob: user?.dob || "",
+  //   religion: user?.religion || "",
+  //   marital_status: user?.marital_status || "",
+  //   age: user?.age || 0,
+  // });
 
-  const [personalData, setPersonalData] = useState({
-    height: {
-      feet: user?.height?.feet || "5",
-      inches: user?.height?.inches || "0",
-    },
-    caste: user?.caste || "",
-    language: user?.language || "",
-    mangalik: user?.mangalik || false,
-    birth_details: {
-      birth_time: user?.birth_details?.birth_time || "",
-      birth_place: user?.birth_details?.birth_place || "",
-    },
-    physical_attributes: {
-      skin_tone: user?.physical_attributes?.skin_tone || "wheatish",
-      body_type: user?.physical_attributes?.body_type || "",
-      physical_disability:
-        user?.physical_attributes?.physical_disability || "false",
-      disability_reason: user?.physical_attributes?.disability_reason || "",
-    },
-    lifestyle: {
-      smoke: user?.lifestyle?.smoke || "no",
-      drink: user?.lifestyle?.drink || "no",
-      veg_nonveg: user?.lifestyle?.veg_nonveg || "veg",
-      nri_status: user?.lifestyle?.nri_status || "false",
-    },
-    home_address: {
-      address: user?.home_address?.address || "",
-      city: user?.home_address?.city || "",
-    },
-  });
+  // const [personalData, setPersonalData] = useState({
+  //   height: {
+  //     feet: user?.height?.feet || "5",
+  //     inches: user?.height?.inches || "0",
+  //   },
+  //   caste: user?.caste || "",
+  //   language: user?.language || "",
+  //   mangalik: user?.mangalik || false,
+  //   birth_details: {
+  //     birth_time: user?.birth_details?.birth_time || "",
+  //     birth_place: user?.birth_details?.birth_place || "",
+  //   },
+  //   physical_attributes: {
+  //     skin_tone: user?.physical_attributes?.skin_tone || "wheatish",
+  //     body_type: user?.physical_attributes?.body_type || "",
+  //     physical_disability:
+  //       user?.physical_attributes?.physical_disability || "false",
+  //     disability_reason: user?.physical_attributes?.disability_reason || "",
+  //   },
+  //   lifestyle: {
+  //     smoke: user?.lifestyle?.smoke || "no",
+  //     drink: user?.lifestyle?.drink || "no",
+  //     veg_nonveg: user?.lifestyle?.veg_nonveg || "veg",
+  //     nri_status: user?.lifestyle?.nri_status || "false",
+  //   },
+  //   home_address: {
+  //     address: user?.home_address?.address || "",
+  //     city: user?.home_address?.city || "",
+  //   },
+  // });
+
+  // const [hobbiesData, setHobbiesData] = useState({
+  //   hobbies: user?.hobbies || [],
+  //   newHobby: "",
+  // });
+
 
   const [hobbiesData, setHobbiesData] = useState({
-    hobbies: user?.hobbies || [],
+    hobbies: user?.hobbies || [], // ✅ Always set an array
     newHobby: "",
   });
 
@@ -411,6 +418,212 @@ export default function ProfileSettings() {
     rashi_nakshatra: "",
     gotra: "",
   });
+
+
+//Basic detail integrate:
+
+
+const [basicData, setBasicData] = useState({
+  fullName: "",
+  mobile: "",
+  email: "",
+  gender: "",
+  dob: "",
+  religion: "",
+  marital_status: "",
+});
+
+const [personalData, setPersonalData] = useState({
+  height: {
+    feet: "",
+    inches: "",
+  },
+  caste: "",
+  language: "",
+  mangalik: false,
+  birth_details: {
+    birth_time: "",
+    birth_place: "",
+  },
+  physical_attributes: {
+    skin_tone: "",
+    body_type: "",
+    physical_disability: false,
+    disability_reason: "",
+  },
+  lifestyle: {
+    smoke: false,
+    drink: false,
+    veg_nonveg: "",
+    nri_status: false,
+  },
+  home_address: {
+    address: "",
+    city: "",
+  },
+  hobbies: [],
+});
+
+const parseHeight = (heightString) => {
+  if (!heightString) return { feet: "5", inches: "0" }; // Default height if not provided
+  const match = heightString.match(/(\d+)'(\d+)"/);
+  return match ? { feet: match[1], inches: match[2] } : { feet: "5", inches: "0" };
+};
+
+
+useEffect(() => {
+  if (user?._id) {
+    fetchUserDetails();
+  }
+}, [user?._id]); 
+
+
+const fetchUserDetails = async () => {
+  if (!user?._id) return;
+
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Session expired. Please log in again.");
+      return;
+    }
+
+    const response = await axios.get(
+      `https://backend-nm1z.onrender.com/api/users/${user._id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const userData = response.data
+    console.log("Fetched User Data:", response.data); // ✅ Debugging step
+
+    setBasicData({
+      fullName: response.data.name || "",
+      mobile: response.data.mobile || "",
+      email: response.data.email || "",
+      gender: response.data.gender || "",
+      dob: response.data.dob || "",
+      religion: response.data.religion || "",
+      marital_status: response.data.marital_status || "",
+    });
+
+    setPersonalData({
+      height: parseHeight(response.data.height), // ✅ Now using the function
+      caste: response.data.caste || "",
+      language: response.data.language || "",
+      mangalik: response.data.mangalik || false,
+      birth_details: {
+        birth_time: response.data.birth_details?.birth_time || "",
+        birth_place: response.data.birth_details?.birth_place || "",
+      },
+      physical_attributes: {
+        skin_tone: response.data.physical_attributes?.skin_tone || "",
+        body_type: response.data.physical_attributes?.body_type || "",
+        physical_disability: response.data.physical_attributes?.physical_disability || false,
+        disability_reason: response.data.physical_attributes?.disability_reason || "",
+      },
+      lifestyle: {
+        smoke: response.data.lifestyle?.smoke || false,
+        drink: response.data.lifestyle?.drink || false,
+        veg_nonveg: response.data.lifestyle?.veg_nonveg || "",
+        nri_status: response.data.lifestyle?.nri_status || false,
+      },
+      home_address: {
+        address: response.data.location?.address || "",
+        city: response.data.location?.city || "",
+      },
+      hobbies: response.data.hobbies || [],
+    });
+
+    // ✅ Fix: Ensure hobbies are correctly updated
+    setHobbiesData({
+      hobbies: Array.isArray(userData.hobbies) && userData.hobbies.length > 0
+        ? userData.hobbies.filter(hobby => hobby !== "None")  // Remove "None" if it's stored
+        : [],
+      newHobby: "",
+    });
+    
+  } catch (error) {
+    console.error("Error fetching user details:", error);
+    alert("Failed to fetch user details.");
+  }
+  setLoading(false);
+};
+
+
+const handleBasicChange = (e) => {
+  const { name, value } = e.target;
+  setBasicData((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+
+const handlePersonalChange = (e) => {
+  const { name, value } = e.target;
+  setPersonalData((prev) => {
+    if (name.includes(".")) {
+      const [section, field] = name.split(".");
+      return {
+        ...prev,
+        [section]: {
+          ...prev[section],
+          [field]: value,
+        },
+      };
+    }
+    return {
+      ...prev,
+      [name]: value,
+    };
+  });
+};
+
+const handleSave = async () => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `https://backend-nm1z.onrender.com/api/users/${user._id}`,
+      { ...basicData, ...personalData, hobbies:hobbiesData.hobbies },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    fetchUserDetails()
+    setIsEditing(false);
+    setIsEditingPersonal(false);
+    setIsEditingHobbies(false);
+    setIsEditingFamily(false);
+    setIsEditingEducation(false);
+    setIsEditingProfession(false);
+    setIsEditingAstrology(false);
+    alert("Profile updated successfully!");
+  } catch (error) {
+    console.error("Error saving profile:", error);
+    alert("Failed to update profile.");
+  }
+  setLoading(false);
+};
+
+const handleCancel = () => {
+  fetchUserDetails();
+  setIsEditing(false);
+};
+
+
+
+
+
 
   useEffect(() => {
     if (user?._id) {
@@ -680,132 +893,134 @@ export default function ProfileSettings() {
     });
   };
 
-  const handleSave = async () => {
-    try {
-      const updatedUser = {
-        ...user,
-        name: formData.fullName,
-        mobile: formData.mobile,
-        email: formData.email,
-        gender: formData.gender,
-        dob: formData.dob,
-        religion: formData.religion,
-        marital_status: formData.marital_status,
-      };
+  // const handleSave = async () => {
+  //   try {
+  //     const updatedUser = {
+  //       ...user,
+  //       name: formData.fullName,
+  //       mobile: formData.mobile,
+  //       email: formData.email,
+  //       gender: formData.gender,
+  //       dob: formData.dob,
+  //       religion: formData.religion,
+  //       marital_status: formData.marital_status,
+  //     };
 
-      const success = await updateUser(updatedUser); // ✅ Ensure this returns a value
+  //     const success = await updateUser(updatedUser); // ✅ Ensure this returns a value
 
-      if (success !== false) {
-        // ✅ Check if update was successful
-        setIsEditing(false);
-        alert("Profile updated successfully!");
-      } else {
-        alert("Failed to update profile. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error saving profile:", error);
-      alert("An unexpected error occurred while saving your profile.");
-    }
-  };
+  //     if (success !== false) {
+  //       // ✅ Check if update was successful
+  //       setIsEditing(false);
+  //       alert("Profile updated successfully!");
+  //     } else {
+  //       alert("Failed to update profile. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving profile:", error);
+  //     alert("An unexpected error occurred while saving your profile.");
+  //   }
+  // };
 
-  const handleCancel = () => {
-    setFormData({
-      fullName: user.name,
-      mobile: user.mobile,
-      email: user.email,
-      password: "",
-      gender: user.gender,
-      dob: user.dob,
-      religion: user.religion,
-      marital_status: user.marital_status,
-    });
-    setIsEditing(false);
-  };
+
+
+  // const handleCancel = () => {
+  //   setFormData({
+  //     fullName: user.name,
+  //     mobile: user.mobile,
+  //     email: user.email,
+  //     password: "",
+  //     gender: user.gender,
+  //     dob: user.dob,
+  //     religion: user.religion,
+  //     marital_status: user.marital_status,
+  //   });
+  //   setIsEditing(false);
+  // };
 
   const handleLogout = () => {
     logout();
     navigate("/"); // Navigate to home page after logout
   };
 
-  const handlePersonalChange = (e) => {
-    const { name, value } = e.target;
-    setPersonalData((prev) => {
-      if (name.includes(".")) {
-        const [section, field] = name.split(".");
-        return {
-          ...prev,
-          [section]: {
-            ...prev[section],
-            [field]: value,
-          },
-        };
-      }
-      return {
-        ...prev,
-        [name]: value,
-      };
-    });
-  };
+  // const handlePersonalChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setPersonalData((prev) => {
+  //     if (name.includes(".")) {
+  //       const [section, field] = name.split(".");
+  //       return {
+  //         ...prev,
+  //         [section]: {
+  //           ...prev[section],
+  //           [field]: value,
+  //         },
+  //       };
+  //     }
+  //     return {
+  //       ...prev,
+  //       [name]: value,
+  //     };
+  //   });
+  // };
 
-  const handleSavePersonal = () => {
-    try {
-      const updatedUser = {
-        ...user,
-        ...personalData,
-        languages: languageData.languages,
-      };
+  // const handleSavePersonal = () => {
+  //   try {
+  //     const updatedUser = {
+  //       ...user,
+  //       ...personalData,
+  //       languages: languageData.languages,
+  //     };
 
-      const success = updateUser(updatedUser);
+  //     const success = updateUser(updatedUser);
 
-      if (success) {
-        setIsEditingPersonal(false);
-        alert("Personal details updated successfully!");
-      } else {
-        alert("Failed to update personal details. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error saving personal details:", error);
-      alert("An error occurred while saving your personal details.");
-    }
-  };
+  //     if (success) {
+  //       setIsEditingPersonal(false);
+  //       alert("Personal details updated successfully!");
+  //     } else {
+  //       alert("Failed to update personal details. Please try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error saving personal details:", error);
+  //     alert("An error occurred while saving your personal details.");
+  //   }
+  // };
 
-  const handleCancelPersonal = () => {
-    setPersonalData({
-      height: {
-        feet: user.height?.feet || "5",
-        inches: user.height?.inches || "0",
-      },
-      caste: user.caste || "",
-      language: user.language || "",
-      mangalik: user.mangalik || false,
-      birth_details: {
-        birth_time: user.birth_details?.birth_time || "",
-        birth_place: user.birth_details?.birth_place || "",
-      },
-      physical_attributes: {
-        skin_tone: user.physical_attributes?.skin_tone || "wheatish",
-        body_type: user.physical_attributes?.body_type || "",
-        physical_disability:
-          user.physical_attributes?.physical_disability || "false",
-        disability_reason: user.physical_attributes?.disability_reason || "",
-      },
-      lifestyle: {
-        smoke: user.lifestyle?.smoke || "no",
-        drink: user.lifestyle?.drink || "no",
-        veg_nonveg: user.lifestyle?.veg_nonveg || "veg",
-        nri_status: user.lifestyle?.nri_status || "false",
-      },
-      home_address: {
-        address: user.home_address?.address || "",
-        city: user.home_address?.city || "",
-      },
-    });
-    setLanguageData({
-      languages: user?.languages || [],
-      selectedLanguage: "",
-    });
-    setIsEditingPersonal(false);
-  };
+  // const handleCancelPersonal = () => {
+  //   setPersonalData({
+  //     height: {
+  //       feet: user.height?.feet || "5",
+  //       inches: user.height?.inches || "0",
+  //     },
+  //     caste: user.caste || "",
+  //     language: user.language || "",
+  //     mangalik: user.mangalik || false,
+  //     birth_details: {
+  //       birth_time: user.birth_details?.birth_time || "",
+  //       birth_place: user.birth_details?.birth_place || "",
+  //     },
+  //     physical_attributes: {
+  //       skin_tone: user.physical_attributes?.skin_tone || "wheatish",
+  //       body_type: user.physical_attributes?.body_type || "",
+  //       physical_disability:
+  //         user.physical_attributes?.physical_disability || "false",
+  //       disability_reason: user.physical_attributes?.disability_reason || "",
+  //     },
+  //     lifestyle: {
+  //       smoke: user.lifestyle?.smoke || "no",
+  //       drink: user.lifestyle?.drink || "no",
+  //       veg_nonveg: user.lifestyle?.veg_nonveg || "veg",
+  //       nri_status: user.lifestyle?.nri_status || "false",
+  //     },
+  //     home_address: {
+  //       address: user.home_address?.address || "",
+  //       city: user.home_address?.city || "",
+  //     },
+  //   });
+  //   setLanguageData({
+  //     languages: user?.languages || [],
+  //     selectedLanguage: "",
+  //   });
+  //   setIsEditingPersonal(false);
+  // };
 
   const handleProfessionChange = (e) => {
     const { name, value } = e.target;
@@ -986,16 +1201,22 @@ export default function ProfileSettings() {
     setIsEditingAstrology(false);
   };
 
-  const handleSaveHobbies = () => {
+  const handleSaveHobbies = async () => {
     const updatedUser = {
       ...user,
       hobbies: hobbiesData.hobbies,
     };
-    const success = updateUser(updatedUser);
-    if (success) {
-      setIsEditingHobbies(false);
+  
+    try {
+      const success = await updateUser(updatedUser); // Ensure it's awaited
+      if (success) {
+        setIsEditingHobbies(false);
+      }
+    } catch (error) {
+      console.error("Error updating hobbies:", error);
     }
   };
+  
 
   const handleCancelHobbies = () => {
     setHobbiesData({
@@ -1004,6 +1225,7 @@ export default function ProfileSettings() {
     });
     setIsEditingHobbies(false);
   };
+
 
   const calculateProfileCompletion = () => {
     let filledFields = 0;
@@ -1022,7 +1244,7 @@ export default function ProfileSettings() {
       });
     };
 
-    checkFields(formData);
+    checkFields(basicData);
     checkFields(personalData);
     checkFields(hobbiesData);
     checkFields(professionData);
@@ -1043,7 +1265,7 @@ export default function ProfileSettings() {
   useEffect(() => {
     calculateProfileCompletion();
   }, [
-    formData,
+    basicData,
     personalData,
     hobbiesData,
     professionData,
@@ -1052,6 +1274,8 @@ export default function ProfileSettings() {
     astrologyData,
     userImages,
   ]);
+
+  
   return (
     <div className="flex flex-col min-h-screen bg-[#FCF9F2]">
       <Header />
@@ -1171,7 +1395,7 @@ export default function ProfileSettings() {
           <ProfileImageGallery
             images={userImages}
             onAddImage={handleAddImage}
-            onRemoveImage={handleRemoveImage}
+            onRemoveImage={handleRemoveImage} 
             onEditImage={handleEditImage}
           />
 
@@ -1207,476 +1431,99 @@ export default function ProfileSettings() {
           <div className="space-y-6">
             {/* Combined Basic Info, Personal Details, and Hobbies Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-              <h3
-                className="text-lg md:text-xl text-[#111111] mb-4"
-                style={{
-                  fontFamily: "'Tiempos Headline', serif",
-                  fontWeight: 400,
-                }}
-              >
-                Profile Information
-              </h3>
+            <h3 className="text-lg md:text-xl text-[#111111] mb-4">
+      Profile Information
+    </h3>              
 
-              {/* Basic Info Section */}
-              <h4 className="text-md font-semibold mb-4">Basic Information</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <InfoRow
-                  label="Full name"
-                  value={formData.fullName}
-                  isEditing={isEditing}
-                  name="fullName"
-                  onChange={handleChange}
-                />
-                <InfoRow
-                  label="Mobile"
-                  value={formData.mobile}
-                  isEditing={isEditing}
-                  name="mobile"
-                  onChange={handleChange}
-                />
-                <InfoRow
-                  label="Email id"
-                  value={formData.email}
-                  isEditing={isEditing}
-                  name="email"
-                  onChange={handleChange}
-                />
-                <InfoRow
-                  label="Password"
-                  value={formData.password}
-                  isEditing={isEditing}
-                  name="password"
-                  onChange={handleChange}
-                  type="password"
-                  isPassword
-                />
-                <InfoRow
-                  label="Gender"
-                  value={formData.gender}
-                  isEditing={isEditing}
-                  name="gender"
-                  onChange={handleChange}
-                  type="select"
-                  options={[
-                    { value: "male", label: "Male" },
-                    { value: "female", label: "Female" },
-                  ]}
-                />
-                <InfoRow
-                  label="Date of Birth"
-                  value={formData.dob}
-                  isEditing={isEditing}
-                  name="dob"
-                  onChange={handleChange}
-                  type="date"
-                />
-                <InfoRow
-                  label="Religion"
-                  value={formData.religion}
-                  isEditing={isEditing}
-                  name="religion"
-                  onChange={handleChange}
-                  type="select"
-                  options={[
-                    { value: "hindu", label: "Hindu" },
-                    { value: "sikh", label: "Sikh" },
-                    { value: "jain", label: "Jain" },
-                    { value: "buddhist", label: "Buddhist" },
-                  ]}
-                />
-                <InfoRow
-                  label="Marital Status"
-                  value={formData.marital_status}
-                  isEditing={isEditing}
-                  name="marital_status"
-                  onChange={handleChange}
-                  type="select"
-                  options={[
-                    { value: "never_married", label: "Never Married" },
-                    { value: "divorced", label: "Divorced" },
-                    { value: "widow_widower", label: "Widow/Widower" },
-                    { value: "awaiting_divorce", label: "Awaiting Divorce" },
-                    { value: "annulled", label: "Annulled" },
-                  ]}
-                />
-              </div>
+{/* Basic Info Section */}
+<h4 className="text-md font-semibold mb-4">Basic Information</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <InfoRow label="Full Name" value={basicData.fullName} isEditing={isEditing} name="fullName" onChange={handleBasicChange} />
+      <InfoRow label="Mobile" value={basicData.mobile} isEditing={isEditing} name="mobile" onChange={handleBasicChange} />
+      <InfoRow label="Email" value={basicData.email} isEditing={isEditing} name="email" onChange={handleBasicChange} />
+      <InfoRow label="Date of Birth" value={basicData.dob} isEditing={isEditing} name="dob" onChange={handleBasicChange} type="date" />
+      <InfoRow label="Gender" value={basicData.gender} isEditing={isEditing} name="gender" onChange={handleBasicChange} type="select" options={[{ value: "male", label: "Male" }, { value: "female", label: "Female" }]} />
+      <InfoRow label="Religion" value={basicData.religion} isEditing={isEditing} name="religion" onChange={handleBasicChange} type="select" options={[{ value: "hindu", label: "Hindu" }, { value: "sikh", label: "Sikh" }, { value: "jain", label: "Jain" }, { value: "buddhist", label: "Buddhist" }]} />
+      <InfoRow label="Marital Status" value={basicData.marital_status} isEditing={isEditing} name="marital_status" onChange={handleBasicChange} type="select" options={[{ value: "never_married", label: "Never Married" }, { value: "divorced", label: "Divorced" }, { value: "widow_widower", label: "Widow/Widower" }, { value: "awaiting_divorce", label: "Awaiting Divorce" }]} />
+    </div>
 
               {/* Personal Details Section */}
-              <h4 className="text-md font-semibold mb-4 border-t pt-6">
-                Personal Details
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <InfoRow
-                  label="Height"
-                  value={personalData.height}
-                  isEditing={isEditingPersonal}
-                  name="height"
-                  onChange={handlePersonalChange}
-                />
-                <InfoRow
-                  label="Caste"
-                  value={personalData.caste}
-                  isEditing={isEditingPersonal}
-                  name="caste"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "khatri", label: "Khatri" },
-                    { value: "arora", label: "Arora" },
-                    { value: "brahmin", label: "Brahmin" },
-                    { value: "other", label: "Other" },
-                  ]}
-                />
-                <div className="col-span-2">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Languages
-                  </label>
-                  {isEditingPersonal ? (
-                    <div className="flex gap-2 mb-2">
-                      <select
-                        value={languageData.selectedLanguage}
-                        onChange={(e) =>
-                          setLanguageData((prev) => ({
-                            ...prev,
-                            selectedLanguage: e.target.value,
-                          }))
-                        }
-                        className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      >
-                        <option value="">Select a language</option>
-                        <option value="Hindi">Hindi</option>
-                        <option value="English">English</option>
-                        <option value="Punjabi">Punjabi</option>
-                        <option value="Bengali">Bengali</option>
-                        <option value="Gujarati">Gujarati</option>
-                        <option value="Marathi">Marathi</option>
-                        <option value="Tamil">Tamil</option>
-                        <option value="Telugu">Telugu</option>
-                        <option value="Kannada">Kannada</option>
-                        <option value="Malayalam">Malayalam</option>
-                        <option value="Urdu">Urdu</option>
-                        <option value="French">French</option>
-                        <option value="German">German</option>
-                        <option value="Spanish">Spanish</option>
-                      </select>
-                      <button
-                        onClick={() => {
-                          if (
-                            languageData.selectedLanguage &&
-                            !languageData.languages.includes(
-                              languageData.selectedLanguage
-                            )
-                          ) {
-                            setLanguageData((prev) => ({
-                              languages: [
-                                ...prev.languages,
-                                prev.selectedLanguage,
-                              ],
-                              selectedLanguage: "",
-                            }));
-                          }
-                        }}
-                        className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                      >
-                        Add
-                      </button>
-                    </div>
-                  ) : null}
-                  <div className="flex flex-wrap gap-2">
-                    {languageData.languages.map((language, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center bg-gray-100 rounded-full px-4 py-2"
-                      >
-                        <span>{language}</span>
-                        {isEditingPersonal && (
-                          <button
-                            onClick={() => {
-                              setLanguageData((prev) => ({
-                                ...prev,
-                                languages: prev.languages.filter(
-                                  (_, i) => i !== index
-                                ),
-                              }));
-                            }}
-                            className="ml-2 text-gray-500 hover:text-red-500"
-                          >
-                            ×
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <InfoRow
-                  label="Mangalik Status"
-                  value={personalData.mangalik}
-                  isEditing={isEditingPersonal}
-                  name="mangalik"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "manglik", label: "Manglik" },
-                    { value: "partial_manglik", label: "Partial Manglik" },
-                    { value: "non_manglik", label: "Non Manglik" },
-                  ]}
-                />
-                <InfoRow
-                  label="Birth Time"
-                  value={personalData.birth_details.birth_time}
-                  isEditing={isEditingPersonal}
-                  name="birth_details.birth_time"
-                  onChange={handlePersonalChange}
-                  type="time"
-                />
-                <InfoRow
-                  label="Birth Place"
-                  value={personalData.birth_details.birth_place}
-                  isEditing={isEditingPersonal}
-                  name="birth_details.birth_place"
-                  onChange={handlePersonalChange}
-                />
-                <InfoRow
-                  label="Skin Tone"
-                  value={personalData.physical_attributes.skin_tone}
-                  isEditing={isEditingPersonal}
-                  name="physical_attributes.skin_tone"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "very_fair", label: "Very Fair" },
-                    { value: "fair", label: "Fair" },
-                    { value: "wheatish", label: "Wheatish" },
-                    { value: "wheatish_medium", label: "Wheatish Medium" },
-                    { value: "wheatish_brown", label: "Wheatish Brown" },
-                    { value: "medium", label: "Medium" },
-                    { value: "brown", label: "Brown" },
-                    { value: "dark", label: "Dark" },
-                  ]}
-                />
-                <InfoRow
-                  label="Body Type"
-                  value={personalData.physical_attributes.body_type}
-                  isEditing={isEditingPersonal}
-                  name="physical_attributes.body_type"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "slim", label: "Slim" },
-                    { value: "athletic", label: "Athletic" },
-                    { value: "average", label: "Average" },
-                  ]}
-                />
-                <InfoRow
-                  label="Physical Disability"
-                  value={personalData.physical_attributes.physical_disability}
-                  isEditing={isEditingPersonal}
-                  name="physical_attributes.physical_disability"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "true", label: "Yes" },
-                    { value: "false", label: "No" },
-                  ]}
-                />
-                <InfoRow
-                  label="Disability Details"
-                  value={personalData.physical_attributes.disability_reason}
-                  isEditing={isEditingPersonal}
-                  name="physical_attributes.disability_reason"
-                  onChange={handlePersonalChange}
-                />
-                <InfoRow
-                  label="Smoking"
-                  value={personalData.lifestyle.smoke}
-                  isEditing={isEditingPersonal}
-                  name="lifestyle.smoke"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "yes", label: "Yes" },
-                    { value: "no", label: "No" },
-                    { value: "occasionally", label: "Occasionally" },
-                  ]}
-                />
-                <InfoRow
-                  label="Drinking"
-                  value={personalData.lifestyle.drink}
-                  isEditing={isEditingPersonal}
-                  name="lifestyle.drink"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "yes", label: "Yes" },
-                    { value: "no", label: "No" },
-                    { value: "occasionally", label: "Occasionally" },
-                  ]}
-                />
-                <InfoRow
-                  label="Diet Preference"
-                  value={personalData.lifestyle.veg_nonveg}
-                  isEditing={isEditingPersonal}
-                  name="lifestyle.veg_nonveg"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "veg", label: "Vegetarian" },
-                    { value: "nonveg", label: "Non-Vegetarian" },
-                    {
-                      value: "occasionally_nonveg",
-                      label: "Occasionally Non-Vegetarian",
-                    },
-                  ]}
-                />
-                <InfoRow
-                  label="NRI Status"
-                  value={personalData.lifestyle.nri_status}
-                  isEditing={isEditingPersonal}
-                  name="lifestyle.nri_status"
-                  onChange={handlePersonalChange}
-                  type="select"
-                  options={[
-                    { value: "true", label: "Yes" },
-                    { value: "false", label: "No" },
-                  ]}
-                />
+              <h4 className="text-md font-semibold mb-4 border-t pt-6">Personal Details</h4>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <InfoRow label="Height (Feet)" value={personalData.height.feet} isEditing={isEditingPersonal || isEditing} name="height.feet" onChange={handlePersonalChange} />
+      <InfoRow label="Height (Inches)" value={personalData.height.inches} isEditing={isEditing || isEditingPersonal} name="height.inches" onChange={handlePersonalChange} />
+      <InfoRow label="Caste" value={personalData.caste} isEditing={isEditing || isEditingPersonal} name="caste" onChange={handlePersonalChange} type="select" options={[{ value: "khatri", label: "Khatri" }, { value: "arora", label: "Arora" }, { value: "brahmin", label: "Brahmin" }, { value: "other", label: "Other" }]} />
+      <InfoRow label="Mangalik Status" value={personalData.mangalik} isEditing={isEditing || isEditingPersonal} name="mangalik" onChange={handlePersonalChange} type="select" options={[{ value: "manglik", label: "Manglik" }, { value: "partial_manglik", label: "Partial Manglik" }, { value: "non_manglik", label: "Non Manglik" }]} />
+      <InfoRow label="Birth Time" value={personalData.birth_details.birth_time} isEditing={isEditing || isEditingPersonal} name="birth_details.birth_time" onChange={handlePersonalChange} type="time" />
+      <InfoRow label="Birth Place" value={personalData.birth_details.birth_place} isEditing={isEditing || isEditingPersonal} name="birth_details.birth_place" onChange={handlePersonalChange} />
+      <InfoRow label="Skin Tone" value={personalData.physical_attributes.skin_tone} isEditing={isEditing || isEditingPersonal} name="physical_attributes.skin_tone" onChange={handlePersonalChange} type="select" options={[{ value: "fair", label: "Fair" }, { value: "wheatish", label: "Wheatish" }, { value: "dark", label: "Dark" }]} />
+      <InfoRow label="Body Type" value={personalData.physical_attributes.body_type} isEditing={isEditing || isEditingPersonal} name="physical_attributes.body_type" onChange={handlePersonalChange} type="select" options={[{ value: "slim", label: "Slim" }, { value: "athletic", label: "Athletic" }, { value: "average", label: "Average" }]} />
+      <InfoRow label="Physical Disability" value={personalData.physical_attributes.physical_disability} isEditing={isEditing || isEditingPersonal} name="physical_attributes.physical_disability" onChange={handlePersonalChange} type="select" options={[{ value: "true", label: "Yes" }, { value: "false", label: "No" }]} />
+      <InfoRow label="Disability Details" value={personalData.physical_attributes.disability_reason} isEditing={isEditing || isEditingPersonal} name="physical_attributes.disability_reason" onChange={handlePersonalChange} />
+      <InfoRow label="Smoking" value={personalData.lifestyle.smoke} isEditing={isEditing || isEditingPersonal} name="lifestyle.smoke" onChange={handlePersonalChange} type="select" options={[{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "occasionally", label: "Occasionally" }]} />
+      <InfoRow label="Drinking" value={personalData.lifestyle.drink} isEditing={isEditing || isEditingPersonal} name="lifestyle.drink" onChange={handlePersonalChange} type="select" options={[{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "occasionally", label: "Occasionally" }]} />
+      <InfoRow label="Diet Preference" value={personalData.lifestyle.veg_nonveg} isEditing={isEditing || isEditingPersonal} name="lifestyle.veg_nonveg" onChange={handlePersonalChange} type="select" options={[{ value: "veg", label: "Vegetarian" }, { value: "nonveg", label: "Non-Vegetarian" }, { value: "occasionally_nonveg", label: "Occasionally Non-Vegetarian" }]} />
+      <InfoRow label="NRI Status" value={personalData.lifestyle.nri_status} isEditing={isEditing || isEditingPersonal} name="lifestyle.nri_status" onChange={handlePersonalChange} type="select" options={[{ value: "true", label: "Yes" }, { value: "false", label: "No" }]} />
+    </div>
+                {/* Hobbies Section */}
+<h4 className="text-md font-semibold mb-4 border-t pt-6">Hobbies</h4>
+<div className="flex flex-wrap gap-2">
+  {hobbiesData.hobbies.map((hobby, index) => (
+    <div key={index} className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+      <span>{hobby}</span>
+      {isEditing && ( // 🔥 Use isEditing instead of isEditingHobbies
+        <button 
+          onClick={() => setHobbiesData((prev) => ({
+            ...prev, 
+            hobbies: prev.hobbies.filter((_, i) => i !== index) 
+          }))}
+          className="ml-2 text-gray-500 hover:text-red-500"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  ))}
+</div>
 
-                {/* Home Address section */}
-                <div className="col-span-2">
-                  <h4 className="text-md font-semibold mb-2 mt-4">
-                    Home Address
-                  </h4>
-                </div>
-                <InfoRow
-                  label="Address"
-                  value={personalData.home_address?.address}
-                  isEditing={isEditingPersonal}
-                  name="home_address.address"
-                  onChange={handlePersonalChange}
-                />
-                <InfoRow
-                  label="City"
-                  value={personalData.home_address?.city}
-                  isEditing={isEditingPersonal}
-                  name="home_address.city"
-                  onChange={handlePersonalChange}
-                />
-              </div>
+{isEditing && ( // 🔥 Hide input unless editing mode is active
+  <div className="flex items-center gap-2 mt-2">
+    <input
+      type="text"
+      value={hobbiesData.newHobby}
+      onChange={(e) => setHobbiesData({ ...hobbiesData, newHobby: e.target.value })}
+      className="border rounded px-2 py-1"
+      placeholder="Add new hobby"
+    />
+    <button
+      onClick={() => {
+        if (hobbiesData.newHobby.trim() !== "") {
+          setHobbiesData((prev) => ({
+            hobbies: [...prev.hobbies, prev.newHobby],
+            newHobby: "",
+          }));
+        }
+      }}
+      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
+    >
+      Add
+    </button>
+  </div>
+)}
 
-              {/* Hobbies Section */}
-              <h4 className="text-md font-semibold mb-4 border-t pt-6">
-                Hobbies
-              </h4>
-              <div className="mb-4">
-                {isEditingHobbies && (
-                  <div className="flex gap-2 mb-4">
-                    <input
-                      type="text"
-                      value={hobbiesData.newHobby}
-                      onChange={(e) =>
-                        setHobbiesData((prev) => ({
-                          ...prev,
-                          newHobby: e.target.value,
-                        }))
-                      }
-                      className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      placeholder="Enter a hobby"
-                    />
-                    <button
-                      onClick={() => {
-                        if (hobbiesData.newHobby.trim()) {
-                          setHobbiesData((prev) => ({
-                            hobbies: [...prev.hobbies, prev.newHobby.trim()],
-                            newHobby: "",
-                          }));
-                        }
-                      }}
-                      className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
-                    >
-                      Add
-                    </button>
-                  </div>
-                )}
+    {/* Action Buttons */}
+    <div className="mt-6 flex space-x-4">
+      {isEditing || isEditingPersonal || isEditingHobbies ? (
+        <>
+          <button onClick={handleSave} className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg">Save Changes</button>
+          <button onClick={handleCancel} className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg">Cancel</button>
+        </>
+      ) : (
+        <button onClick={() => setIsEditing(true)} className="mt-6 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg">Edit</button>
+      )}
+    </div>
+    </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {hobbiesData.hobbies.map((hobby, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center bg-gray-100 rounded-full px-4 py-2"
-                    >
-                      <span>{hobby}</span>
-                      {isEditingHobbies && (
-                        <button
-                          onClick={() => {
-                            setHobbiesData((prev) => ({
-                              ...prev,
-                              hobbies: prev.hobbies.filter(
-                                (_, i) => i !== index
-                              ),
-                            }));
-                          }}
-                          className="ml-2 text-gray-500 hover:text-red-500"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Action buttons at the bottom */}
-              {isEditing || isEditingPersonal || isEditingHobbies ? (
-                <div className="mt-6 flex space-x-4">
-                  <button
-                    onClick={() => {
-                      handleSave();
-                      handleSavePersonal();
-                      handleSaveHobbies();
-                    }}
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    Save Changes
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleCancel();
-                      handleCancelPersonal();
-                      handleCancelHobbies();
-                      setIsEditing(false);
-                      setIsEditingPersonal(false);
-                      setIsEditingHobbies(false);
-                    }}
-                    className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => {
-                    setIsEditing(true);
-                    setIsEditingPersonal(true);
-                    setIsEditingHobbies(true);
-                  }}
-                  className="mt-6 px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg transition duration-300"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  Edit
-                </button>
-              )}
-            </div>
 
             {/* Family Details Section */}
             <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
