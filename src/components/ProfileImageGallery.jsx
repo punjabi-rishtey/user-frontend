@@ -173,16 +173,6 @@ const ProfileImageGallery = () => {
       ) : (
         <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8">
           <p className="text-gray-600 mb-4">No photos uploaded yet</p>
-          <label className="cursor-pointer px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg flex items-center">
-            <FaPlus className="mr-2" /> Upload First Photo
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileInputChange}
-              disabled={loading}
-            />
-          </label>
         </div>
       )}
     </div>
