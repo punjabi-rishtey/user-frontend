@@ -26,8 +26,13 @@ const FindPartner = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login", { replace: true });
+      return;
     }
-  }, [isAuthenticated, navigate]);
+    if (user && user.status !== "Approved") {
+      navigate("/membership-expired", { replace: true });
+    }
+  }, [isAuthenticated, user, navigate]);
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;

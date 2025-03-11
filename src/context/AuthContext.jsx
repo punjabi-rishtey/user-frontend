@@ -23,12 +23,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://backend-nm1z.onrender.com/api/users/login', credentials, {
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await axios.post(
+        'https://backend-nm1z.onrender.com/api/users/login',
+        credentials,
+        {
+          headers: { 'Content-Type': 'application/json' }
         }
-      });
-      console.log("Response data:", response.data); // Debugging response
+      );
+      console.log("Response data:", response.data);
+      
       if (response.data && response.data.token) {
         localStorage.setItem("currentUser", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
@@ -45,7 +48,6 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
-  
 
   const logout = () => {
     localStorage.removeItem("currentUser");
@@ -75,8 +77,10 @@ export const AuthProvider = ({ children }) => {
       );
 
       if (response.status === 200) {
+        // If your backend returns just the updated user object (not wrapped),
+        // you might need to access response.data.user or similar. Adjust if needed.
         localStorage.setItem("currentUser", JSON.stringify(response.data));
-        setUser(response.data);  // Update user state with new data
+        setUser(response.data); 
         return true;
       } else {
         alert("Failed to update profile. Please try again.");
@@ -89,6 +93,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // NEW: Refresh the user data from the backend so we always have latest status, etc.
+  const refreshUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token || !user) return;
+
+      const response = await axios.get(
+        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Update context + localStorage if we got a user object back
+      if (response.data) {
+        localStorage.setItem("currentUser", JSON.stringify(response.data));
+        setUser(response.data);
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+    }
+  };
+
   const value = {
     user,
     isAuthenticated,
@@ -96,7 +121,8 @@ export const AuthProvider = ({ children }) => {
     error,
     login,
     logout,
-    updateUser
+    updateUser,
+    refreshUser // Expose refreshUser in the context
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
