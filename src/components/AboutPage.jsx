@@ -96,7 +96,7 @@ const AboutPage = () => {
               whileHover={{ scale: 1.02 }}
             >
               <img
-                src="src\assets\4.jpg"
+                src="https://res.cloudinary.com/dkbzoosmm/image/upload/v1741775335/m5fdkw0mjynkn0hzlb3l.jpg"
                 alt="Wedding Couple"
                 className="rounded-xl shadow-lg w-full h-auto"
               />
