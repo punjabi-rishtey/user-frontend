@@ -4,21 +4,23 @@ import { useAuth } from "../context/AuthContext";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import LoginModal from "./LoginModal";
-import dummyData from "./dummyData";
 import Footer from "./Footer";
 import Header from "./Header";
 import ProfileSlider from "./ProfileSlider";
 import { motion } from "framer-motion";
+import axios from "axios"; // Make sure axios is installed
 
 const FindPartner = () => {
   const [filters, setFilters] = useState({
-    gender: "",
     caste: "",
     manglik: "",
     maritalStatus: "",
     religion: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
@@ -26,13 +28,27 @@ const FindPartner = () => {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/login", { replace: true });
-      return;
     }
-    if (user && user.status !== "Approved") {
-      navigate("/membership-expired", { replace: true });
-    }
-  }, [isAuthenticated, user, navigate]);
-  
+  }, [isAuthenticated, navigate]);
+
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get("https://backend-nm1z.onrender.com/api/users/all-basic");
+        setUsers(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+        setError("Failed to load users. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -44,7 +60,6 @@ const FindPartner = () => {
 
   const handleClearFilters = () => {
     setFilters({
-      gender: "",
       caste: "",
       manglik: "",
       maritalStatus: "",
@@ -54,31 +69,118 @@ const FindPartner = () => {
   };
 
   const handleProfileClick = (profile) => {
-    navigate(`/profile/${profile.id}`);
+    navigate(`/profile/${profile.preferences.user}`); // Assuming API returns _id for each user
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const filteredData = dummyData.filter((item) => {
+  // Normalize API response fields to match filter structure
+  const normalizeMaritalStatus = (status) => {
+    if (!status) return "";
+    
+    // Map various API values to our standardized options
+    const statusMap = {
+      'never_married': 'Never Married',
+      'divorced': 'Divorced',
+      'widow_widower': 'Widowed',
+      'separated': 'Separated',
+      'single': 'Never Married',
+      'unmarried': 'Never Married',
+      'maried': 'Never Married', // Assuming this is a typo for "married"
+      'married': 'Never Married'
+    };
+    
+    // Check if it's in our map
+    const lowerCaseStatus = status.toLowerCase();
+    if (statusMap[lowerCaseStatus]) {
+      return statusMap[lowerCaseStatus];
+    }
+    
+    // Convert snake_case to title case as fallback
+    if (status.includes('_')) {
+      return status.split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+    }
+    
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  };
+
+  // Get opposite gender of the logged in user
+  const getOppositeGender = () => {
+    if (!user || !user.gender) return null;
+    
+    const userGender = String(user.gender).toLowerCase();
+    return userGender === 'male' ? 'female' : userGender === 'female' ? 'male' : null;
+  };
+
+  const filteredData = users.filter((item) => {
+    const normalizedMaritalStatus = normalizeMaritalStatus(item.marital_status);
+    const isManglik = item.mangalik === true || item.mangalik === "true";
+    const oppositeGender = getOppositeGender();
+    
+    // Only show profiles of opposite gender
+    if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
+      return false;
+    }
+    
     return (
-      (filters.gender === "" || item.gender === filters.gender) &&
-      (filters.caste === "" || item.caste === filters.caste) &&
-      (filters.manglik === "" || item.manglik === filters.manglik) &&
-      (filters.maritalStatus === "" ||
-        item.maritalStatus === filters.maritalStatus) &&
-      (filters.religion === "" || item.religion === filters.religion) &&
-      (searchTerm === "" ||
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      (filters.caste === "" || 
+       item.caste?.toLowerCase() === filters.caste.toLowerCase()) &&
+      (filters.manglik === "" || 
+       (filters.manglik === "true" && isManglik) || 
+       (filters.manglik === "false" && !isManglik)) &&
+      (filters.maritalStatus === "" || 
+       normalizedMaritalStatus === filters.maritalStatus) &&
+      (filters.religion === "" || 
+       item.religion?.toLowerCase() === filters.religion.toLowerCase()) &&
+      (searchTerm === "" || 
+       item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
+  
+  // Sort filtered data by name alphabetically for better user experience
+  const sortedFilteredData = [...filteredData].sort((a, b) => 
+    a.name?.toLowerCase() > b.name?.toLowerCase() ? 1 : -1
+  );
 
   // Extract unique values for each filter category
-  const uniqueValues = (key) => [
-    ...new Set(dummyData.map((item) => item[key])),
-  ];
+  const uniqueValues = (key) => {
+    const values = [];
+    users.forEach(user => {
+      let value;
+      
+      if (key === "maritalStatus") {
+        value = normalizeMaritalStatus(user.marital_status);
+      } else if (key === "manglik") {
+        value = user.mangalik?.toString();
+      } else if (key === "caste") {
+        value = user.caste;
+      } else if (key === "gender") {
+        value = user.gender?.charAt(0).toUpperCase() + user.gender?.slice(1).toLowerCase();
+      } else if (key === "religion") {
+        value = user.religion?.charAt(0).toUpperCase() + user.religion?.slice(1).toLowerCase();
+      } else {
+        value = user[key === "maritalStatus" ? "marital_status" : key];
+      }
+      
+      if (value && !values.includes(value) && value !== "undefined" && value !== "null") {
+        values.push(value);
+      }
+    });
+    
+    // Sort values alphabetically
+    return values.sort();
+  };
 
   // Format options for better readability
   const formatOption = (option) => {
-    return option
+    // Check if option is undefined, null, or not a string
+    if (option === undefined || option === null) return "";
+    
+    // Convert to string if it's not already
+    const optionStr = String(option);
+    
+    return optionStr
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
@@ -94,12 +196,22 @@ const FindPartner = () => {
     },
   };
 
+  // Predefined options for more consistent filtering
+  const predefinedOptions = {
+    manglik: ["true", "false"],
+    // Standardized list of marital statuses
+    maritalStatus: ["Never Married", "Divorced", "Widowed", "Separated"],
+    // Major religions in India for matrimony context
+    religion: ["Hindu", "Muslim", "Sikh", "Christian", "Jain", "Buddhist", "Parsi"],
+  };
+
   // Filter options configuration for reuse
   const filterOptions = [
     {
-      label: "Gender",
-      name: "gender",
-      options: uniqueValues("gender"),
+      label: "Religion",
+      name: "religion",
+      // Use only predefined religions for consistency
+      options: predefinedOptions.religion,
     },
     {
       label: "Caste",
@@ -107,21 +219,37 @@ const FindPartner = () => {
       options: uniqueValues("caste"),
     },
     {
-      label: "Manglik",
-      name: "manglik",
-      options: uniqueValues("manglik"),
-    },
-    {
       label: "Marital Status",
       name: "maritalStatus",
-      options: uniqueValues("maritalStatus"),
+      // Use only the standardized list
+      options: predefinedOptions.maritalStatus,
     },
     {
-      label: "Religion",
-      name: "religion",
-      options: uniqueValues("religion"),
+      label: "Manglik",
+      name: "manglik",
+      options: [
+        { value: "", label: "Any" },
+        { value: "true", label: "Yes" },
+        { value: "false", label: "No" }
+      ],
     },
   ];
+
+  if (loading) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex items-center justify-center">
+        <div className="text-[#4F2F1D] text-xl">Loading profiles...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex items-center justify-center">
+        <div className="text-[#990000] text-xl">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
@@ -259,12 +387,23 @@ const FindPartner = () => {
                   fontWeight: 400,
                 }}
               >
-                <option value="">Select {label}</option>
-                {options.map((option, idx) => (
-                  <option key={idx} value={option}>
-                    {formatOption(option)}
-                  </option>
-                ))}
+                <option value="">Any {label}</option>
+                {Array.isArray(options) ? options.map((option, idx) => {
+                  // Handle both object options and string options
+                  if (option && typeof option === 'object' && 'value' in option) {
+                    return (
+                      <option key={idx} value={option.value}>
+                        {option.label || formatOption(option.value)}
+                      </option>
+                    );
+                  } else {
+                    return (
+                      <option key={idx} value={option}>
+                        {formatOption(option)}
+                      </option>
+                    );
+                  }
+                }) : null}
               </select>
             </div>
           ))}
@@ -281,63 +420,69 @@ const FindPartner = () => {
         {/* Profile List - Updated to match Membership style */}
         <div className="w-full md:w-3/4 p-4 sm:p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-            {filteredData.map((item) => (
-              <motion.div
-                key={item.id}
-                variants={cardVariants}
-                initial="initial"
-                animate="animate"
-                whileHover="hover"
-                className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
-                onClick={() => handleProfileClick(item)}
-              >
-                <div className="flex items-center flex-col sm:flex-row">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6"
-                  />
-                  <div className="text-center sm:text-left">
-                    <h3
-                      className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
-                      style={{
-                        fontFamily: "'Tiempos Headline', serif",
-                        fontWeight: 400,
-                      }}
-                    >
-                      {item.name}
-                    </h3>
-                    <p
-                      className="text-sm sm:text-base text-[#6B4132] mb-1"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                      }}
-                    >
-                      <strong>Age:</strong> {item.age}
-                    </p>
-                    <p
-                      className="text-sm sm:text-base text-[#6B4132] mb-1"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                      }}
-                    >
-                      <strong>Religion:</strong> {item.religion}
-                    </p>
-                    <p
-                      className="text-sm sm:text-base text-[#6B4132] mb-1"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                      }}
-                    >
-                      <strong>Marital Status:</strong> {item.maritalStatus}
-                    </p>
+            {sortedFilteredData.length === 0 ? (
+              <div className="col-span-2 text-center py-8 text-[#4F2F1D]">
+                No profiles match your search criteria.
+              </div>
+            ) : (
+              sortedFilteredData.map((item) => (
+                <motion.div
+                  key={item._id}
+                  variants={cardVariants}
+                  initial="initial"
+                  animate="animate"
+                  whileHover="hover"
+                  className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
+                  onClick={() => handleProfileClick(item)}
+                >
+                  <div className="flex items-center flex-col sm:flex-row">
+                    <img
+                      src={item.profile_picture || profileIcon}
+                      alt={item.name}
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6 object-cover"
+                    />
+                    <div className="text-center sm:text-left">
+                      <h3
+                        className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
+                        style={{
+                          fontFamily: "'Tiempos Headline', serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        {item.name}
+                      </h3>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>Age:</strong> {item.age || "Not specified"}
+                      </p>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>Religion:</strong> {formatOption(item.religion) || "Not specified"}
+                      </p>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>Marital Status:</strong> {normalizeMaritalStatus(item.marital_status) || "Not specified"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       </div>
