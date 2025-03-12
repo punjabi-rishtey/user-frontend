@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import videoSrc from "../assets/video.mp4";
+import videoSrc from "../assets/WeddingVideomp4.mp4";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import { useAuth } from "../context/AuthContext";
