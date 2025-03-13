@@ -19,6 +19,7 @@ import MembershipPage from "./components/membershipPage";
 import CustomerReviews from "./components/CustomerReviews";
 import ResetPasswordPage from "./components/ResetPasswordPage";
 import BlockingPage from "./components/BlockingPage";
+import ProfileSettings from "./components/Profilepage";
 function App() {
   return (
     <AuthProvider>
@@ -41,7 +42,7 @@ function App() {
           <Route path="/findpartner" element={<FindPartner />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<ProfileDetail />} />
-          <Route path="/profilepage" element={<Profilepage />} />
+          <Route path="/profilepage" element={<ProfileSettings />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset-password/:token" element={<ResetPasswordPage />}
           />

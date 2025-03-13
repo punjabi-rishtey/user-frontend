@@ -22,8 +22,24 @@ const FindPartner = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, refreshUser } = useAuth(); // Add refreshUser from context
   const [showFilters, setShowFilters] = useState(false);
+  const [currentUserGender, setCurrentUserGender] = useState(null);
+
+  // Refresh user data when component mounts to get latest gender
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUser();
+    }
+  }, [isAuthenticated, refreshUser]);
+
+  // Update currentUserGender when user changes
+  useEffect(() => {
+    if (user && user.gender) {
+      setCurrentUserGender(user.gender.toLowerCase());
+      console.log("Current user gender set to:", user.gender.toLowerCase());
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -69,7 +85,7 @@ const FindPartner = () => {
   };
 
   const handleProfileClick = (profile) => {
-    navigate(`/profile/${profile.preferences.user}`); // Assuming API returns _id for each user
+    navigate(`/profile/${profile.preferences?.user || profile._id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -105,12 +121,11 @@ const FindPartner = () => {
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   };
 
-  // Get opposite gender of the logged in user
+  // Get opposite gender of the logged in user using the currentUserGender state
   const getOppositeGender = () => {
-    if (!user || !user.gender) return null;
+    if (!currentUserGender) return null;
     
-    const userGender = String(user.gender).toLowerCase();
-    return userGender === 'male' ? 'female' : userGender === 'female' ? 'male' : null;
+    return currentUserGender === 'male' ? 'female' : 'male';
   };
 
   const filteredData = users.filter((item) => {
@@ -118,7 +133,7 @@ const FindPartner = () => {
     const isManglik = item.mangalik === true || item.mangalik === "true";
     const oppositeGender = getOppositeGender();
     
-    // Only show profiles of opposite gender
+    // Only show profiles of opposite gender based on currentUserGender
     if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
       return false;
     }
