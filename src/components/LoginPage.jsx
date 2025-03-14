@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logoSrc from "../assets/logo.png"; // Logo path, ensure it's correct or update accordingly
+import logoSrc from "../assets/logo.png";
 import Footer from "./Footer";
 import Header from "./Header";
 import ForgotPasswordPopup from "./ForgotPasswordPopup";
@@ -16,17 +16,22 @@ const LoginPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const success = await login(formData);
-    console.log("Login success:", success, "Redirecting to:", redirectPath); // Debugging redirect
-    if (success) {
+
+    // success can be: true | false | 'networkError'
+    if (success === "networkError") {
+      alert("No internet or server is not responding. Please try again later.");
+    } else if (!success) {
+      // i.e., success === false
+      alert("Invalid credentials. Please check your email or password.");
+    } else {
+      // success === true
       navigate(redirectPath);
     }
   };
@@ -102,6 +107,7 @@ const LoginPage = () => {
               </button>
             </div>
           </form>
+
           <div className="mt-6 text-center space-y-2">
             <button
               className="text-[#4A4A4A] hover:text-[#2D2D2D] hover:underline transition duration-300"

@@ -10,7 +10,6 @@ const API_URL = "https://backend-nm1z.onrender.com/api/users";
 const ProfileImageGallery = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
 
-  // Instead of a single `loading` boolean, use a string or enum-like state:
   // null = idle, 'uploading' = actively uploading, 'deleting' = actively deleting
   const [operation, setOperation] = useState(null);
 
@@ -45,9 +44,15 @@ const ProfileImageGallery = () => {
     const file = e.target.files[0];
     if (!file || !user?._id) return;
 
-    // Set operation to "uploading"
-    setOperation("uploading");
+    // 1) Validate file type: only JPG/JPEG/PNG
+    // Note: "image/jpeg" covers both .jpg and .jpeg
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      alert("Only JPG, JPEG, or PNG files are allowed!");
+      return;
+    }
 
+    // 2) Proceed to upload
+    setOperation("uploading");
     try {
       const formData = new FormData();
       formData.append("profile_pictures", file);
@@ -73,7 +78,6 @@ const ProfileImageGallery = () => {
     } catch (error) {
       console.error("Error uploading image:", error);
     } finally {
-      // Return to idle
       setOperation(null);
     }
   };
@@ -81,9 +85,7 @@ const ProfileImageGallery = () => {
   const handleRemoveImage = async (index) => {
     if (!window.confirm("Are you sure you want to delete this image?") || !user?._id) return;
 
-    // Set operation to "deleting"
     setOperation("deleting");
-
     const imageToDelete = images[index];
 
     try {
@@ -98,18 +100,15 @@ const ProfileImageGallery = () => {
 
       if (response.ok) {
         setImages((prev) => prev.filter((_, i) => i !== index));
-        // Refresh user so if the deleted image was the first, the next one updates as profile
         await refreshUser();
       }
     } catch (error) {
       console.error("Error deleting image:", error);
     } finally {
-      // Return to idle
       setOperation(null);
     }
   };
 
-  // Decide what text to show on the "Add Photo" button
   let addPhotoText = "Add Photo";
   if (operation === "uploading") addPhotoText = "Uploading...";
   else if (operation === "deleting") addPhotoText = "Deleting...";
@@ -119,7 +118,6 @@ const ProfileImageGallery = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">My Photos</h2>
 
-        {/* Use addPhotoText instead of loading for the label */}
         <label className="cursor-pointer px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg flex items-center">
           <FaPlus className="mr-2" />
           {addPhotoText}
@@ -128,7 +126,6 @@ const ProfileImageGallery = () => {
             accept="image/*"
             className="hidden"
             onChange={handleFileInputChange}
-            // Disable while uploading (or deleting) to prevent collisions
             disabled={operation === "uploading" || operation === "deleting"}
           />
         </label>
