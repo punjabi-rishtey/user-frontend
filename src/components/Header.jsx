@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth(); // ✅ Get user details
+  const { user, isAuthenticated } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleProfileClick = () => {
@@ -45,9 +45,9 @@ const Header = () => {
     <div className="w-full p-4 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] shadow-md">
       <div className="container mx-auto flex justify-between items-center px-6">
         <div>
-          <img 
-            src={logoSrc} 
-            alt="Punjabi Matrimony Logo" 
+          <img
+            src={logoSrc}
+            alt="Punjabi Matrimony Logo"
             className="h-12 sm:h-16 cursor-pointer"
             onClick={() => navigate("/")}
           />
@@ -68,11 +68,12 @@ const Header = () => {
 
         {/* Mobile Menu and Profile/Auth Buttons */}
         <div className="flex items-center space-x-4">
-          {/* Profile Icon - Show on both mobile and desktop when authenticated */}
           {isAuthenticated && (
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E5D3C8] cursor-pointer">
+              {/* user.profile_pictures[0] is updated automatically if
+                  ProfileImageGallery calls refreshUser() after uploading */}
               <img
-                src={user?.profile_pictures?.[0] || profileIcon} 
+                src={user?.profile_pictures?.[0] || profileIcon}
                 alt="Profile"
                 className="w-full h-full object-cover object-top"
                 onClick={handleProfileClick}
@@ -80,7 +81,6 @@ const Header = () => {
             </div>
           )}
 
-          {/* Auth Buttons - Only show on desktop when not authenticated */}
           {!isAuthenticated && (
             <div className="hidden md:flex space-x-4">
               <button
@@ -110,12 +110,7 @@ const Header = () => {
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
@@ -123,12 +118,11 @@ const Header = () => {
         {/* Mobile Sidebar */}
         {isSidebarOpen && (
           <>
-            <div 
+            <div
               className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
               onClick={() => setIsSidebarOpen(false)}
             />
-            
-            <div 
+            <div
               className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] p-4 shadow-lg z-50"
               style={{
                 transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
@@ -147,12 +141,7 @@ const Header = () => {
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
@@ -166,8 +155,6 @@ const Header = () => {
                     {item.label}
                   </button>
                 ))}
-                
-                {/* Auth Buttons - Only show in mobile menu when not authenticated */}
                 {!isAuthenticated && (
                   <>
                     <button

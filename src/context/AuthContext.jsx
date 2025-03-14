@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
         }
       );
       console.log("Response data:", response.data);
-      
+
       if (response.data && response.data.token) {
         localStorage.setItem("currentUser", JSON.stringify(response.data.user));
         localStorage.setItem("token", response.data.token);
@@ -77,10 +77,8 @@ export const AuthProvider = ({ children }) => {
       );
 
       if (response.status === 200) {
-        // If your backend returns just the updated user object (not wrapped),
-        // you might need to access response.data.user or similar. Adjust if needed.
         localStorage.setItem("currentUser", JSON.stringify(response.data));
-        setUser(response.data); 
+        setUser(response.data);
         return true;
       } else {
         alert("Failed to update profile. Please try again.");
@@ -93,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // NEW: Refresh the user data from the backend so we always have latest status, etc.
+  // We'll rely on refreshUser() after uploading/deleting pictures:
   const refreshUser = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -104,7 +102,6 @@ export const AuthProvider = ({ children }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Update context + localStorage if we got a user object back
       if (response.data) {
         localStorage.setItem("currentUser", JSON.stringify(response.data));
         setUser(response.data);
@@ -122,7 +119,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateUser,
-    refreshUser // Expose refreshUser in the context
+    refreshUser, // make sure you destructure this where needed
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
