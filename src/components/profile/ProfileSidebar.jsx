@@ -7,10 +7,10 @@ const ProfileSidebar = ({ user, logout, isMobileMenuOpen, setIsMobileMenuOpen })
   const navigate = useNavigate();
 
   const menuItems = [
-    { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches", path: "/matches" },
-    { icon: <FaComments className="text-[#B31312]" />, label: "Interests", path: "/interests" },
-    { icon: <FaComments className="text-[#B31312]" />, label: "Chat List", path: "/chats" },
-    { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan", path: "/plan" },
+    // { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches", path: "/matches" },
+    // { icon: <FaComments className="text-[#B31312]" />, label: "Interests", path: "/interests" },
+    // { icon: <FaComments className="text-[#B31312]" />, label: "Chat List", path: "/chats" },
+    // { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan", path: "/plan" },
     {
       icon: <FaCog className="text-[#B31312]" />,
       label: "Settings",

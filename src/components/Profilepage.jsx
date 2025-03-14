@@ -671,7 +671,7 @@ const handleCancel = () => {
     if (user?._id) {
       fetchProfessionDetails();
     }
-  }, [user]);
+  }, [user?._id]);
 
   const fetchProfessionDetails = async () => {
     if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
@@ -741,7 +741,7 @@ const handleCancel = () => {
     if (user?._id) {
       fetchFamilyDetails();
     }
-  }, [user]);
+  }, [user?._id]);
 
   const fetchFamilyDetails = async () => {
     if (!user?._id) return; // ✅ Prevent API calls if user ID is missing
@@ -802,7 +802,7 @@ const handleCancel = () => {
     if (user?._id) {
       fetchEducationDetails();
     }
-  }, [user]);
+  }, [user?._id]);
 
   const fetchEducationDetails = async () => {
     if (!user?._id) return; // ✅ Prevent API calls if user ID is missing

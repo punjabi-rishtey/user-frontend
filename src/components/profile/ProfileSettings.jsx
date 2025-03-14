@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import Header from "./Header";
-import Footer from "./Footer";
-import ProfileImageGallery from "./ProfileImageGallery";
-import ProfileSidebar from "./profile/ProfileSidebar";
-import ProfileInfoSection from "./profile/ProfileInfoSection";
-import FamilyDetailsSection from "./profile/FamilyDetailsSection";
-import EducationSection from "./profile/EducationSection";
-import ProfessionSection from "./profile/ProfessionSection";
-import AstrologySection from "./profile/AstrologySection";
-import ProfileCompletionCard from "./profile/ProfileCompletionCard";
+import Header from "../Header";
+import Footer from "../Footer";
+import ProfileImageGallery from "../ProfileImageGallery";
+import ProfileSidebar from "./ProfileSidebar";
+import ProfileInfoSection from "./ProfileInfoSection";
+import FamilyDetailsSection from "./FamilyDetailsSection";
+import EducationSection from "./EducationSection";
+import ProfessionSection from "./ProfessionSection";
+import AstrologySection from "./AstrologySection";
+import ProfileCompletionCard from "./ProfileCompletionCard";
 
 function ProfileSettings() {
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser, logout, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [userImages, setUserImages] = useState([]);
-
+  const [isUploading, setIsUploading] = useState(false);
+  
   // States for different sections to calculate profile completion
   const [basicData, setBasicData] = useState({});
   const [personalData, setPersonalData] = useState({});
@@ -27,6 +27,13 @@ function ProfileSettings() {
   const [familyData, setFamilyData] = useState({});
   const [educationData, setEducationData] = useState({});
   const [astrologyData, setAstrologyData] = useState({});
+
+  // Refresh user data when component mounts to get latest data
+  useEffect(() => {
+    if (user?._id) {
+      refreshUser();
+    }
+  }, []);
 
   // Initialize userImages when user data changes
   useEffect(() => {
@@ -161,15 +168,73 @@ function ProfileSettings() {
     <div className="flex flex-col min-h-screen bg-[#FCF9F2]">
       <Header />
 
-      {/* Mobile Menu and Sidebar */}
-      <ProfileSidebar 
-        user={user}
-        logout={logout}
-        isMobileMenuOpen={isMobileMenuOpen}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-      />
+      <div className="flex flex-1">
+        {/* ProfileSidebar */}
+        <div className="hidden md:block w-64 bg-white shadow-md">
+          <ProfileSidebar 
+            user={user}
+            logout={logout}
+            isMobileMenuOpen={isMobileMenuOpen}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+          />
+        </div>
 
-      <div className="flex-grow flex">
+        {/* Mobile menu toggle */}
+        <div className="md:hidden p-4">
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="text-gray-600 hover:text-gray-900"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-50 bg-white">
+            <div className="p-4 flex justify-end">
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <ProfileSidebar
+              user={user}
+              logout={logout}
+              isMobileMenuOpen={isMobileMenuOpen}
+              setIsMobileMenuOpen={setIsMobileMenuOpen}
+            />
+          </div>
+        )}
+
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-8">
           {/* Profile Image Gallery */}
@@ -178,7 +243,6 @@ function ProfileSettings() {
             onAddImage={handleAddImage}
             onRemoveImage={handleRemoveImage} 
             onEditImage={handleEditImage}
-            isUploading={isUploading}
           />
 
           {/* Profile Completion Progress Card */}
