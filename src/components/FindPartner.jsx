@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
-import LoginModal from "./LoginModal";
 import Footer from "./Footer";
 import Header from "./Header";
 import ProfileSlider from "./ProfileSlider";

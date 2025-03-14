@@ -9,11 +9,13 @@ const Testimonials = () => {
 
   useEffect(() => {
     fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
-      .then(response => response.json())
-      .then(data => {
-        const formattedClients = data.map(client => ({
+      .then((response) => response.json())
+      .then((data) => {
+        const formattedClients = data.map((client) => ({
           name: client.user_name,
-          photo: client.image_url || `https://backend-nm1z.onrender.com${client.image}`,
+          photo:
+            client.image_url ||
+            `https://backend-nm1z.onrender.com${client.image}`,
           quote: client.message,
         }));
         setClients(formattedClients);
@@ -21,7 +23,7 @@ const Testimonials = () => {
           selectClient(0);
         }
       })
-      .catch(error => console.error("Failed to fetch testimonials:", error));
+      .catch((error) => console.error("Failed to fetch testimonials:", error));
   }, []);
 
   const selectClient = (index) => {
@@ -49,14 +51,24 @@ const Testimonials = () => {
                 <motion.div
                   key={index}
                   whileHover={{ scale: 1.05 }}
-                  className={`cursor-pointer overflow-hidden rounded-lg shadow-lg ${selectedClient === index ? "ring-2 ring-[#4F2F1D] bg-[#F5EDE7]" : "bg-[#FCF9F2]"}`}
+                  className={`cursor-pointer overflow-hidden rounded-lg shadow-lg ${
+                    selectedClient === index
+                      ? "ring-2 ring-[#4F2F1D] bg-[#F5EDE7]"
+                      : "bg-[#FCF9F2]"
+                  }`}
                   onClick={() => selectClient(index)}
                 >
-                  <img
-                    src={client.photo}
-                    alt={client.name}
-                    className="w-full h-48 object-cover"
-                  />
+                  {/* 
+                    Wrap your img in an aspect-ratio container to keep
+                    consistent shape (square in this example).
+                  */}
+                  <div className="aspect-w-1 aspect-h-1">
+                    <img
+                      src={client.photo}
+                      alt={client.name}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -64,7 +76,7 @@ const Testimonials = () => {
             {/* Right Side - Selected Client */}
             {clients.length > 0 && (
               <div className="w-full md:w-1/2 flex flex-col items-center">
-                {/* Image Container - Outside blockquote */}
+                {/* Image Container - Circle */}
                 <motion.div
                   id="client-photo"
                   initial={{ opacity: 0 }}
