@@ -1044,17 +1044,22 @@ const handleCancel = () => {
     });
   };
 
+  // const handleCancelProfession = () => {
+  //   setProfessionData({
+  //     occupation: user?.occupation || "",
+  //     designation: user?.designation || "",
+  //     working_with: user?.working_with || "",
+  //     income: user?.income || "",
+  //     work_address: {
+  //       address: user?.work_address?.address || "",
+  //       city: user?.work_address?.city || "",
+  //     },
+  //   });
+  //   setIsEditingProfession(false);
+  // };
+
   const handleCancelProfession = () => {
-    setProfessionData({
-      occupation: user?.occupation || "",
-      designation: user?.designation || "",
-      working_with: user?.working_with || "",
-      income: user?.income || "",
-      work_address: {
-        address: user?.work_address?.address || "",
-        city: user?.work_address?.city || "",
-      },
-    });
+    fetchProfessionDetails(); // Re-fetch from API instead of using old user data
     setIsEditingProfession(false);
   };
 
@@ -1088,30 +1093,32 @@ const handleCancel = () => {
     setLoadingFamily(false);
   };
 
+  // const handleCancelFamily = () => {
+  //   setFamilyData({
+  //     family_value: user.family_value || "",
+  //     family_type: user.family_type || "",
+  //     mother: {
+  //       name: user.mother?.name || "",
+  //       occupation: user.mother?.occupation || "",
+  //     },
+  //     father: {
+  //       name: user.father?.name || "",
+  //       occupation: user.father?.occupation || "",
+  //     },
+  //     siblings: {
+  //       brother_count: user.siblings?.brother_count || 0,
+  //       sister_count: user.siblings?.sister_count || 0,
+  //     },
+  //   });
+  //   setIsEditingFamily(false);
+  // };
+
   const handleCancelFamily = () => {
-    setFamilyData({
-      family_value: user.family_value || "",
-      family_type: user.family_type || "",
-      mother: {
-        name: user.mother?.name || "",
-        occupation: user.mother?.occupation || "",
-      },
-      father: {
-        name: user.father?.name || "",
-        occupation: user.father?.occupation || "",
-      },
-      siblings: {
-        brother_count: user.siblings?.brother_count || 0,
-        sister_count: user.siblings?.sister_count || 0,
-      },
-    });
+    fetchFamilyDetails(); // Fetch latest data from API instead of relying on old state
     setIsEditingFamily(false);
   };
 
-  // const handleCancelFamily = () => {
-  //   fetchFamilyDetails(); // Fetch latest data from API instead of relying on old state
-  //   setIsEditingFamily(false);
-  // };
+
   const handleEducationChange = (e) => {
     const { name, value } = e.target;
     setEducationData((prev) => {
@@ -1129,22 +1136,29 @@ const handleCancel = () => {
     });
   };
 
+  // const handleCancelEducation = () => {
+  //   setEducationData({
+  //     school_details: {
+  //       name: user?.school_details?.name || "",
+  //       city: user?.school_details?.city || "",
+  //     },
+  //     college_details: {
+  //       name: user?.college_details?.name || "",
+  //       city: user?.college_details?.city || "",
+  //       passout_year: user?.college_details?.passout_year || "",
+  //     },
+  //     education_level: user?.education_level || "",
+  //     education_field: user?.education_field || "",
+  //   });
+  //   setIsEditingEducation(false);
+  // };
+
+
   const handleCancelEducation = () => {
-    setEducationData({
-      school_details: {
-        name: user?.school_details?.name || "",
-        city: user?.school_details?.city || "",
-      },
-      college_details: {
-        name: user?.college_details?.name || "",
-        city: user?.college_details?.city || "",
-        passout_year: user?.college_details?.passout_year || "",
-      },
-      education_level: user?.education_level || "",
-      education_field: user?.education_field || "",
-    });
+    fetchEducationDetails(); // Re-fetch from API instead of using old user data
     setIsEditingEducation(false);
   };
+
 
   const handleAstrologyChange = (e) => {
     const { name, value } = e.target;
