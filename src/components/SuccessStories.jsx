@@ -35,41 +35,40 @@ const SuccessStories = () => {
     offset: ["start end", "end center"],
   });
 
-  // Animate the red line from 0% height to ~85% as you scroll
+  // Animate the timeline from 0% height to ~85% as you scroll
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "85%"]);
 
   return (
-    <div className="bg-[#FCF9F2] py-12 sm:py-16 relative overflow-hidden">
+    <div className="bg-cream py-12 sm:py-16 relative overflow-hidden">
       <div className="container mx-auto px-4 text-center relative" ref={containerRef}>
         <h2
-          className="text-3xl sm:text-4xl mb-8 sm:mb-12 text-[#111111]"
+          className="text-3xl sm:text-4xl mb-8 sm:mb-12 text-dark"
           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           Success Stories
         </h2>
 
-        {/*
-          Main vertical line:
-          - On mobile: pinned to the left at left-6 
-          - On desktop: pinned to center (left-1/2, -translate-x-1/2)
-          - We also animate its height based on scroll
+        {/* 
+          Main vertical timeline:
+          - Enhanced visibility with brighter accent color
+          - Responsive positioning for all screen sizes
         */}
         <motion.div
           style={{ height: lineHeight, top: "10rem" }}
           className={`
             absolute
-            w-[3px]
-            bg-[#FF3D57]
+            w-1
+            bg-accent
             transition-all
         
             /* Mobile (default) styles: */
-            left-11.5           /* line sits to the left on small screens */
-            top-[10rem]      /* top offset for mobile, e.g. 10rem */
+            left-11.5
+            top-[10rem]
         
             /* Desktop (md breakpoint) overrides: */
-            md:left-1/2      /* move line to center at md+ */
+            md:left-1/2
             md:-translate-x-1/2
-            md:top-[12rem]   /* top offset for desktop, e.g. 12rem */
+            md:top-[12rem]
           `}
         />
 
@@ -81,11 +80,6 @@ const SuccessStories = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               viewport={{ once: true, amount: 0.5 }}
-              /*
-                Mobile: single column, with some left padding (pl-16) 
-                so the line and diamond are visible on the left
-                Desktop: two columns, reversing as needed
-              */
               className={`
                 relative
                 flex flex-col
@@ -98,28 +92,26 @@ const SuccessStories = () => {
                 ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}
               `}
             >
-              {/*
-                Diamond marker
-                - same pinned position as the line
-                - on mobile: left-6
-                - on desktop: center with left-1/2, -translate-x-1/2
-                - Also vertically center it relative to this item
+              {/* 
+                Diamond marker - enhanced with brighter color
+                and subtle glow effect for better visibility on Mac
               */}
               <div
                 className="
                   absolute
                   w-4 h-4
-                  bg-[#FF3D57]
+                  bg-accent
                   rotate-45
                   z-0
                   left-6
                   md:left-1/2
                   md:-translate-x-1/2
+                  shadow-glow
                 "
                 style={{ top: "calc(50% - 8px)" }}
               />
 
-              {/* Image */}
+              {/* Image with enhanced shadow */}
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
@@ -136,11 +128,11 @@ const SuccessStories = () => {
                 <img
                   src={story.image}
                   alt={story.name}
-                  className="w-full h-full object-cover rounded-full shadow-lg"
+                  className="w-full h-full object-cover rounded-full shadow-xl border-2 border-white"
                 />
               </motion.div>
 
-              {/* Content Card */}
+              {/* Content Card with increased contrast */}
               <motion.div
                 initial={{ opacity: 0, x: index % 2 === 0 ? 100 : -100 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -150,23 +142,24 @@ const SuccessStories = () => {
                   bg-white
                   p-4 sm:p-6
                   rounded-lg
-                  shadow-lg
+                  shadow-xl
                   flex flex-col
                   text-left
                   z-10
                   w-full
                   max-w-md
+                  border border-gray-100
                   ${index % 2 === 0 ? "md:ml-5" : "md:mr-5"}
                 `}
               >
                 <h3
-                  className="text-xl sm:text-2xl mb-2 text-[#111111]"
+                  className="text-xl sm:text-2xl mb-2 text-dark"
                   style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   {story.name}
                 </h3>
                 <p
-                  className="text-[#333333]"
+                  className="text-gray-700"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {`"${story.quote}"`}
@@ -179,5 +172,27 @@ const SuccessStories = () => {
     </div>
   );
 };
+
+// Define CSS variables for better color consistency across Mac screens
+const styles = document.createElement('style');
+styles.innerHTML = `
+  :root {
+    --color-cream: #FCF9F2;
+    --color-dark: #0A0A0A;
+    --color-accent: #FF2B47;
+    --color-gray-700: #374151;
+  }
+  
+  .bg-cream { background-color: var(--color-cream); }
+  .text-dark { color: var(--color-dark); }
+  .bg-accent { background-color: var(--color-accent); }
+  .text-gray-700 { color: var(--color-gray-700); }
+  
+  /* Add a subtle glow effect to timeline markers for better visibility on Mac */
+  .shadow-glow {
+    box-shadow: 0 0 8px rgba(255, 43, 71, 0.6);
+  }
+`;
+document.head.appendChild(styles);
 
 export default SuccessStories;
