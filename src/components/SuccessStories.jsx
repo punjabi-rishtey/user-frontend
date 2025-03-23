@@ -35,36 +35,41 @@ const SuccessStories = () => {
     offset: ["start end", "end center"],
   });
 
-  // Animate the timeline from 0% height to ~85% as you scroll
+  // Animate the red line from 0% height to ~85% as you scroll
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "85%"]);
 
   return (
-    <div className="stories-bg py-12 sm:py-16 relative overflow-hidden">
+    <div className="bg-[#FCF9F2] py-12 sm:py-16 relative overflow-hidden">
       <div className="container mx-auto px-4 text-center relative" ref={containerRef}>
         <h2
-          className="text-3xl sm:text-4xl mb-8 sm:mb-12 stories-title"
+          className="text-3xl sm:text-4xl mb-8 sm:mb-12 text-[#111111]"
           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           Success Stories
         </h2>
 
-        {/* Main vertical timeline */}
+        {/*
+          Main vertical line:
+          - On mobile: pinned to the left at left-6 
+          - On desktop: pinned to center (left-1/2, -translate-x-1/2)
+          - We also animate its height based on scroll
+        */}
         <motion.div
           style={{ height: lineHeight, top: "10rem" }}
           className={`
             absolute
-            w-1
-            stories-timeline
+            w-[3px]
+            bg-[#FF3D57]
             transition-all
         
             /* Mobile (default) styles: */
-            left-11.5
-            top-[10rem]
+            left-11.5           /* line sits to the left on small screens */
+            top-[10rem]      /* top offset for mobile, e.g. 10rem */
         
             /* Desktop (md breakpoint) overrides: */
-            md:left-1/2
+            md:left-1/2      /* move line to center at md+ */
             md:-translate-x-1/2
-            md:top-[12rem]
+            md:top-[12rem]   /* top offset for desktop, e.g. 12rem */
           `}
         />
 
@@ -76,6 +81,11 @@ const SuccessStories = () => {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               viewport={{ once: true, amount: 0.5 }}
+              /*
+                Mobile: single column, with some left padding (pl-16) 
+                so the line and diamond are visible on the left
+                Desktop: two columns, reversing as needed
+              */
               className={`
                 relative
                 flex flex-col
@@ -88,15 +98,20 @@ const SuccessStories = () => {
                 ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}
               `}
             >
-              {/* Diamond marker */}
+              {/*
+                Diamond marker
+                - same pinned position as the line
+                - on mobile: left-6
+                - on desktop: center with left-1/2, -translate-x-1/2
+                - Also vertically center it relative to this item
+              */}
               <div
                 className="
                   absolute
                   w-4 h-4
-                  stories-diamond
+                  bg-[#FF3D57]
                   rotate-45
                   z-0
-                  shadow-glow
                   left-6
                   md:left-1/2
                   md:-translate-x-1/2
@@ -121,7 +136,7 @@ const SuccessStories = () => {
                 <img
                   src={story.image}
                   alt={story.name}
-                  className="w-full h-full object-cover rounded-full shadow-xl border-2 border-white"
+                  className="w-full h-full object-cover rounded-full shadow-lg"
                 />
               </motion.div>
 
@@ -132,27 +147,26 @@ const SuccessStories = () => {
                 transition={{ duration: 0.8, delay: index * 0.2 }}
                 viewport={{ once: true, amount: 0.5 }}
                 className={`
-                  stories-card
+                  bg-white
                   p-4 sm:p-6
                   rounded-lg
-                  shadow-xl
+                  shadow-lg
                   flex flex-col
                   text-left
                   z-10
                   w-full
                   max-w-md
-                  border stories-border
                   ${index % 2 === 0 ? "md:ml-5" : "md:mr-5"}
                 `}
               >
                 <h3
-                  className="text-xl sm:text-2xl mb-2 stories-title"
+                  className="text-xl sm:text-2xl mb-2 text-[#111111]"
                   style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   {story.name}
                 </h3>
                 <p
-                  className="stories-text"
+                  className="text-[#333333]"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {`"${story.quote}"`}
@@ -165,41 +179,5 @@ const SuccessStories = () => {
     </div>
   );
 };
-
-// Define CSS variables specifically for this component
-const stylesTag = document.createElement('style');
-stylesTag.innerHTML = `
-  /* SUCCESS STORIES STYLES */
-  :root {
-    --stories-bg: #FFFAF5;
-    --stories-card: #FFFFFF;
-    --stories-title: #111111;
-    --stories-text: #333333;
-    --stories-timeline: #FF2B47;
-    --stories-diamond: #FF2B47;
-    --stories-border: #FFDDDD;
-  }
-  
-  .stories-bg { background-color: var(--stories-bg); }
-  .stories-card { 
-    background-color: var(--stories-card);
-  }
-  .stories-title { color: var(--stories-title); }
-  .stories-text { color: var(--stories-text); }
-  .stories-timeline { background-color: var(--stories-timeline); }
-  .stories-diamond { background-color: var(--stories-diamond); }
-  .stories-border { border-color: var(--stories-border); }
-  
-  .shadow-glow {
-    box-shadow: 0 0 8px rgba(255, 43, 71, 0.6);
-  }
-  
-  .shadow-xl {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 
-                0 8px 10px -6px rgba(0, 0, 0, 0.1),
-                0 0 0 1px rgba(0, 0, 0, 0.03);
-  }
-`;
-document.head.appendChild(stylesTag);
 
 export default SuccessStories;
