@@ -143,22 +143,25 @@ const ProfileImageGallery = () => {
             autoplay={true}
             autoplaySpeed={3000}
             pauseOnHover={true}
-            centerMode={images.length > 1}
-            centerPadding="0px"
+            /* REMOVE centerMode & centerPadding from here! */
+
             responsive={[
               {
+                // Medium screens (<1024px & >=640px)
                 breakpoint: 1024,
                 settings: {
                   slidesToShow: Math.min(2, Math.max(1, images.length)),
-                  centerMode: images.length > 1,
+                  centerMode: images.length > 1, 
+                  centerPadding: "0px",
                 },
               },
               {
+                // Mobile screens (<640px)
                 breakpoint: 640,
                 settings: {
                   slidesToShow: 1,
-                  centerMode: images.length > 1,
-                  centerPadding: "30px",
+                  centerMode: false,     // ensure it’s disabled
+                  centerPadding: "0px",
                 },
               },
             ]}

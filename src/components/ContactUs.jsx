@@ -190,23 +190,18 @@ const ContactUs = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "", // ✅ Changed from "mobile" to "phone" to match API
+    phone: "",
     subject: "",
     message: "",
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ Handle Input Changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Validate Form Inputs
   const validateForm = () => {
     const newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
@@ -217,7 +212,6 @@ const ContactUs = () => {
     return newErrors;
   };
 
-  // ✅ Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
@@ -225,26 +219,20 @@ const ContactUs = () => {
       setErrors(validationErrors);
       return;
     }
-
     setIsSubmitting(true);
 
     try {
       const response = await fetch(
-        "https://backend-nm1z.onrender.com/api/users/inquiries/submit", // ✅ Full API URL
+        "https://backend-nm1z.onrender.com/api/users/inquiries/submit",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
         }
       );
-
-      
       if (!response.ok) {
         throw new Error("Failed to submit inquiry");
       }
-
       alert("Inquiry submitted successfully!");
       setFormData({
         name: "",
@@ -269,8 +257,15 @@ const ContactUs = () => {
         <section className="py-16 px-6 md:px-20 relative">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-start gap-8">
             <div className="flex flex-col md:flex-row w-full">
-              {/* Left Side - Contact Form */}
-              <div className="flex flex-col flex-grow bg-[#F5EDE7] p-8 mr-6 rounded-lg">
+              {/* LEFT PANEL (Contact Form) */}
+              <div className="
+                flex flex-col flex-grow
+                bg-[#F5EDE7]
+                p-8
+                mb-6 md:mb-0    /* add vertical gap on mobile */
+                md:mr-6         /* keep right margin only on desktop */
+                rounded-lg
+              ">
                 <form onSubmit={handleSubmit} className="flex-grow">
                   {["name", "email", "phone", "subject"].map((field) => (
                     <div key={field} className="mb-6">
@@ -286,7 +281,9 @@ const ContactUs = () => {
                         placeholder={`Your ${field}`}
                       />
                       {errors[field] && (
-                        <p className="text-red-600 text-sm mt-1">{errors[field]}</p>
+                        <p className="text-red-600 text-sm mt-1">
+                          {errors[field]}
+                        </p>
                       )}
                     </div>
                   ))}
@@ -302,7 +299,9 @@ const ContactUs = () => {
                       rows="5"
                     ></textarea>
                     {errors.message && (
-                      <p className="text-red-600 text-sm mt-1">{errors.message}</p>
+                      <p className="text-red-600 text-sm mt-1">
+                        {errors.message}
+                      </p>
                     )}
                   </div>
 
@@ -316,7 +315,7 @@ const ContactUs = () => {
                 </form>
               </div>
 
-              {/* Right Side - Contact Info */}
+              {/* RIGHT PANEL (Contact Info) */}
               <div className="flex flex-col flex-grow bg-[#F5EDE7] p-8 rounded-lg">
                 <h2 className="text-2xl mb-6 text-[#4F2F1D]">Get in Touch</h2>
                 <p className="text-[#6B4132] mb-8">
@@ -339,7 +338,7 @@ const ContactUs = () => {
                   ))}
                 </div>
 
-                {/* Map Section */}
+                {/* MAP */}
                 <div className="mt-12 rounded-lg overflow-hidden shadow-lg">
                   <iframe
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3679.1979448425536!2d75.90972427496939!3d22.75803417936002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39631dc98ba6d683%3A0x64f13661e6711e45!2sPunjabi%20Rishtey!5e0!3m2!1sen!2sin!4v1739554919003!5m2!1sen!2sin"
