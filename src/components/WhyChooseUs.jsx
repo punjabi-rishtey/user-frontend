@@ -31,22 +31,22 @@ const WhyChooseUs = () => {
         animate: { opacity: 1, y: 0 },
         hover: {
             scale: 1.05,
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1)',
             transition: { duration: 0.3 },
         },
     };
 
     return (
-        <div className="py-12 sm:py-16 overflow-hidden bg-background">
+        <div className="why-bg py-12 sm:py-16 overflow-hidden">
             <div className="container mx-auto px-4 text-center">
                 <h2
-                    className="text-3xl sm:text-5xl mb-6 sm:mb-12 text-primary font-normal"
+                    className="text-3xl sm:text-5xl mb-6 sm:mb-12 why-title font-normal"
                     style={{ fontFamily: "'Tiempos Headline', serif" }}
                 >
                     Why Choose Us
                 </h2>
                 <p 
-                    className="text-lg sm:text-xl mb-8 sm:mb-12 text-secondary font-normal max-w-3xl mx-auto"
+                    className="text-lg sm:text-xl mb-8 sm:mb-12 why-text font-normal max-w-3xl mx-auto"
                     style={{ fontFamily: "'Modern Era', sans-serif" }}
                 >
                     Discover the benefits of joining our platform and find your perfect match with ease.
@@ -60,23 +60,23 @@ const WhyChooseUs = () => {
                             animate="animate"
                             whileHover="hover"
                             transition={{ duration: 0.3, delay: index * 0.1 }}
-                            className="px-5 py-8 rounded-xl shadow-md border border-border bg-card"
+                            className="px-5 py-8 rounded-xl shadow-md border why-border why-card"
                         >
                             <div className="mb-5 flex justify-center">
-                                <div className="p-3 rounded-full bg-primary-light flex items-center justify-center">
-                                    <div className="text-primary">
+                                <div className="p-3 rounded-full why-icon-bg flex items-center justify-center">
+                                    <div className="why-icon">
                                         {feature.icon}
                                     </div>
                                 </div>
                             </div>
                             <h3
-                                className="text-2xl mb-3 text-primary font-normal"
+                                className="text-2xl mb-3 why-title font-normal"
                                 style={{ fontFamily: "'Tiempos Headline', serif" }}
                             >
                                 {feature.title}
                             </h3>
                             <p 
-                                className="text-secondary font-normal"
+                                className="why-text font-normal"
                                 style={{ fontFamily: "'Modern Era', sans-serif" }}
                             >
                                 {feature.description}
@@ -89,25 +89,34 @@ const WhyChooseUs = () => {
     );
 };
 
-// Add CSS variables for consistent colors across all screens including Mac
-const styles = document.createElement('style');
-styles.innerHTML = `
+// Define CSS variables specifically for this component
+const stylesTag = document.createElement('style');
+stylesTag.innerHTML = `
+  /* WHY CHOOSE US STYLES */
   :root {
-    --color-background: #FFFFFF;
-    --color-card: #FAF6F3;
-    --color-primary: #3D2314;
-    --color-primary-light: #F2E6DF;
-    --color-secondary: #5A3926;
-    --color-border: #DBC6B9;
+    --why-bg: #FFFFF9;
+    --why-card: #F5F0E5;
+    --why-title: #2D1A0C;
+    --why-text: #5A3926;
+    --why-icon: #5A3926;
+    --why-icon-bg: #F4EAE2;
+    --why-border: #E8D6C8;
   }
   
-  .bg-background { background-color: var(--color-background); }
-  .bg-card { background-color: var(--color-card); }
-  .text-primary { color: var(--color-primary); }
-  .text-secondary { color: var(--color-secondary); }
-  .bg-primary-light { background-color: var(--color-primary-light); }
-  .border-border { border-color: var(--color-border); }
+  .why-bg { background-color: var(--why-bg); }
+  .why-card { background-color: var(--why-card); }
+  .why-title { color: var(--why-title); }
+  .why-text { color: var(--why-text); }
+  .why-icon { color: var(--why-icon); }
+  .why-icon-bg { background-color: var(--why-icon-bg); }
+  .why-border { border-color: var(--why-border); }
+  
+  .shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.06), 
+                0 0 0 1px rgba(0, 0, 0, 0.03);
+  }
 `;
-document.head.appendChild(styles);
+document.head.appendChild(stylesTag);
 
 export default WhyChooseUs;

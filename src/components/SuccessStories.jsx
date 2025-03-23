@@ -39,26 +39,22 @@ const SuccessStories = () => {
   const lineHeight = useTransform(scrollYProgress, [0, 1], ["0%", "85%"]);
 
   return (
-    <div className="bg-cream py-12 sm:py-16 relative overflow-hidden">
+    <div className="stories-bg py-12 sm:py-16 relative overflow-hidden">
       <div className="container mx-auto px-4 text-center relative" ref={containerRef}>
         <h2
-          className="text-3xl sm:text-4xl mb-8 sm:mb-12 text-dark"
+          className="text-3xl sm:text-4xl mb-8 sm:mb-12 stories-title"
           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           Success Stories
         </h2>
 
-        {/* 
-          Main vertical timeline:
-          - Enhanced visibility with brighter accent color
-          - Responsive positioning for all screen sizes
-        */}
+        {/* Main vertical timeline */}
         <motion.div
           style={{ height: lineHeight, top: "10rem" }}
           className={`
             absolute
             w-1
-            bg-accent
+            stories-timeline
             transition-all
         
             /* Mobile (default) styles: */
@@ -92,26 +88,23 @@ const SuccessStories = () => {
                 ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"}
               `}
             >
-              {/* 
-                Diamond marker - enhanced with brighter color
-                and subtle glow effect for better visibility on Mac
-              */}
+              {/* Diamond marker */}
               <div
                 className="
                   absolute
                   w-4 h-4
-                  bg-accent
+                  stories-diamond
                   rotate-45
                   z-0
+                  shadow-glow
                   left-6
                   md:left-1/2
                   md:-translate-x-1/2
-                  shadow-glow
                 "
                 style={{ top: "calc(50% - 8px)" }}
               />
 
-              {/* Image with enhanced shadow */}
+              {/* Image */}
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
@@ -132,14 +125,14 @@ const SuccessStories = () => {
                 />
               </motion.div>
 
-              {/* Content Card with increased contrast */}
+              {/* Content Card */}
               <motion.div
                 initial={{ opacity: 0, x: index % 2 === 0 ? 100 : -100 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.2 }}
                 viewport={{ once: true, amount: 0.5 }}
                 className={`
-                  bg-white
+                  stories-card
                   p-4 sm:p-6
                   rounded-lg
                   shadow-xl
@@ -148,18 +141,18 @@ const SuccessStories = () => {
                   z-10
                   w-full
                   max-w-md
-                  border border-gray-100
+                  border stories-border
                   ${index % 2 === 0 ? "md:ml-5" : "md:mr-5"}
                 `}
               >
                 <h3
-                  className="text-xl sm:text-2xl mb-2 text-dark"
+                  className="text-xl sm:text-2xl mb-2 stories-title"
                   style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   {story.name}
                 </h3>
                 <p
-                  className="text-gray-700"
+                  className="stories-text"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {`"${story.quote}"`}
@@ -173,26 +166,40 @@ const SuccessStories = () => {
   );
 };
 
-// Define CSS variables for better color consistency across Mac screens
-const styles = document.createElement('style');
-styles.innerHTML = `
+// Define CSS variables specifically for this component
+const stylesTag = document.createElement('style');
+stylesTag.innerHTML = `
+  /* SUCCESS STORIES STYLES */
   :root {
-    --color-cream: #FCF9F2;
-    --color-dark: #0A0A0A;
-    --color-accent: #FF2B47;
-    --color-gray-700: #374151;
+    --stories-bg: #FFFAF5;
+    --stories-card: #FFFFFF;
+    --stories-title: #111111;
+    --stories-text: #333333;
+    --stories-timeline: #FF2B47;
+    --stories-diamond: #FF2B47;
+    --stories-border: #FFDDDD;
   }
   
-  .bg-cream { background-color: var(--color-cream); }
-  .text-dark { color: var(--color-dark); }
-  .bg-accent { background-color: var(--color-accent); }
-  .text-gray-700 { color: var(--color-gray-700); }
+  .stories-bg { background-color: var(--stories-bg); }
+  .stories-card { 
+    background-color: var(--stories-card);
+  }
+  .stories-title { color: var(--stories-title); }
+  .stories-text { color: var(--stories-text); }
+  .stories-timeline { background-color: var(--stories-timeline); }
+  .stories-diamond { background-color: var(--stories-diamond); }
+  .stories-border { border-color: var(--stories-border); }
   
-  /* Add a subtle glow effect to timeline markers for better visibility on Mac */
   .shadow-glow {
     box-shadow: 0 0 8px rgba(255, 43, 71, 0.6);
   }
+  
+  .shadow-xl {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 
+                0 8px 10px -6px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(0, 0, 0, 0.03);
+  }
 `;
-document.head.appendChild(styles);
+document.head.appendChild(stylesTag);
 
 export default SuccessStories;
