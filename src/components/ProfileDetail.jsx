@@ -19,6 +19,7 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import profileIcon from "../assets/profile.png";
 
+
 // Custom Arrow Components for the slider
 const NextArrow = (props) => {
   const { className, style, onClick } = props;
@@ -40,6 +41,58 @@ const PrevArrow = (props) => {
       onClick={onClick}
     />
   );
+};
+
+// Define a vibrant color palette for different card types
+const cardColorSchemes = {
+  basicDetails: {
+    bg: "#E3F2FD", // Light blue
+    border: "#90CAF9",
+    title: "#1565C0",
+    icon: "#1565C0",
+    label: "#0D47A1",
+    value: "#1976D2"
+  },
+  lifestyle: {
+    bg: "#F3E5F5", // Light purple
+    border: "#CE93D8",
+    title: "#7B1FA2",
+    icon: "#7B1FA2",
+    label: "#4A148C",
+    value: "#8E24AA"
+  },
+  horoscope: {
+    bg: "#FFF3E0", // Light orange
+    border: "#FFCC80",
+    title: "#E65100",
+    icon: "#E65100",
+    label: "#BF360C",
+    value: "#EF6C00"
+  },
+  education: {
+    bg: "#E8F5E9", // Light green
+    border: "#A5D6A7",
+    title: "#2E7D32",
+    icon: "#2E7D32",
+    label: "#1B5E20",
+    value: "#388E3C"
+  },
+  profession: {
+    bg: "#E0F7FA", // Light cyan
+    border: "#80DEEA",
+    title: "#00838F",
+    icon: "#00838F",
+    label: "#006064",
+    value: "#0097A7"
+  },
+  family: {
+    bg: "#FFF8E1", // Light amber
+    border: "#FFE082",
+    title: "#FF8F00",
+    icon: "#FF8F00",
+    label: "#FF6F00",
+    value: "#FFA000"
+  }
 };
 
 const ProfileDetail = () => {
@@ -117,21 +170,30 @@ const ProfileDetail = () => {
     return value;
   };
 
+  // Get slides to show based on image count
+  const getSlidesToShow = (imageCount) => {
+    if (imageCount >= 3) return 3;
+    if (imageCount === 2) return 2;
+    return 1;
+  };
+
   // Slider settings
   const settings = {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 1,
+    slidesToShow: profileData?.profile_pictures ? getSlidesToShow(profileData.profile_pictures.length) : 1,
     slidesToScroll: 1,
-    autoplay: false,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    pauseOnHover: true,
     nextArrow: <NextArrow />,
     prevArrow: <PrevArrow />,
     responsive: [
       {
         breakpoint: 1024,
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 2,
           slidesToScroll: 1,
           infinite: true,
           dots: true,
@@ -318,14 +380,16 @@ const ProfileDetail = () => {
   }
 
   // Card variants for animation
-  const cardVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    hover: {
-      scale: 1.05,
-      backgroundColor: "#E5D3C8",
-      transition: { duration: 0.3 },
-    },
+  const getCardVariants = (cardType) => {
+    return {
+      initial: { opacity: 0, y: 20 },
+      animate: { opacity: 1, y: 0 },
+      hover: {
+        scale: 1.05,
+        boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+        transition: { duration: 0.3 },
+      },
+    };
   };
 
   return (
@@ -388,19 +452,21 @@ const ProfileDetail = () => {
         {profileData.name}
       </h2>
       
-      {/* Slideshow for profile pictures */}
-      {profileData.profile_pictures && profileData.profile_pictures.length > 1 && (
+      {/* Slideshow for profile pictures - show whenever there's at least one image */}
+      {profileData.profile_pictures && profileData.profile_pictures.length > 0 && (
         <div className="flex justify-center mb-8 mt-8">
-          <div className="w-3/5">
+          <div className="w-4/5 lg:w-3/4">
             <Slider {...settings}>
               {profileData.profile_pictures.map((image, index) => (
                 <div key={index} className="px-2">
-                  <img
-                    src={image}
-                    alt={`Profile ${index + 1}`}
-                    className="w-64 h-64 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 mx-auto object-cover"
-                    onClick={() => handleImageClick(image)}
-                  />
+                  <div className="mx-2">
+                    <img
+                      src={image}
+                      alt={`Profile ${index + 1}`}
+                      className="w-64 h-64 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 mx-auto object-cover"
+                      onClick={() => handleImageClick(image)}
+                    />
+                  </div>
                 </div>
               ))}
             </Slider>
@@ -412,20 +478,27 @@ const ProfileDetail = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">
         {/* Basic Details */}
         <motion.div
-          variants={cardVariants}
+          variants={getCardVariants('basicDetails')}
           initial="initial"
           animate="animate"
           whileHover="hover"
-          className="p-8 bg-[#F5EDE7] rounded-xl shadow-lg border border-[#E5D3C8] transition-all"
+          className="p-8 rounded-xl shadow-lg transition-all"
+          style={{
+            backgroundColor: cardColorSchemes.basicDetails.bg,
+            borderColor: cardColorSchemes.basicDetails.border,
+            borderWidth: "2px",
+            borderStyle: "solid"
+          }}
         >
           <h3
-            className="text-2xl mb-4 flex items-center text-[#4F2F1D]"
+            className="text-2xl mb-4 flex items-center"
             style={{
               fontFamily: "'Tiempos Headline', serif",
               fontWeight: 400,
+              color: cardColorSchemes.basicDetails.title
             }}
           >
-            <FaUser className="mr-2 text-[#4F2F1D]" /> Basic Details
+            <FaUser className="mr-2" style={{ color: cardColorSchemes.basicDetails.icon }} /> Basic Details
           </h3>
           <div className="space-y-2">
             {Object.entries(basicDetails).map(([key, value]) => (
@@ -437,10 +510,10 @@ const ProfileDetail = () => {
                   fontWeight: 400,
                 }}
               >
-                <strong className="text-[#4F2F1D]">
+                <strong style={{ color: cardColorSchemes.basicDetails.label }}>
                   {key}:
                 </strong>
-                <span className="text-[#6B4132] ml-2">
+                <span style={{ color: cardColorSchemes.basicDetails.value }} className="ml-2">
                   {value}
                 </span>
               </p>
@@ -450,20 +523,27 @@ const ProfileDetail = () => {
 
         {/* Lifestyle Details */}
         <motion.div
-          variants={cardVariants}
+          variants={getCardVariants('lifestyle')}
           initial="initial"
           animate="animate"
           whileHover="hover"
-          className="p-8 bg-[#F5EDE7] rounded-xl shadow-lg border border-[#E5D3C8] transition-all"
+          className="p-8 rounded-xl shadow-lg transition-all"
+          style={{
+            backgroundColor: cardColorSchemes.lifestyle.bg,
+            borderColor: cardColorSchemes.lifestyle.border,
+            borderWidth: "2px",
+            borderStyle: "solid"
+          }}
         >
           <h3
-            className="text-2xl mb-4 flex items-center text-[#4F2F1D]"
+            className="text-2xl mb-4 flex items-center"
             style={{
               fontFamily: "'Tiempos Headline', serif",
               fontWeight: 400,
+              color: cardColorSchemes.lifestyle.title
             }}
           >
-            <FaHeart className="mr-2 text-[#4F2F1D]" /> Lifestyle
+            <FaHeart className="mr-2" style={{ color: cardColorSchemes.lifestyle.icon }} /> Lifestyle
           </h3>
           <div className="space-y-2">
             {Object.entries(lifestyleDetails).map(([key, value]) => (
@@ -475,37 +555,54 @@ const ProfileDetail = () => {
                   fontWeight: 400,
                 }}
               >
-                <strong className="text-[#4F2F1D]">
+                <strong style={{ color: cardColorSchemes.lifestyle.label }}>
                   {key}:
                 </strong>
-                <span className="text-[#6B4132] ml-2">
+                <span style={{ color: cardColorSchemes.lifestyle.value }} className="ml-2">
                   {value}
                 </span>
               </p>
             ))}
-            <p className="text-lg" style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}>
-              <strong className="text-[#4F2F1D]">Registration Date:</strong>
-              <span className="text-[#6B4132] ml-2">{formatDate(profileData.metadata?.register_date)}</span>
+            <p 
+              className="text-lg" 
+              style={{ 
+                fontFamily: "'Modern Era', sans-serif", 
+                fontWeight: 400 
+              }}
+            >
+              <strong style={{ color: cardColorSchemes.lifestyle.label }}>
+                Registration Date:
+              </strong>
+              <span style={{ color: cardColorSchemes.lifestyle.value }} className="ml-2">
+                {formatDate(profileData.metadata?.register_date)}
+              </span>
             </p>
           </div>
         </motion.div>
 
         {/* Horoscope Details */}
         <motion.div
-          variants={cardVariants}
+          variants={getCardVariants('horoscope')}
           initial="initial"
           animate="animate"
           whileHover="hover"
-          className="p-8 bg-[#F5EDE7] rounded-xl shadow-lg border border-[#E5D3C8] transition-all"
+          className="p-8 rounded-xl shadow-lg transition-all"
+          style={{
+            backgroundColor: cardColorSchemes.horoscope.bg,
+            borderColor: cardColorSchemes.horoscope.border,
+            borderWidth: "2px",
+            borderStyle: "solid"
+          }}
         >
           <h3
-            className="text-2xl mb-4 flex items-center text-[#4F2F1D]"
+            className="text-2xl mb-4 flex items-center"
             style={{
               fontFamily: "'Tiempos Headline', serif",
               fontWeight: 400,
+              color: cardColorSchemes.horoscope.title
             }}
           >
-            <FaHeart className="mr-2 text-[#4F2F1D]" /> Horoscope
+            <FaHeart className="mr-2" style={{ color: cardColorSchemes.horoscope.icon }} /> Horoscope
           </h3>
           <div className="space-y-2">
             <p
@@ -515,10 +612,10 @@ const ProfileDetail = () => {
                 fontWeight: 400,
               }}
             >
-              <strong className="text-[#4F2F1D]">
+              <strong style={{ color: cardColorSchemes.horoscope.label }}>
                 Manglik Status:
               </strong>
-              <span className="text-[#6B4132] ml-2">
+              <span style={{ color: cardColorSchemes.horoscope.value }} className="ml-2">
                 {profileData.mangalik ? 'Yes' : 'No'}
               </span>
             </p>
@@ -528,20 +625,27 @@ const ProfileDetail = () => {
         {/* Education Details */}
         {Object.keys(educationDetails).length > 0 && (
           <motion.div
-            variants={cardVariants}
+            variants={getCardVariants('education')}
             initial="initial"
             animate="animate"
             whileHover="hover"
-            className="p-8 bg-[#F5EDE7] rounded-xl shadow-lg border border-[#E5D3C8] transition-all"
+            className="p-8 rounded-xl shadow-lg transition-all"
+            style={{
+              backgroundColor: cardColorSchemes.education.bg,
+              borderColor: cardColorSchemes.education.border,
+              borderWidth: "2px",
+              borderStyle: "solid"
+            }}
           >
             <h3
-              className="text-2xl mb-4 flex items-center text-[#4F2F1D]"
+              className="text-2xl mb-4 flex items-center"
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
+                color: cardColorSchemes.education.title
               }}
             >
-              <FaGraduationCap className="mr-2 text-[#4F2F1D]" /> Education
+              <FaGraduationCap className="mr-2" style={{ color: cardColorSchemes.education.icon }} /> Education
             </h3>
             <div className="space-y-2">
               {Object.entries(educationDetails).map(([key, value]) => (
@@ -553,10 +657,10 @@ const ProfileDetail = () => {
                     fontWeight: 400,
                   }}
                 >
-                  <strong className="text-[#4F2F1D]">
+                  <strong style={{ color: cardColorSchemes.education.label }}>
                     {key}:
                   </strong>
-                  <span className="text-[#6B4132] ml-2">
+                  <span style={{ color: cardColorSchemes.education.value }} className="ml-2">
                     {value || 'Not specified'}
                   </span>
                 </p>
@@ -568,20 +672,27 @@ const ProfileDetail = () => {
         {/* Profession Details */}
         {Object.keys(professionDetails).length > 0 && (
           <motion.div
-            variants={cardVariants}
+            variants={getCardVariants('profession')}
             initial="initial"
             animate="animate"
             whileHover="hover"
-            className="p-8 bg-[#F5EDE7] rounded-xl shadow-lg border border-[#E5D3C8] transition-all"
+            className="p-8 rounded-xl shadow-lg transition-all"
+            style={{
+              backgroundColor: cardColorSchemes.profession.bg,
+              borderColor: cardColorSchemes.profession.border,
+              borderWidth: "2px",
+              borderStyle: "solid"
+            }}
           >
             <h3
-              className="text-2xl mb-4 flex items-center text-[#4F2F1D]"
+              className="text-2xl mb-4 flex items-center"
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
+                color: cardColorSchemes.profession.title
               }}
             >
-              <FaGraduationCap className="mr-2 text-[#4F2F1D]" /> Profession
+              <FaGraduationCap className="mr-2" style={{ color: cardColorSchemes.profession.icon }} /> Profession
             </h3>
             <div className="space-y-2">
               {Object.entries(professionDetails).map(([key, value]) => (
@@ -593,10 +704,10 @@ const ProfileDetail = () => {
                     fontWeight: 400,
                   }}
                 >
-                  <strong className="text-[#4F2F1D]">
+                  <strong style={{ color: cardColorSchemes.profession.label }}>
                     {key}:
                   </strong>
-                  <span className="text-[#6B4132] ml-2">
+                  <span style={{ color: cardColorSchemes.profession.value }} className="ml-2">
                     {value || 'Not specified'}
                   </span>
                 </p>
@@ -608,20 +719,27 @@ const ProfileDetail = () => {
         {/* Family Details */}
         {Object.keys(familyDetails).length > 0 && (
           <motion.div
-            variants={cardVariants}
+            variants={getCardVariants('family')}
             initial="initial"
             animate="animate"
             whileHover="hover"
-            className="p-8 bg-[#F5EDE7] rounded-xl shadow-lg border border-[#E5D3C8] transition-all"
+            className="p-8 rounded-xl shadow-lg transition-all"
+            style={{
+              backgroundColor: cardColorSchemes.family.bg,
+              borderColor: cardColorSchemes.family.border,
+              borderWidth: "2px",
+              borderStyle: "solid"
+            }}
           >
             <h3
-              className="text-2xl mb-4 flex items-center text-[#4F2F1D]"
+              className="text-2xl mb-4 flex items-center"
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
+                color: cardColorSchemes.family.title
               }}
             >
-              <FaUsers className="mr-2 text-[#4F2F1D]" /> Family
+              <FaUsers className="mr-2" style={{ color: cardColorSchemes.family.icon }} /> Family
             </h3>
             <div className="space-y-2">
               {Object.entries(familyDetails).map(([key, value]) => (
@@ -633,10 +751,10 @@ const ProfileDetail = () => {
                     fontWeight: 400,
                   }}
                 >
-                  <strong className="text-[#4F2F1D]">
+                  <strong style={{ color: cardColorSchemes.family.label }}>
                     {key}:
                   </strong>
-                  <span className="text-[#6B4132] ml-2">
+                  <span style={{ color: cardColorSchemes.family.value }} className="ml-2">
                     {value || 'Not specified'}
                   </span>
                 </p>

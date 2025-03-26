@@ -270,7 +270,7 @@ const FindPartner = () => {
       <Header />
 
       {/* Profile Slider */}
-      <ProfileSlider />
+      {/* <ProfileSlider /> */}
 
       {/* Search Bar and Filter Toggle for Mobile */}
       <div className="container mx-auto px-4 sm:px-8 my-4">

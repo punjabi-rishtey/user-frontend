@@ -453,7 +453,7 @@ const SignupPage = () => {
             </div>
           </div>
 
-          <div
+          {/* <div
             className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg"
             style={{ width: "450px", height: "450px" }}
           >
@@ -484,19 +484,9 @@ const SignupPage = () => {
                 )
               )}
             </form>
-          </div>
+          </div> */}
         </div>
       </div>
-
-      {showPreferences && (
-        <PreferencesPopup
-          onClose={() => {
-            setShowPreferences(false);
-            navigate("/", { replace: true });
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        />
-      )}
 
       <Footer />
     </div>
