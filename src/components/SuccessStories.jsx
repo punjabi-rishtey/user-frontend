@@ -166,7 +166,7 @@ const SuccessStories = () => {
                   {story.name}
                 </h3>
                 <p
-                  className="text-[#333333]"
+                  className="text-[#333333] text-sm sm:text-base"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {`"${story.quote}"`}

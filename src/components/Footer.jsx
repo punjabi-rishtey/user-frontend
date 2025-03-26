@@ -66,6 +66,12 @@ const Footer = () => {
             >
               Contact
             </button>
+            <button
+              onClick={() => handleNavigation("/")}
+              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm font-medium"
+            >
+              Punjabi Marriage Forum
+            </button>
           </div>
 
           {/* Social Media Links */}
@@ -107,12 +113,15 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col items-center space-y-4 text-sm text-[#E5D3C8]">
           <p className="text-center">&copy; 2025 PunjabiMatrimony. All rights reserved.</p>
-          <div className="flex space-x-4">
+          <div className="flex flex-wrap justify-center gap-4">
             <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Privacy Policy
             </a>
             <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Terms of Service
+            </a>
+            <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
+              Punjabi Marriage Forum
             </a>
           </div>
         </div>

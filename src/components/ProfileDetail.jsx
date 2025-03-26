@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Footer from "./Footer";
 import Header from "./Header";
+import ProfilePhotosLayout from "./ProfilePhotosLayout"; // Import the new component
 import {
   FaHeart,
   FaUser,
@@ -12,36 +13,9 @@ import {
   FaTimes,
   FaArrowLeft,
 } from "react-icons/fa";
-import Slider from "react-slick"; // Importing react-slick for the slideshow
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import profileIcon from "../assets/profile.png";
-
-
-// Custom Arrow Components for the slider
-const NextArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={className}
-      style={{ ...style, display: "block", color: "black" }}
-      onClick={onClick}
-    />
-  );
-};
-
-const PrevArrow = (props) => {
-  const { className, style, onClick } = props;
-  return (
-    <div
-      className={className}
-      style={{ ...style, display: "block", color: "black" }}
-      onClick={onClick}
-    />
-  );
-};
 
 // Define a vibrant color palette for different card types
 const cardColorSchemes = {
@@ -102,8 +76,6 @@ const ProfileDetail = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
-  const [popupImage, setPopupImage] = useState(null);
   const { scrollYProgress } = useScroll();
 
   // Dynamic Scroll Effects for Boxes
@@ -149,11 +121,6 @@ const ProfileDetail = () => {
     navigate(-1);
   };
 
-  const handleImageClick = (image) => {
-    setPopupImage(image);
-    setIsImagePopupOpen(true);
-  };
-
   // Format values for better display
   const formatValue = (value) => {
     if (value === undefined || value === null) return 'Not specified';
@@ -168,45 +135,6 @@ const ProfileDetail = () => {
     }
     
     return value;
-  };
-
-  // Get slides to show based on image count
-  const getSlidesToShow = (imageCount) => {
-    if (imageCount >= 3) return 3;
-    if (imageCount === 2) return 2;
-    return 1;
-  };
-
-  // Slider settings
-  const settings = {
-    dots: true,
-    infinite: true,
-    speed: 500,
-    slidesToShow: profileData?.profile_pictures ? getSlidesToShow(profileData.profile_pictures.length) : 1,
-    slidesToScroll: 1,
-    autoplay: true,
-    autoplaySpeed: 3000,
-    pauseOnHover: true,
-    nextArrow: <NextArrow />,
-    prevArrow: <PrevArrow />,
-    responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-          infinite: true,
-          dots: true,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
-    ],
   };
 
   if (loading) {
@@ -407,72 +335,16 @@ const ProfileDetail = () => {
         </button>
       </div>
 
-      {/* Profile Picture */}
-      <motion.img
-        src={(profileData.profile_pictures && profileData.profile_pictures.length > 0) 
-          ? profileData.profile_pictures[0] 
-          : profileIcon}
-        alt={profileData.name}
-        className="rounded-full border-4 border-[#4F2F1D] cursor-pointer mx-auto mt-12 mb-8 shadow-xl object-cover"
-        style={{
-          width: imageSize,
-          height: imageSize,
-          opacity: imageOpacity,
-          transition: "all 0.3s ease-in-out",
-        }}
-        onClick={() => handleImageClick((profileData.profile_pictures && profileData.profile_pictures.length > 0) 
-          ? profileData.profile_pictures[0] 
-          : profileIcon)}
-      />
-
-      {/* Enlarged Image Popup */}
-      {isImagePopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#F5EDE7] p-4 rounded-lg shadow-2xl border border-[#E5D3C8] relative">
-            <button
-              className="absolute top-2 right-2 text-[#4F2F1D] text-xl hover:text-[#6B4132] transition-colors duration-300"
-              onClick={() => setIsImagePopupOpen(false)}
-            >
-              <FaTimes />
-            </button>
-            <img
-              src={popupImage}
-              alt="Enlarged"
-              className="rounded-lg max-w-[90vw] max-h-[80vh] shadow-lg"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Profile Name & About */}
+      {/* Profile Name */}
       <h2
-        className="text-5xl font-bold text-center text-[#4F2F1D] mb-4"
+        className="text-5xl font-bold text-center text-[#4F2F1D] mt-10 mb-6"
         style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
       >
         {profileData.name}
       </h2>
-      
-      {/* Slideshow for profile pictures - show whenever there's at least one image */}
-      {profileData.profile_pictures && profileData.profile_pictures.length > 0 && (
-        <div className="flex justify-center mb-8 mt-8">
-          <div className="w-4/5 lg:w-3/4">
-            <Slider {...settings}>
-              {profileData.profile_pictures.map((image, index) => (
-                <div key={index} className="px-2">
-                  <div className="mx-2">
-                    <img
-                      src={image}
-                      alt={`Profile ${index + 1}`}
-                      className="w-64 h-64 rounded-lg shadow-md cursor-pointer hover:shadow-xl transition-shadow duration-300 mx-auto object-cover"
-                      onClick={() => handleImageClick(image)}
-                    />
-                  </div>
-                </div>
-              ))}
-            </Slider>
-          </div>
-        </div>
-      )}
+
+      {/* ProfilePhotosLayout Component - Replaces previous slideshow implementation */}
+      <ProfilePhotosLayout photos={profileData.profile_pictures} />
 
       {/* Profile Details Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">

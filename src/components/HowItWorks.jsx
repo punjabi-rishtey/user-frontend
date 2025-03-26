@@ -29,7 +29,7 @@ const HowItWorks = () => {
     <div className="bg-[#FFFFFF] py-12 sm:py-16 overflow-hidden">
       <div className="container mx-auto text-center px-4">
         <h2
-          className="text-3xl sm:text-5xl mb-8 sm:mb-12 text-[#4F2F1D]"
+          className="text-3xl sm:text-4xl mb-8 sm:mb-12 text-[#4F2F1D]"
           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
         >
           How It Works
@@ -45,14 +45,14 @@ const HowItWorks = () => {
                 </div>
                 {/* Title */}
                 <h3
-                  className="text-2xl mb-2 text-[#4F2F1D]"
+                  className="text-xl sm:text-2xl mb-2 text-[#4F2F1D]"
                   style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                   {step.title}
                 </h3>
                 {/* Description */}
                 <p 
-                  className="text-[#6B4132] text-base"
+                  className="text-[#6B4132] text-sm sm:text-base"
                   style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                   {step.description}

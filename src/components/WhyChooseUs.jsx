@@ -40,13 +40,13 @@ const WhyChooseUs = () => {
         <div className="bg-[#FFFFFF] py-12 sm:py-16 overflow-hidden">
             <div className="container mx-auto px-4 text-center">
                 <h2
-                    className="text-3xl sm:text-5xl mb-6 sm:mb-12 text-[#4F2F1D]"
+                    className="text-3xl sm:text-4xl mb-6 sm:mb-12 text-[#4F2F1D]"
                     style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                 >
                     Why Choose Us
                 </h2>
                 <p 
-                    className="text-lg sm:text-xl text-[#6B4132] mb-8 sm:mb-12"
+                    className="text-base sm:text-lg text-[#6B4132] mb-8 sm:mb-12"
                     style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                 >
                     Discover the benefits of joining our platform and find your perfect match with ease.
@@ -64,13 +64,13 @@ const WhyChooseUs = () => {
                         >
                             <div className="mb-4 flex justify-center">{feature.icon}</div>
                             <h3
-                                className="text-2xl mb-2 text-[#4F2F1D]"
+                                className="text-xl sm:text-2xl mb-2 text-[#4F2F1D]"
                                 style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                             >
                                 {feature.title}
                             </h3>
                             <p 
-                                className="text-[#6B4132]"
+                                className="text-[#6B4132] text-sm sm:text-base"
                                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                             >
                                 {feature.description}

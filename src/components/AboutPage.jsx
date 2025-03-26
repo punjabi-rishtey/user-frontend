@@ -143,7 +143,7 @@ const AboutPage = () => {
                 className="text-[#333333] text-lg"
                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
               >
-                Shri Balraj Sablok established "Punjabi Marriage Forum (Now
+                "Punjabi Marriage Forum (Now
                 Punjabi-Rishtey, our digital platform)" in 2000 and has been
                 running successfully for 22 years.
               </p>
