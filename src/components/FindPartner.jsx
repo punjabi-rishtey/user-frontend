@@ -9,12 +9,15 @@ import ProfileSlider from "./ProfileSlider";
 import { motion } from "framer-motion";
 import axios from "axios"; // Make sure axios is installed
 
+
 const FindPartner = () => {
   const [filters, setFilters] = useState({
     caste: "",
     manglik: "",
     maritalStatus: "",
     religion: "",
+    ageMin: "", // Added minimum age filter
+    ageMax: "", // Added maximum age filter
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
@@ -114,7 +117,7 @@ const FindPartner = () => {
 
   // Rest of the component remains the same
   
-  // Include all your original code from here down
+  // Handle all input changes including range inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters({
@@ -129,6 +132,8 @@ const FindPartner = () => {
       manglik: "",
       maritalStatus: "",
       religion: "",
+      ageMin: "", // Clear min age
+      ageMax: "", // Clear max age
     });
     setSearchTerm("");
   };
@@ -183,9 +188,19 @@ const FindPartner = () => {
     const normalizedMaritalStatus = normalizeMaritalStatus(item.marital_status);
     const isManglik = item.mangalik === true || item.mangalik === "true";
     const oppositeGender = getOppositeGender();
+    const age = parseInt(item.age);
     
     // Only show profiles of opposite gender based on currentUserGender
     if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
+      return false;
+    }
+    
+    // Apply age filter if values are set
+    if (filters.ageMin && !isNaN(age) && age < parseInt(filters.ageMin)) {
+      return false;
+    }
+    
+    if (filters.ageMax && !isNaN(age) && age > parseInt(filters.ageMax)) {
       return false;
     }
     
@@ -439,6 +454,49 @@ const FindPartner = () => {
 
           {/* Mobile Filter options */}
           <div className="space-y-4">
+            {/* Age Range Filter for Mobile */}
+            <div className="mb-4">
+              <label
+                className="block text-[#E5D3C8] mb-2"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                Age Range
+              </label>
+              <div className="flex space-x-2">
+                <input
+                  type="number"
+                  name="ageMin"
+                  placeholder="Min"
+                  value={filters.ageMin}
+                  onChange={handleChange}
+                  min="18"
+                  max="100"
+                  className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
+                />
+                <input
+                  type="number"
+                  name="ageMax"
+                  placeholder="Max"
+                  value={filters.ageMax}
+                  onChange={handleChange}
+                  min="18"
+                  max="100"
+                  className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
+                />
+              </div>
+            </div>
+
             {filterOptions.map(({ label, name, options }, index) => (
               <div className="mb-4" key={index}>
                 <label
@@ -501,6 +559,50 @@ const FindPartner = () => {
           >
             Filters
           </h2>
+
+          {/* Age Range Filter for Desktop */}
+          <div className="mb-6">
+            <label
+              className="block text-[#6B4132] mb-2"
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
+            >
+              Age Range
+            </label>
+            <div className="flex space-x-3 items-center">
+              <input
+                type="number"
+                name="ageMin"
+                placeholder="Min"
+                value={filters.ageMin}
+                onChange={handleChange}
+                min="18"
+                max="100"
+                className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              />
+              <span className="text-[#6B4132]">to</span>
+              <input
+                type="number"
+                name="ageMax"
+                placeholder="Max"
+                value={filters.ageMax}
+                onChange={handleChange}
+                min="18"
+                max="100"
+                className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              />
+            </div>
+          </div>
 
           {filterOptions.map(({ label, name, options }, index) => (
             <div className="mb-4" key={index}>

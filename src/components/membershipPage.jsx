@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
+import ReferralProgram from "./ReferralProgram";
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
@@ -315,7 +316,7 @@ const MembershipPage = () => {
   return (
     <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
-
+  
       <main className="flex-grow py-16 px-6">
         <h2 
           className="text-5xl text-center mb-12 text-[#4F2F1D]"
@@ -323,13 +324,13 @@ const MembershipPage = () => {
         >
           Choose Your Perfect Plan
         </h2>
-
+  
         {error && (
           <div className="mb-8 max-w-3xl mx-auto bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
             {error}
           </div>
         )}
-
+  
         {loading ? (
           <p className="text-center text-[#4F2F1D] text-xl">Loading membership plans...</p>
         ) : (
@@ -400,6 +401,12 @@ const MembershipPage = () => {
             ))}
           </div>
         )}
+
+        {/* Add the ReferralProgram component here - below the plans */}
+      <div className="mt-16">
+        <ReferralProgram />
+      </div>
+
       </main>
 
       {/* Payment Modal */}
