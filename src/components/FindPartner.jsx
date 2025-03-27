@@ -289,7 +289,7 @@ const FindPartner = () => {
       options: uniqueValues("caste"),
     },
     {
-      label: "Marital Status",
+      label: "Marital Status / History",
       name: "maritalStatus",
       // Use only the standardized list
       options: predefinedOptions.maritalStatus,
