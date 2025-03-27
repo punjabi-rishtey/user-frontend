@@ -431,6 +431,7 @@ const [basicData, setBasicData] = useState({
   dob: "",
   religion: "",
   marital_status: "",
+  age: "",
 });
 
 const [personalData, setPersonalData] = useState({
@@ -1459,6 +1460,7 @@ const handleCancel = () => {
       <InfoRow label="Gender" value={basicData.gender} isEditing={isEditing} name="gender" onChange={handleBasicChange} type="select" options={[{ value: "male", label: "Male" }, { value: "female", label: "Female" }]} />
       <InfoRow label="Religion" value={basicData.religion} isEditing={isEditing} name="religion" onChange={handleBasicChange} type="select" options={[{ value: "hindu", label: "Hindu" }, { value: "sikh", label: "Sikh" }, { value: "jain", label: "Jain" }, { value: "buddhist", label: "Buddhist" }]} />
       <InfoRow label="Marital Status" value={basicData.marital_status} isEditing={isEditing} name="marital_status" onChange={handleBasicChange} type="select" options={[{ value: "never_married", label: "Never Married" }, { value: "divorced", label: "Divorced" }, { value: "widow_widower", label: "Widow/Widower" }, { value: "awaiting_divorce", label: "Awaiting Divorce" }]} />
+      <InfoRow label="Age" value={basicData.age} isEditing={isEditing} name="age" onChange={handleBasicChange} />
     </div>
 
               {/* Personal Details Section */}
