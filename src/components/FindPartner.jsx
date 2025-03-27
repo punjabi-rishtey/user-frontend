@@ -25,6 +25,16 @@ const FindPartner = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [currentUserGender, setCurrentUserGender] = useState(null);
   const [profileComplete, setProfileComplete] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false); // Add state to track if auth has been checked
+
+  // Give auth context time to initialize before checking
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAuthChecked(true);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Refresh user data when component mounts to get latest gender
   useEffect(() => {
@@ -41,15 +51,19 @@ const FindPartner = () => {
     }
   }, [user]);
 
+  // Only redirect if we've confirmed the user is not authenticated
+  // and we've given auth context time to initialize
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated && authChecked) {
       navigate("/login", { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, authChecked]);
 
   // First check if profile is complete enough to access this feature
   useEffect(() => {
     const checkProfileCompleteness = async () => {
+      if (!isAuthenticated) return; // Don't check if not authenticated
+      
       try {
         await axios.get("https://backend-nm1z.onrender.com/api/users/find-my-partner", {
           headers: {
@@ -71,10 +85,10 @@ const FindPartner = () => {
       }
     };
 
-    if (isAuthenticated) {
+    if (isAuthenticated && authChecked) {
       checkProfileCompleteness();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authChecked]);
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -98,6 +112,9 @@ const FindPartner = () => {
     }
   };
 
+  // Rest of the component remains the same
+  
+  // Include all your original code from here down
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters({
@@ -287,6 +304,19 @@ const FindPartner = () => {
       ],
     },
   ];
+
+  // Loading indicator while authChecked is false
+  if (!authChecked) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-[#4F2F1D] text-xl">Checking authentication...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   // Render incomplete profile message
   if (!profileComplete) {

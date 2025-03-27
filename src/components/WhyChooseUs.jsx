@@ -1,3 +1,4 @@
+// WhyChooseUs Component with Updated Animations
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
@@ -26,12 +27,14 @@ const WhyChooseUs = () => {
         }
     ];
 
+    // Updated cardVariants to match both components
     const cardVariants = {
         initial: { opacity: 0, y: 20 },
         animate: { opacity: 1, y: 0 },
         hover: {
             scale: 1.05,
             backgroundColor: '#F5EDE7',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             transition: { duration: 0.3 },
         },
     };

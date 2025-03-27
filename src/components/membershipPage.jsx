@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
 
@@ -14,8 +17,63 @@ const MembershipPage = () => {
     phone: "",
     screenshot: null,
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+  const { isAuthenticated, user, refreshUser } = useAuth();
+
+  // Refresh user data when component mounts
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUser();
+    }
+  }, [isAuthenticated, refreshUser]);
+
+  // Improved authentication check - prevent premature redirects
+  useEffect(() => {
+    // Only perform redirection after we've confirmed authentication status
+    if (authChecked && !isAuthenticated) {
+      navigate("/login", { replace: true });
+    }
+  }, [authChecked, isAuthenticated, navigate]);
+
+  // Check authentication properly with timeout for initialization
+  useEffect(() => {
+    // Check if token exists in localStorage
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      // If we have a token but auth context says not authenticated,
+      // wait a moment for the auth context to catch up (it might still be initializing)
+      if (!isAuthenticated) {
+        const timeout = setTimeout(() => {
+          console.log("Auth context hasn't updated after delay, considering user not authenticated");
+          setAuthChecked(true);
+        }, 1500); // Give the auth context 1.5 seconds to initialize
+        
+        return () => clearTimeout(timeout);
+      } else {
+        // We have a token and auth context says we're authenticated
+        setAuthChecked(true);
+      }
+    } else {
+      // No token exists, definitely not authenticated
+      setAuthChecked(true);
+    }
+  }, [isAuthenticated]);
+
+  // Debug authentication state
+  useEffect(() => {
+    console.log("Auth state:", { 
+      isAuthenticated, 
+      hasToken: !!localStorage.getItem('token'),
+      authChecked,
+      user
+    });
+  }, [isAuthenticated, authChecked, user]);
 
   useEffect(() => {
     const fetchMemberships = async () => {
@@ -43,6 +101,13 @@ const MembershipPage = () => {
   }, [previewUrl]);
 
   const handlePlanClick = (plan) => {
+    // Check authentication before opening modal
+    if (!isAuthenticated) {
+      setError("You must be logged in to subscribe to a plan");
+      navigate("/login");
+      return;
+    }
+    
     setSelectedPlan(plan);
     setShowModal(true);
     // Reset form when opening modal
@@ -78,32 +143,60 @@ const MembershipPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
     
-    if (!formData.name || !formData.phone || !formData.screenshot) {
-      alert("Please fill all required fields");
+    // Debug authentication state
+    console.log("Submit auth state:", { isAuthenticated, user });
+    console.log("Token exists:", !!localStorage.getItem('token'));
+
+    // First check if user is authenticated
+    if (!isAuthenticated) {
+      setError("You must be logged in to subscribe to a plan");
+      setIsSubmitting(false);
       return;
     }
-    
+
     try {
-      const data = new FormData();
-      data.append("name", formData.name);
-      data.append("phone", formData.phone);
-      data.append("planId", selectedPlan._id);
-      data.append("paymentScreenshot", formData.screenshot);
-      
-      // For demonstration - replace with your actual API endpoint
-      // const response = await fetch("https://backend-nm1z.onrender.com/api/payments/submit", {
-      //   method: "POST",
-      //   body: data
-      // });
-      
-      // if (!response.ok) throw new Error("Failed to submit payment");
-      
-      // For demo purposes just show success
-      alert("Payment details submitted successfully! We'll verify and confirm your membership.");
-      setShowModal(false);
+      // Verify token presence
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      // Create form data for submission with only the required fields
+      const formDataToSubmit = new FormData();
+      formDataToSubmit.append('fullName', formData.name);
+      formDataToSubmit.append('phoneNumber', formData.phone);
+      formDataToSubmit.append('screenshot', formData.screenshot);
+
+      const response = await axios.post(
+        'https://backend-nm1z.onrender.com/api/users/subscribe',
+        formDataToSubmit,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      if (response.data && response.data.success) {
+        setSuccess(true);
+        closeModal();
+        
+        // Refresh user data to update subscription status
+        if (refreshUser) {
+          await refreshUser();
+        }
+      } else {
+        throw new Error(response.data?.message || "Payment submission failed");
+      }
     } catch (err) {
-      alert(`Error submitting payment: ${err.message}`);
+      console.error("Payment submission error:", err);
+      setError(err.message || "Failed to process payment. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -133,6 +226,92 @@ const MembershipPage = () => {
     exit: { opacity: 0 }
   };
 
+  // Don't render anything substantial until we've checked authentication
+  if (!authChecked) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-[#4F2F1D] text-xl">Loading...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // If not authenticated, show a message
+  if (authChecked && !isAuthenticated) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h2 
+              className="text-2xl mb-4 text-[#4F2F1D] text-center"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Authentication Required
+            </h2>
+            <p 
+              className="text-[#6B4132] mb-6 text-center"
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            >
+              Please log in to access membership plans.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              >
+                Log In
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // If payment was successful, show success message
+  if (success) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h2 
+              className="text-2xl mb-4 text-[#4F2F1D] text-center"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Payment Successful!
+            </h2>
+            <p 
+              className="text-[#6B4132] mb-6 text-center"
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            >
+              Thank you for your subscription. Our team will verify your payment and upgrade your account shortly.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={() => {
+                  setSuccess(false);
+                  navigate('/');
+                }}
+                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              >
+                Go to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
@@ -145,10 +324,14 @@ const MembershipPage = () => {
           Choose Your Perfect Plan
         </h2>
 
+        {error && (
+          <div className="mb-8 max-w-3xl mx-auto bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+            {error}
+          </div>
+        )}
+
         {loading ? (
           <p className="text-center text-[#4F2F1D] text-xl">Loading membership plans...</p>
-        ) : error ? (
-          <p className="text-center text-red-600 text-xl">Error: {error}</p>
         ) : (
           <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto">
             {plans.map((plan, index) => (
@@ -254,6 +437,12 @@ const MembershipPage = () => {
                   </button>
                 </div>
 
+                {error && (
+                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded">
+                    {error}
+                  </div>
+                )}
+
                 <div className="flex flex-col md:flex-row gap-6">
                   {/* QR Code Section */}
                   <div className="flex-1 bg-[#F9F3EE] p-6 rounded-lg">
@@ -302,6 +491,7 @@ const MembershipPage = () => {
                           required
                           className="w-full p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D]"
                           style={{ fontFamily: "'Modern Era', sans-serif" }}
+                          placeholder="Enter your full name"
                         />
                       </div>
                       
@@ -322,6 +512,7 @@ const MembershipPage = () => {
                           required
                           className="w-full p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D]"
                           style={{ fontFamily: "'Modern Era', sans-serif" }}
+                          placeholder="Enter your phone number"
                         />
                       </div>
                       
@@ -375,10 +566,11 @@ const MembershipPage = () => {
                       
                       <button 
                         type="submit"
-                        className="w-full py-3 mt-6 text-white bg-[#53392A] rounded-md hover:bg-[#6B4132] transition-colors"
+                        disabled={isSubmitting}
+                        className={`w-full py-3 mt-6 text-white ${isSubmitting ? 'bg-[#8B7355]' : 'bg-[#53392A] hover:bg-[#6B4132]'} rounded-md transition-colors`}
                         style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 500 }}
                       >
-                        Submit Payment Details
+                        {isSubmitting ? 'Submitting...' : 'Submit Payment Details'}
                       </button>
                     </form>
                   </div>
