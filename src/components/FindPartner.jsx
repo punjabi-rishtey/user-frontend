@@ -24,6 +24,7 @@ const FindPartner = () => {
   const { isAuthenticated, user, refreshUser } = useAuth(); // Add refreshUser from context
   const [showFilters, setShowFilters] = useState(false);
   const [currentUserGender, setCurrentUserGender] = useState(null);
+  const [profileComplete, setProfileComplete] = useState(true);
 
   // Refresh user data when component mounts to get latest gender
   useEffect(() => {
@@ -46,24 +47,56 @@ const FindPartner = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Fetch users from API
+  // First check if profile is complete enough to access this feature
   useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
+    const checkProfileCompleteness = async () => {
       try {
-        const response = await axios.get("https://backend-nm1z.onrender.com/api/users/all-basic");
-        setUsers(response.data);
-        setError(null);
+        await axios.get("https://backend-nm1z.onrender.com/api/users/find-my-partner", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        // If we get here, the profile is complete enough (no 403 error)
+        setProfileComplete(true);
+        fetchUsers(); // Fetch users only if profile is complete
       } catch (err) {
-        console.error("Error fetching users:", err);
-        setError("Failed to load users. Please try again later.");
-      } finally {
+        console.error("Error checking profile completeness:", err);
+        if (err.response && err.response.status === 403) {
+          setProfileComplete(false);
+          setError("Your profile must be at least 70% complete to access this feature.");
+        } else {
+          setError("Failed to check profile completeness. Please try again later.");
+        }
         setLoading(false);
       }
     };
 
-    fetchUsers();
-  }, []);
+    if (isAuthenticated) {
+      checkProfileCompleteness();
+    }
+  }, [isAuthenticated]);
+
+  // Fetch users from API
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("https://backend-nm1z.onrender.com/api/users/all-basic");
+      if (Array.isArray(response.data)) {
+        setUsers(response.data);
+      } else if (response.data && Array.isArray(response.data.users)) {
+        setUsers(response.data.users);
+      } else {
+        console.warn("API response data is not in expected format:", response.data);
+        setUsers([]);
+      }
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setError("Failed to load users. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -127,7 +160,9 @@ const FindPartner = () => {
     return currentUserGender === 'male' ? 'female' : 'male';
   };
 
-  const filteredData = users.filter((item) => {
+  const filteredData = Array.isArray(users) ? users.filter((item) => {
+    if (!item) return false;
+    
     const normalizedMaritalStatus = normalizeMaritalStatus(item.marital_status);
     const isManglik = item.mangalik === true || item.mangalik === "true";
     const oppositeGender = getOppositeGender();
@@ -150,7 +185,7 @@ const FindPartner = () => {
       (searchTerm === "" || 
        item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-  });
+  }) : [];
   
   // Sort filtered data by name alphabetically for better user experience
   const sortedFilteredData = [...filteredData].sort((a, b) => 
@@ -160,7 +195,11 @@ const FindPartner = () => {
   // Extract unique values for each filter category
   const uniqueValues = (key) => {
     const values = [];
+    if (!Array.isArray(users)) return values;
+    
     users.forEach(user => {
+      if (!user) return;
+      
       let value;
       
       if (key === "maritalStatus") {
@@ -249,18 +288,61 @@ const FindPartner = () => {
     },
   ];
 
-  if (loading) {
+  // Render incomplete profile message
+  if (!profileComplete) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex items-center justify-center">
-        <div className="text-[#4F2F1D] text-xl">Loading profiles...</div>
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h2 
+              className="text-2xl mb-4 text-[#4F2F1D] text-center"
+              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+            >
+              Profile Incomplete
+            </h2>
+            <p 
+              className="text-[#6B4132] mb-6 text-center"
+              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            >
+              Your profile must be at least 70% complete to access the partner search feature.
+            </p>
+            <div className="flex justify-center">
+              <button
+                onClick={() => navigate('/profilepage')}
+                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              >
+                Complete Your Profile
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
-  if (error) {
+  if (loading) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex items-center justify-center">
-        <div className="text-[#990000] text-xl">{error}</div>
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-[#4F2F1D] text-xl">Loading profiles...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error && profileComplete) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-[#990000] text-xl">{error}</div>
+        </div>
+        <Footer />
       </div>
     );
   }
@@ -349,11 +431,21 @@ const FindPartner = () => {
                   }}
                 >
                   <option value="">Select {label}</option>
-                  {options.map((option, idx) => (
-                    <option key={idx} value={option}>
-                      {formatOption(option)}
-                    </option>
-                  ))}
+                  {Array.isArray(options) ? options.map((option, idx) => {
+                    if (option && typeof option === 'object' && 'value' in option) {
+                      return (
+                        <option key={idx} value={option.value}>
+                          {option.label || formatOption(option.value)}
+                        </option>
+                      );
+                    } else {
+                      return (
+                        <option key={idx} value={option}>
+                          {formatOption(option)}
+                        </option>
+                      );
+                    }
+                  }) : null}
                 </select>
               </div>
             ))}
