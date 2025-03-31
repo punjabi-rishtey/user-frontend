@@ -1,123 +1,197 @@
-// HowItWorks Component with Updated Animations
-import React from "react";
-import { motion } from 'framer-motion';
-import { UserPlus, Search, Heart, MessageSquare } from "lucide-react";
+import React from 'react';
+import { UserPlus, Search, Heart, MessageSquare } from 'lucide-react';
 
 const HowItWorks = () => {
-  const steps = [
-    {
-      title: "Sign Up",
-      description: "Create your profile and join our trusted community.",
-      icon: <UserPlus className="w-14 h-14 text-[#4F2F1D]" />,
-    },
-    {
-      title: "Find Matches",
-      description: "Browse and search for compatible profiles.",
-      icon: <Search className="w-14 h-14 text-[#4F2F1D]" />,
-    },
-    {
-      title: "Express Interest",
-      description: "Send requests and connect with potential partners.",
-      icon: <Heart className="w-14 h-14 text-[#4F2F1D]" />,
-    },
-    {
-      title: "Start Your Journey",
-      description: "Chat, build connections, and take the next step.",
-      icon: <MessageSquare className="w-14 h-14 text-[#4F2F1D]" />,
-    },
-  ];
+    const steps = [
+        {
+            title: 'Sign Up',
+            description: 'Create your profile and join our vibrant community.',
+            icon: <UserPlus className="text-orange-800 w-10 h-10" />
+        },
+        {
+            title: 'Find Matches',
+            description: 'Browse and search for compatible profiles with traditional values.',
+            icon: <Search className="text-orange-800 w-10 h-10" />
+        },
+        {
+            title: 'Express Interest',
+            description: 'Send requests and connect with potential partners.',
+            icon: <Heart className="text-orange-800 w-10 h-10" />
+        },
+        {
+            title: 'Start Your Journey',
+            description: 'Chat, build connections, and take the first step towards shaadi.',
+            icon: <MessageSquare className="text-orange-800 w-10 h-10" />
+        }
+    ];
 
-  // Using the same cardVariants as WhyChooseUs for consistency
-  const cardVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    hover: {
-      scale: 1.05,
-      backgroundColor: '#F5EDE7',
-      boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-      transition: { duration: 0.3 },
-    },
-  };
-
-  const arrowVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    hover: { x: [0, 5, 0], transition: { repeat: Infinity, duration: 1 } }
-  };
-
-  return (
-    <div className="bg-[#FFFFFF] py-12 sm:py-16 overflow-hidden">
-      <div className="container mx-auto text-center px-4">
-        <h2
-          className="text-3xl sm:text-4xl mb-8 sm:mb-12 text-[#4F2F1D]"
-          style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-        >
-          How It Works
-        </h2>
-
-        <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
-          {steps.map((step, index) => (
-            <div key={index} className="relative flex items-center w-full md:w-auto">
-              <motion.div
-                variants={cardVariants}
-                initial="initial"
-                animate="animate"
-                whileHover="hover"
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="relative flex flex-col items-center bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg border border-[#E5D3C8] w-full"
-              >
-                {/* Icon */}
-                <div className="mb-4 p-4 rounded-full bg-[#FFFFFF]">
-                  {step.icon}
+    return (
+        <div className="relative bg-amber-50 py-12 sm:py-16 overflow-hidden">
+            {/* Traditional Indian Pattern Background - Top Border */}
+            <div className="absolute top-0 left-0 right-0 h-8 bg-orange-800 overflow-hidden">
+                <div className="flex justify-center">
+                    {Array.from({ length: 30 }).map((_, index) => (
+                        <div key={`top-pattern-${index}`} className="w-8 h-8 relative">
+                            <div className="absolute inset-0 bg-orange-700 rotate-45 transform origin-center scale-50"></div>
+                        </div>
+                    ))}
                 </div>
-                {/* Title */}
-                <h3
-                  className="text-xl sm:text-2xl mb-2 text-[#4F2F1D]"
-                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-                >
-                  {step.title}
-                </h3>
-                {/* Description */}
-                <p 
-                  className="text-[#6B4132] text-sm sm:text-base"
-                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                >
-                  {step.description}
-                </p>
-              </motion.div>
-              
-              {/* Arrow with animation */}
-              {index < steps.length - 1 && (
-                <motion.div 
-                  className="hidden md:block absolute -right-6 top-1/2 transform -translate-y-1/2"
-                  variants={arrowVariants}
-                  initial="initial"
-                  animate="animate"
-                  whileHover="hover"
-                >
-                  <svg 
-                    width="24" 
-                    height="24" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    className="text-[#4F2F1D]"
-                  >
-                    <path 
-                      d="M14 5l7 7m0 0l-7 7m7-7H3" 
-                      stroke="currentColor" 
-                      strokeWidth="2" 
-                      strokeLinecap="round" 
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </motion.div>
-              )}
             </div>
-          ))}
+
+            {/* Lotus Pattern Left */}
+            <div className="absolute left-0 top-1/3 w-32 h-32 opacity-10">
+                <svg viewBox="0 0 100 100" className="w-full h-full text-orange-800 fill-current">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <path
+                            key={`lotus-petal-left-${i}`}
+                            d={`M 50 50 
+                                Q ${50 + 25 * Math.cos(i * Math.PI / 4)} ${50 + 25 * Math.sin(i * Math.PI / 4)}, 
+                                  ${50 + 50 * Math.cos(i * Math.PI / 4)} ${50 + 50 * Math.sin(i * Math.PI / 4)}
+                                Q ${50 + 25 * Math.cos((i + 0.5) * Math.PI / 4)} ${50 + 25 * Math.sin((i + 0.5) * Math.PI / 4)},
+                                  50 50`}
+                        />
+                    ))}
+                    <circle cx="50" cy="50" r="10" />
+                </svg>
+            </div>
+
+            {/* Lotus Pattern Right */}
+            <div className="absolute right-0 top-2/3 w-32 h-32 opacity-10">
+                <svg viewBox="0 0 100 100" className="w-full h-full text-orange-800 fill-current">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                        <path
+                            key={`lotus-petal-right-${i}`}
+                            d={`M 50 50 
+                                Q ${50 + 25 * Math.cos(i * Math.PI / 4)} ${50 + 25 * Math.sin(i * Math.PI / 4)}, 
+                                  ${50 + 50 * Math.cos(i * Math.PI / 4)} ${50 + 50 * Math.sin(i * Math.PI / 4)}
+                                Q ${50 + 25 * Math.cos((i + 0.5) * Math.PI / 4)} ${50 + 25 * Math.sin((i + 0.5) * Math.PI / 4)},
+                                  50 50`}
+                        />
+                    ))}
+                    <circle cx="50" cy="50" r="10" />
+                </svg>
+            </div>
+
+            {/* Traditional Rangoli Pattern Background */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
+                <svg viewBox="0 0 600 600" className="w-full max-w-4xl text-orange-800 fill-current">
+                    <circle cx="300" cy="300" r="15" />
+                    <path d="M300,240 L360,300 L300,360 L240,300 Z" fillOpacity="0.7" />
+                    <circle cx="300" cy="300" r="100" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="10,5" />
+                    <circle cx="300" cy="300" r="150" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="15,5" />
+                    <circle cx="300" cy="300" r="200" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5,10" />
+                    {Array.from({ length: 16 }).map((_, i) => (
+                        <line
+                            key={`rangoli-line-${i}`}
+                            x1="300"
+                            y1="300"
+                            x2={300 + 250 * Math.cos(i * Math.PI / 8)}
+                            y2={300 + 250 * Math.sin(i * Math.PI / 8)}
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            strokeDasharray="8,12"
+                        />
+                    ))}
+                    {Array.from({ length: 24 }).map((_, i) => (
+                        <circle
+                            key={`rangoli-dot-${i}`}
+                            cx={300 + 230 * Math.cos(i * Math.PI / 12)}
+                            cy={300 + 230 * Math.sin(i * Math.PI / 12)}
+                            r="5"
+                        />
+                    ))}
+                </svg>
+            </div>
+
+            {/* Subtle kolam-inspired dot pattern */}
+            <div className="absolute inset-0 opacity-7 pointer-events-none">
+                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+                    <pattern id="kolam-dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <circle cx="5" cy="5" r="1" fill="#4F2F1D" opacity="0.3" />
+                        <circle cx="15" cy="15" r="1" fill="#4F2F1D" opacity="0.3" />
+                        <circle cx="25" cy="25" r="1" fill="#4F2F1D" opacity="0.3" />
+                    </pattern>
+                    <rect x="0" y="0" width="100%" height="100%" fill="url(#kolam-dots)" />
+                </svg>
+            </div>
+
+            {/* Main Content */}
+            <div className="container mx-auto px-4 text-center relative z-10">
+                {/* Decorative divider above title */}
+                <div className="flex justify-center mb-6">
+                    <div className="relative w-64 h-1">
+                        <div className="absolute inset-0 bg-orange-800"></div>
+                        <div className="absolute inset-x-0 -top-1.5 mx-auto w-8 h-4 bg-amber-50">
+                            <div className="w-8 h-4 bg-amber-50 rotate-45 transform origin-center translate-y-0.5"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2 className="text-3xl sm:text-4xl mb-2 text-orange-800 font-medium relative inline-block"
+                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}>
+                    How It Works
+                    {/* Decorative underline */}
+                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-orange-800 opacity-30"></span>
+                </h2>
+
+                {/* Traditional Indian swirl decorative element */}
+                <div className="flex justify-center mb-6 mt-2">
+                    <svg viewBox="0 0 100 20" className="h-4 text-orange-800 fill-current opacity-70">
+                        <path d="M20,10 Q30,5 40,10 T60,10 T80,10" fill="none" stroke="currentColor" strokeWidth="2" />
+                        <circle cx="10" cy="10" r="2" />
+                        <circle cx="90" cy="10" r="2" />
+                    </svg>
+                </div>
+
+                <p className="text-base sm:text-lg text-orange-900 mb-8 sm:mb-12 max-w-2xl mx-auto"
+                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}>
+                    Follow these simple steps to begin your journey.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
+                    {steps.map((step, index) => (
+                        <div
+                            key={index}
+                            className="relative bg-gradient-to-b from-amber-50 to-orange-50 px-4 py-6 rounded-lg shadow-md border border-orange-200 group transition duration-300 ease-in-out hover:shadow-lg hover:scale-105"
+                        >
+                            {/* Corner decorative patterns */}
+                            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-orange-800 opacity-60 rounded-tl"></div>
+                            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-orange-800 opacity-60 rounded-tr"></div>
+                            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-orange-800 opacity-60 rounded-bl"></div>
+                            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-orange-800 opacity-60 rounded-br"></div>
+
+                            <div className="relative z-10">
+                                <div className="mb-4 flex justify-center">
+                                    <div className="bg-orange-100 rounded-full p-2 group-hover:bg-orange-200 transition duration-300">
+                                        {step.icon}
+                                    </div>
+                                </div>
+                                <h3 className="text-xl sm:text-2xl mb-2 text-orange-900"
+                                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}>
+                                    {step.title}
+                                </h3>
+                                <p className="text-orange-800 text-sm sm:text-base"
+                                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}>
+                                    {step.description}
+                                </p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Traditional Indian Pattern Background - Bottom Border */}
+            <div className="absolute bottom-0 left-0 right-0 h-8 bg-orange-800 overflow-hidden">
+                <div className="flex justify-center">
+                    {Array.from({ length: 30 }).map((_, index) => (
+                        <div key={`bottom-pattern-${index}`} className="w-8 h-8 relative">
+                            <div className="absolute inset-0 bg-orange-700 rotate-45 transform origin-center scale-50"></div>
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
-}
+    );
+};
 
 export default HowItWorks;
