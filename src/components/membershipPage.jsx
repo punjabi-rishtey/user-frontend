@@ -5,7 +5,6 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
-import ReferralProgram from "./ReferralProgram";
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
@@ -17,7 +16,11 @@ const MembershipPage = () => {
     name: "",
     phone: "",
     screenshot: null,
+    couponCode: "",
   });
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [discountPercentage, setDiscountPercentage] = useState(0);
+  const [finalPrice, setFinalPrice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -111,13 +114,17 @@ const MembershipPage = () => {
     
     setSelectedPlan(plan);
     setShowModal(true);
-    // Reset form when opening modal
+    // Reset form and coupon state when opening modal
     setFormData({
       name: "",
       phone: "",
-      screenshot: null
+      screenshot: null,
+      couponCode: ""
     });
     setPreviewUrl(null);
+    setCouponApplied(false);
+    setDiscountPercentage(0);
+    setFinalPrice(plan.price);
   };
 
   const handleInputChange = (e) => {
@@ -139,6 +146,67 @@ const MembershipPage = () => {
       // Create preview URL for the image
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+    }
+  };
+
+  // Handle coupon code application
+  const handleApplyCoupon = async () => {
+    if (!formData.couponCode.trim()) {
+      setError("Please enter a coupon code");
+      return;
+    }
+
+    try {
+      // Verify token presence
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
+
+      // Call API to validate coupon
+      const response = await axios.post(
+        'https://backend-nm1z.onrender.com/api/coupons/validate',
+        { code: formData.couponCode },
+        { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        }
+      );
+      
+      // Process response
+      if (response.data && response.data.discountValue) {
+        // Get discount information from response
+        const discount = response.data.discountValue;
+        const discountType = response.data.discountType;
+        
+        // Calculate new price based on discount type
+        let newPrice = selectedPlan.price;
+        if (discountType === "percentage") {
+          const discountAmount = (selectedPlan.price * discount) / 100;
+          newPrice = selectedPlan.price - discountAmount;
+        } else if (discountType === "fixed") {
+          newPrice = selectedPlan.price - discount;
+        }
+        
+        // Make sure price doesn't go below zero
+        newPrice = Math.max(0, newPrice);
+        
+        // Update state
+        setCouponApplied(true);
+        setDiscountPercentage(discount);
+        setFinalPrice(newPrice);
+        setError(null);
+      } else {
+        throw new Error(response.data?.message || "Failed to apply coupon");
+      }
+    } catch (err) {
+      console.error("Coupon application error:", err);
+      setError(err.response?.data?.message || err.message || "Failed to apply coupon code");
+      setCouponApplied(false);
+      setDiscountPercentage(0);
+      setFinalPrice(selectedPlan.price);
     }
   };
 
@@ -169,7 +237,14 @@ const MembershipPage = () => {
       const formDataToSubmit = new FormData();
       formDataToSubmit.append('fullName', formData.name);
       formDataToSubmit.append('phoneNumber', formData.phone);
-      formDataToSubmit.append('screenshot', formData.screenshot);
+      formDataToSubmit.append('image', formData.screenshot);
+      
+      // Include coupon code and discount information if applied
+      if (couponApplied && formData.couponCode) {
+        formDataToSubmit.append('couponCode', formData.couponCode);
+        // formDataToSubmit.append('discountPercentage', discountPercentage);
+        // formDataToSubmit.append('finalPrice', finalPrice);
+      }
 
       const response = await axios.post(
         'https://backend-nm1z.onrender.com/api/users/subscribe',
@@ -401,12 +476,6 @@ const MembershipPage = () => {
             ))}
           </div>
         )}
-
-        {/* Add the ReferralProgram component here - below the plans */}
-      <div className="mt-16">
-        <ReferralProgram />
-      </div>
-
       </main>
 
       {/* Payment Modal */}
@@ -457,7 +526,12 @@ const MembershipPage = () => {
                       className="text-lg mb-4 text-center text-[#4F2F1D]"
                       style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
                     >
-                      Scan to Pay ₹{selectedPlan.price}
+                      Scan to Pay ₹{couponApplied ? finalPrice : selectedPlan.price}
+                      {couponApplied && (
+                        <span className="block mt-1 text-sm text-green-600">
+                          {discountPercentage}% discount applied
+                        </span>
+                      )}
                     </h4>
                     
                     <div className="flex justify-center mb-4">
@@ -521,6 +595,51 @@ const MembershipPage = () => {
                           style={{ fontFamily: "'Modern Era', sans-serif" }}
                           placeholder="Enter your phone number"
                         />
+                      </div>
+
+                      <div>
+                        <label 
+                          htmlFor="couponCode" 
+                          className="block mb-2 text-[#4F2F1D]"
+                          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 500 }}
+                        >
+                          Coupon Code
+                        </label>
+                        <div className="flex space-x-2">
+                          <input
+                            type="text"
+                            id="couponCode"
+                            name="couponCode"
+                            value={formData.couponCode}
+                            onChange={handleInputChange}
+                            disabled={couponApplied}
+                            className={`flex-1 p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D] ${couponApplied ? 'bg-gray-100' : ''}`}
+                            style={{ fontFamily: "'Modern Era', sans-serif" }}
+                            placeholder="Enter coupon code (if available)"
+                          />
+                          <button
+                            type="button"
+                            onClick={couponApplied ? () => {
+                              setCouponApplied(false);
+                              setDiscountPercentage(0);
+                              setFinalPrice(selectedPlan.price);
+                              setFormData(prev => ({ ...prev, couponCode: "" }));
+                            } : handleApplyCoupon}
+                            className={`px-4 py-2 rounded-md transition-colors ${
+                              couponApplied
+                                ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                : 'bg-[#4F2F1D] hover:bg-[#6B4132] text-white'
+                            }`}
+                            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 500 }}
+                          >
+                            {couponApplied ? 'Remove' : 'Apply'}
+                          </button>
+                        </div>
+                        {couponApplied && (
+                          <p className="mt-2 text-sm text-green-600">
+                            Coupon applied! You save ₹{(selectedPlan.price * discountPercentage / 100).toFixed(2)}
+                          </p>
+                        )}
                       </div>
                       
                       <div>

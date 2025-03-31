@@ -191,6 +191,7 @@ const FindPartner = () => {
     const age = parseInt(item.age);
     const isNRI = item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes";
     const userOccupation = item.occupation || "";
+    // console.log(item.occupation);
     
     // Only show profiles of opposite gender based on currentUserGender
     if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
@@ -207,7 +208,6 @@ const FindPartner = () => {
     }
     
     return (
-      // console.log(filters.occupation)
       (filters.manglik === "" || 
        (filters.manglik === "true" && isManglik) || 
        (filters.manglik === "false" && !isManglik)) &&
