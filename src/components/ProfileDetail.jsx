@@ -638,12 +638,6 @@ const ProfileDetail = () => {
 
       {/* Contact Actions */}
       <div className="flex justify-center mb-20">
-        <button
-          className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-lg transition duration-300 mr-6 shadow-lg"
-          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-        >
-          Express Interest
-        </button>
         {user && user._id === profileData._id && (
           <button
             className="bg-[#4F2F1D] hover:bg-[#6B4132] text-white font-bold py-3 px-8 rounded-lg transition duration-300 shadow-lg"

@@ -12,12 +12,12 @@ import axios from "axios"; // Make sure axios is installed
 
 const FindPartner = () => {
   const [filters, setFilters] = useState({
-    caste: "",
     manglik: "",
     maritalStatus: "",
-    religion: "",
-    ageMin: "", // Added minimum age filter
-    ageMax: "", // Added maximum age filter
+    nriStatus: "", // Added NRI status filter
+    occupation: "", // Added occupation filter
+    ageMin: "",
+    ageMax: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
@@ -128,10 +128,10 @@ const FindPartner = () => {
 
   const handleClearFilters = () => {
     setFilters({
-      caste: "",
       manglik: "",
       maritalStatus: "",
-      religion: "",
+      nriStatus: "", // Clear NRI status
+      occupation: "", // Clear occupation filter
       ageMin: "", // Clear min age
       ageMax: "", // Clear max age
     });
@@ -189,6 +189,8 @@ const FindPartner = () => {
     const isManglik = item.mangalik === true || item.mangalik === "true";
     const oppositeGender = getOppositeGender();
     const age = parseInt(item.age);
+    const isNRI = item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes";
+    const userOccupation = item.occupation || "";
     
     // Only show profiles of opposite gender based on currentUserGender
     if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
@@ -205,15 +207,17 @@ const FindPartner = () => {
     }
     
     return (
-      (filters.caste === "" || 
-       item.caste?.toLowerCase() === filters.caste.toLowerCase()) &&
+      // console.log(filters.occupation)
       (filters.manglik === "" || 
        (filters.manglik === "true" && isManglik) || 
        (filters.manglik === "false" && !isManglik)) &&
       (filters.maritalStatus === "" || 
        normalizedMaritalStatus === filters.maritalStatus) &&
-      (filters.religion === "" || 
-       item.religion?.toLowerCase() === filters.religion.toLowerCase()) &&
+      (filters.nriStatus === "" || 
+       (filters.nriStatus === "true" && isNRI) || 
+       (filters.nriStatus === "false" && !isNRI)) &&
+      (filters.occupation === "" ||
+       userOccupation === filters.occupation) &&
       (searchTerm === "" || 
        item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
@@ -238,12 +242,8 @@ const FindPartner = () => {
         value = normalizeMaritalStatus(user.marital_status);
       } else if (key === "manglik") {
         value = user.mangalik?.toString();
-      } else if (key === "caste") {
-        value = user.caste;
       } else if (key === "gender") {
         value = user.gender?.charAt(0).toUpperCase() + user.gender?.slice(1).toLowerCase();
-      } else if (key === "religion") {
-        value = user.religion?.charAt(0).toUpperCase() + user.religion?.slice(1).toLowerCase();
       } else {
         value = user[key === "maritalStatus" ? "marital_status" : key];
       }
@@ -284,24 +284,31 @@ const FindPartner = () => {
   // Predefined options for more consistent filtering
   const predefinedOptions = {
     manglik: ["true", "false"],
+    nriStatus: ["true", "false"],
     // Standardized list of marital statuses
     maritalStatus: ["Never Married", "Divorced", "Widowed", "Separated"],
-    // Major religions in India for matrimony context
-    religion: ["Hindu", "Muslim", "Sikh", "Christian", "Jain", "Buddhist", "Parsi"],
   };
 
   // Filter options configuration for reuse
   const filterOptions = [
     {
-      label: "Religion",
-      name: "religion",
-      // Use only predefined religions for consistency
-      options: predefinedOptions.religion,
+      label: "Occupation",
+      name: "occupation",
+      options: [
+        { value: "", label: "Any" },
+        { value: "Private Job", label: "Private Job" },
+        { value: "Government Job", label: "Government Job" },
+        { value: "Business Owner", label: "Business Owner" }
+      ],
     },
     {
-      label: "Caste",
-      name: "caste",
-      options: uniqueValues("caste"),
+      label: "NRI Status",
+      name: "nriStatus",
+      options: [
+        { value: "", label: "Any" },
+        { value: "true", label: "Yes" },
+        { value: "false", label: "No" }
+      ],
     },
     {
       label: "Marital Status / History",
@@ -705,7 +712,16 @@ const FindPartner = () => {
                           fontWeight: 400,
                         }}
                       >
-                        <strong>Religion:</strong> {formatOption(item.religion) || "Not specified"}
+                        <strong>Occupation:</strong> {formatOption(item.occupation) || "Not specified"}
+                      </p>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>NRI:</strong> {item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes" ? "Yes" : "No"}
                       </p>
                       <p
                         className="text-sm sm:text-base text-[#6B4132] mb-1"

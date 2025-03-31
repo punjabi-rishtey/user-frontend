@@ -1341,6 +1341,7 @@ export default function ProfileSettings() {
           </div>
         );
       
+      // Modified portion of the profession case in renderTabContent function
       case "profession":
         return (
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
@@ -1355,6 +1356,13 @@ export default function ProfileSettings() {
                 isEditing={isEditingProfession}
                 name="occupation"
                 onChange={handleProfessionChange}
+                type="select"
+                options={[
+                  { value: "Unemployed", label: "Unemployed" },
+                  { value: "Private Job", label: "Private Job" },
+                  { value: "Government Job", label: "Government Job" },
+                  { value: "Business Owner", label: "Business Owner" },
+                ]}
               />
               <InfoRow
                 label="Designation"
@@ -1423,7 +1431,6 @@ export default function ProfileSettings() {
             />
           </div>
         );
-      
       case "astrology":
         return (
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">

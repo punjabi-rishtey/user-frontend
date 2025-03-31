@@ -46,9 +46,9 @@ const HeroWithHeader = () => {
 
   return (
     <div className="relative h-screen overflow-hidden bg-[#800000] w-full">
-      {/* Loading spinner until video loads */}
+      {/* Loading spinner for video only - positioned on top of video */}
       {!isVideoLoaded && (
-        <div className="absolute inset-0 flex items-center justify-center z-20">
+        <div className="absolute inset-0 flex items-center justify-center z-1">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
         </div>
       )}
@@ -68,7 +68,7 @@ const HeroWithHeader = () => {
       </video>
       <div className="absolute inset-0 bg-black opacity-50"></div>
 
-      {/* Header Bar */}
+      {/* Header Bar - z-index higher than loading spinner */}
       <div className="absolute top-0 left-0 right-0 p-4 bg-black/50 backdrop-blur-md z-10 w-full">
         <div className="container mx-auto flex justify-between items-center px-4 max-w-full">
           <div onClick={() => navigate("/")}>
@@ -143,7 +143,7 @@ const HeroWithHeader = () => {
         </div>
       </div>
 
-      {/* Mobile Sidebar Menu */}
+      {/* Mobile Sidebar Menu - z-index higher than everything else */}
       {isSidebarOpen && (
         <>
           <div
@@ -193,7 +193,7 @@ const HeroWithHeader = () => {
         </>
       )}
 
-      {/* Hero Text */}
+      {/* Hero Text - z-index higher than loading spinner */}
       <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 text-center text-white px-4 z-10 w-full">
         <h1
           className="text-3xl sm:text-5xl font-bold mb-4"
