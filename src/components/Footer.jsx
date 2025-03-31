@@ -30,7 +30,7 @@ const Footer = () => {
             />
             <p className="text-sm text-[#E5D3C8] max-w-md mx-auto">
               Find your perfect life partner on our trusted platform. We bring
-              love and connection closer for the Punjabi community.
+              love and connection closer for the Punjabi community. - Punjabi Matrimony Forum
             </p>
           </div>
 
@@ -120,9 +120,7 @@ const Footer = () => {
             <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Terms of Service
             </a>
-            <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
-              Punjabi Marriage Forum
-            </a>
+            
           </div>
         </div>
       </div>

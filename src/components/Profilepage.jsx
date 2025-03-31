@@ -1595,6 +1595,10 @@ export default function ProfileSettings() {
             onEditImage={handleEditImage}
           />
 
+          <div className="bg-[#FEF3F3] border border-[#B31312] rounded-md p-3 mb-6 text-center">
+            <p className="text-[#B31312] font-medium">First photo you upload will be the profile photo</p>
+          </div>
+
           {/* Profile Completion Progress Card */}
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg mb-6">
             <h3 className="text-md md:text-lg text-[#111111] mb-2">

@@ -29,6 +29,10 @@ const FindPartner = () => {
   const [currentUserGender, setCurrentUserGender] = useState(null);
   const [profileComplete, setProfileComplete] = useState(true);
   const [authChecked, setAuthChecked] = useState(false); // Add state to track if auth has been checked
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [profilesPerPage] = useState(10);
 
   // Give auth context time to initialize before checking
   useEffect(() => {
@@ -124,6 +128,8 @@ const FindPartner = () => {
       ...filters,
       [name]: value,
     });
+    // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleClearFilters = () => {
@@ -136,6 +142,14 @@ const FindPartner = () => {
       ageMax: "", // Clear max age
     });
     setSearchTerm("");
+    // Reset to first page when filters are cleared
+    setCurrentPage(1);
+  };
+
+  // Update search term and reset to first page
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
   };
 
   const handleProfileClick = (profile) => {
@@ -191,7 +205,6 @@ const FindPartner = () => {
     const age = parseInt(item.age);
     const isNRI = item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes";
     const userOccupation = item.occupation || "";
-    // console.log(item.occupation);
     
     // Only show profiles of opposite gender based on currentUserGender
     if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
@@ -227,6 +240,14 @@ const FindPartner = () => {
   const sortedFilteredData = [...filteredData].sort((a, b) => 
     a.name?.toLowerCase() > b.name?.toLowerCase() ? 1 : -1
   );
+
+  // Get current profiles for pagination
+  const indexOfLastProfile = currentPage * profilesPerPage;
+  const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
+  const currentProfiles = sortedFilteredData.slice(indexOfFirstProfile, indexOfLastProfile);
+  
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   // Extract unique values for each filter category
   const uniqueValues = (key) => {
@@ -327,6 +348,116 @@ const FindPartner = () => {
     },
   ];
 
+  // Pagination component
+  const Pagination = ({ profilesPerPage, totalProfiles, currentPage, paginate }) => {
+    const pageNumbers = [];
+    
+    for (let i = 1; i <= Math.ceil(totalProfiles / profilesPerPage); i++) {
+      pageNumbers.push(i);
+    }
+    
+    // Determine which page numbers to show
+    let displayedPageNumbers = [];
+    const totalPages = pageNumbers.length;
+    
+    if (totalPages <= 5) {
+      // If 5 or fewer pages, show all
+      displayedPageNumbers = pageNumbers;
+    } else {
+      // Always include current page
+      displayedPageNumbers.push(currentPage);
+      
+      // Add page numbers before current page
+      for (let i = 1; i <= 2; i++) {
+        if (currentPage - i > 0) {
+          displayedPageNumbers.unshift(currentPage - i);
+        }
+      }
+      
+      // Add page numbers after current page
+      for (let i = 1; i <= 2; i++) {
+        if (currentPage + i <= totalPages) {
+          displayedPageNumbers.push(currentPage + i);
+        }
+      }
+      
+      // If we have room to add more pages at the beginning
+      while (displayedPageNumbers.length < 5 && displayedPageNumbers[0] > 1) {
+        displayedPageNumbers.unshift(displayedPageNumbers[0] - 1);
+      }
+      
+      // If we have room to add more pages at the end
+      while (displayedPageNumbers.length < 5 && displayedPageNumbers[displayedPageNumbers.length - 1] < totalPages) {
+        displayedPageNumbers.push(displayedPageNumbers[displayedPageNumbers.length - 1] + 1);
+      }
+      
+      // Add ellipsis indicators
+      if (displayedPageNumbers[0] > 1) {
+        displayedPageNumbers = [1, '...', ...displayedPageNumbers.slice(displayedPageNumbers[0] === 2 ? 1 : 0)];
+      }
+      
+      if (displayedPageNumbers[displayedPageNumbers.length - 1] < totalPages) {
+        displayedPageNumbers = [...displayedPageNumbers, '...', totalPages];
+      }
+    }
+    
+    return (
+      <nav className="flex justify-center mt-8">
+        <ul className="flex space-x-2">
+          {/* Previous button */}
+          <li>
+            <button
+              onClick={() => currentPage > 1 ? paginate(currentPage - 1) : null}
+              disabled={currentPage === 1}
+              className={`px-3 py-2 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-[#4F2F1D] text-white hover:bg-[#6B4132]'
+              } transition duration-300`}
+            >
+              &laquo;
+            </button>
+          </li>
+          
+          {/* Page numbers */}
+          {displayedPageNumbers.map((number, index) => (
+            <li key={index}>
+              {number === '...' ? (
+                <span className="px-3 py-2">...</span>
+              ) : (
+                <button
+                  onClick={() => paginate(number)}
+                  className={`px-3 py-2 rounded-md ${
+                    currentPage === number
+                      ? 'bg-[#990000] text-white'
+                      : 'bg-[#F5EDE7] text-[#4F2F1D] hover:bg-[#E5D3C8]'
+                  } transition duration-300`}
+                >
+                  {number}
+                </button>
+              )}
+            </li>
+          ))}
+          
+          {/* Next button */}
+          <li>
+            <button
+              onClick={() => currentPage < pageNumbers.length ? paginate(currentPage + 1) : null}
+              disabled={currentPage === pageNumbers.length || pageNumbers.length === 0}
+              className={`px-3 py-2 rounded-md ${
+                currentPage === pageNumbers.length || pageNumbers.length === 0
+                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'bg-[#4F2F1D] text-white hover:bg-[#6B4132]'
+              } transition duration-300`}
+            >
+              &raquo;
+            </button>
+          </li>
+        </ul>
+      </nav>
+    );
+  };
+
   // Loading indicator while authChecked is false
   if (!authChecked) {
     return (
@@ -413,7 +544,7 @@ const FindPartner = () => {
             type="text"
             placeholder="Search by name..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
             style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
           />
@@ -664,86 +795,101 @@ const FindPartner = () => {
 
         {/* Profile List - Updated to match Membership style */}
         <div className="w-full md:w-3/4 p-4 sm:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-            {sortedFilteredData.length === 0 ? (
-              <div className="col-span-2 text-center py-8 text-[#4F2F1D]">
-                No profiles match your search criteria.
-              </div>
-            ) : (
-              sortedFilteredData.map((item) => (
-                <motion.div
-                  key={item._id}
-                  variants={cardVariants}
-                  initial="initial"
-                  animate="animate"
-                  whileHover="hover"
-                  className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
-                  onClick={() => handleProfileClick(item)}
-                >
-                  <div className="flex items-center flex-col sm:flex-row">
-                    <img
-                      src={item.profile_picture || profileIcon}
-                      alt={item.name}
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6 object-cover"
-                    />
-                    <div className="text-center sm:text-left">
-                      <h3
-                        className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
-                        style={{
-                          fontFamily: "'Tiempos Headline', serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        {item.name}
-                      </h3>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Age:</strong> {item.age || "Not specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Occupation:</strong> {formatOption(item.occupation) || "Not specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>NRI:</strong> {item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes" ? "Yes" : "No"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Marital Status:</strong> {normalizeMaritalStatus(item.marital_status) || "Not specified"}
-                      </p>
-                    </div>
-                  </div>
-                </motion.div>
-              ))
-            )}
+          {/* Results count */}
+          <div className="mb-4 text-[#4F2F1D]">
+            <p>Showing {currentProfiles.length} of {sortedFilteredData.length} profiles</p>
+            </div>
+
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+  {sortedFilteredData.length === 0 ? (
+    <div className="col-span-2 text-center py-8 text-[#4F2F1D]">
+      No profiles match your search criteria.
+    </div>
+  ) : (
+    currentProfiles.map((item) => (
+      <motion.div
+        key={item._id}
+        variants={cardVariants}
+        initial="initial"
+        animate="animate"
+        whileHover="hover"
+        className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
+        onClick={() => handleProfileClick(item)}
+      >
+        <div className="flex items-center flex-col sm:flex-row">
+          <img
+            src={item.profile_picture || profileIcon}
+            alt={item.name}
+            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6 object-cover"
+          />
+          <div className="text-center sm:text-left">
+            <h3
+              className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
+            >
+              {item.name}
+            </h3>
+            <p
+              className="text-sm sm:text-base text-[#6B4132] mb-1"
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
+            >
+              <strong>Age:</strong> {item.age || "Not specified"}
+            </p>
+            <p
+              className="text-sm sm:text-base text-[#6B4132] mb-1"
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
+            >
+              <strong>Occupation:</strong> {formatOption(item.occupation) || "Not specified"}
+            </p>
+            <p
+              className="text-sm sm:text-base text-[#6B4132] mb-1"
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
+            >
+              <strong>NRI:</strong> {item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes" ? "Yes" : "No"}
+            </p>
+            <p
+              className="text-sm sm:text-base text-[#6B4132] mb-1"
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
+            >
+              <strong>Marital Status:</strong> {normalizeMaritalStatus(item.marital_status) || "Not specified"}
+            </p>
           </div>
         </div>
-      </div>
+      </motion.div>
+    ))
+  )}
+</div>
 
-      <Footer />
-    </div>
-  );
+{/* Pagination */}
+{sortedFilteredData.length > 0 && (
+  <Pagination 
+    profilesPerPage={profilesPerPage}
+    totalProfiles={sortedFilteredData.length}
+    currentPage={currentPage}
+    paginate={paginate}
+  />
+)}
+</div>
+</div>
+
+<Footer />
+</div>
+);
 };
 
 export default FindPartner;
