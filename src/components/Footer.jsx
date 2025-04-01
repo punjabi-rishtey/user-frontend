@@ -30,7 +30,7 @@ const Footer = () => {
             />
             <p className="text-sm text-[#E5D3C8] max-w-md mx-auto">
               Find your perfect life partner on our trusted platform. We bring
-              love and connection closer for the Punjabi community. - Punjabi Matrimony Forum
+              love and connection closer for the Punjabi community.
             </p>
           </div>
 
@@ -66,12 +66,12 @@ const Footer = () => {
             >
               Contact
             </button>
-            <button
+            {/* <button
               onClick={() => handleNavigation("/")}
               className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm font-medium"
             >
               Punjabi Marriage Forum
-            </button>
+            </button> */}
           </div>
 
           {/* Social Media Links */}
@@ -112,7 +112,7 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <div className="flex flex-col items-center space-y-4 text-sm text-[#E5D3C8]">
-          <p className="text-center">&copy; 2025 PunjabiMatrimony. All rights reserved.</p>
+          <p className="text-center">&copy; 2025 PunjabiMarriageForum. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-4">
             <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Privacy Policy
