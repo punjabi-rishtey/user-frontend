@@ -368,9 +368,12 @@
 
 import React, { useRef, useState } from "react";
 import { motion, useTransform, useScroll } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const SuccessStories = () => {
   const [hoveredStory, setHoveredStory] = useState(null);
+  const navigate = useNavigate(); // ✅ Add this line
+
   
   const stories = [
     {
@@ -602,28 +605,29 @@ const SuccessStories = () => {
         </div>
         
         {/* CTA button with hover effect */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          viewport={{ once: true }}
-          className="mt-24"
-        >
-          <button 
-            className="
-              bg-[#FF3D57] hover:bg-[#FF5A71] 
-              text-white text-lg font-medium 
-              py-4 px-10 
-              rounded-full 
-              shadow-md hover:shadow-xl 
-              transform transition-all 
-              hover:-translate-y-1 
-              duration-300
-            "
-          >
-            Start Your Success Story
-          </button>
-        </motion.div>
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.5 }}
+  viewport={{ once: true }}
+  className="mt-24"
+>
+  <button 
+    onClick={() => navigate("/login")}
+    className="
+      bg-[#FF3D57] hover:bg-[#FF5A71] 
+      text-white text-lg font-medium 
+      py-4 px-10 
+      rounded-full 
+      shadow-md hover:shadow-xl 
+      transform transition-all 
+      hover:-translate-y-1 
+      duration-300
+    "
+  >
+    Start Your Success Story
+  </button>
+</motion.div>
       </div>
     </div>
   );
