@@ -789,32 +789,61 @@ export default function ProfileSettings() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-
+  
+      // Since we no longer convert "yes"/"no"/"occasionally" to booleans,
+      // we keep drink/smoke as strings in personalData.lifestyle
+      const fixedLifestyle = { ...personalData.lifestyle };
+  
+      // Convert "fullName" -> "name", and include "caste" in the request
+      const requestBody = {
+        name: basicData.fullName,
+        email: basicData.email,
+        mobile: basicData.mobile,
+        dob: basicData.dob,
+        gender: basicData.gender,
+        religion: basicData.religion,
+        marital_status: basicData.marital_status,
+        height: personalData.height,
+        language: personalData.language,
+        mangalik: personalData.mangalik,
+        caste: personalData.caste,  //  <-- Include caste here
+        birth_details: personalData.birth_details,
+        physical_attributes: personalData.physical_attributes,
+        lifestyle: fixedLifestyle,
+        location: {
+          city: personalData.home_address.city,
+          address: personalData.home_address.address
+        },
+        hobbies: hobbiesData.hobbies
+      };
+  
       await axios.put(
         `https://backend-nm1z.onrender.com/api/users/${user._id}`,
-        { ...basicData, ...personalData, hobbies: hobbiesData.hobbies },
+        requestBody,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+            "Content-Type": "application/json"
+          }
         }
       );
-      fetchUserDetails();
+  
+      // Refetch user details so UI is in sync
+      await fetchUserDetails();
+  
       setIsEditing(false);
       setIsEditingPersonal(false);
-      setIsEditingHobbies(false);
-      setIsEditingFamily(false);
-      setIsEditingEducation(false);
-      setIsEditingProfession(false);
-      setIsEditingAstrology(false);
+  
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error saving profile:", error);
       alert("Failed to update profile.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+  
+  
 
   const handleCancel = () => {
     fetchUserDetails();
