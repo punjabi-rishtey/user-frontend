@@ -377,25 +377,25 @@ const SuccessStories = () => {
       name: "Shalini and Vicky",
       quote:
         "We found love and companionship on this amazing platform. It was everything we dreamed of and more!",
-      image: "https://asset.cloudinary.com/dkbzoosmm/abd2acd9f32c22cb4a18c66fec43cde7",
+      image: "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600875/2_mo4kor.jpg",
     },
     {
       name: "Taranjeet and Simran",
       quote:
         "Thank you for helping us find each other! We are now happily married and couldn't be more grateful.",
-      image: "https://asset.cloudinary.com/dkbzoosmm/f76eb693a5ff99689693310158e5870e",
+      image: "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600875/3_q3fi9z.jpg",
     },
     {
       name: "Vivek and Sakshi Manchanda",
       quote:
         "The perfect match! This platform made it so easy to find someone who truly understands me.",
-      image: "https://asset.cloudinary.com/dkbzoosmm/38757829cca90d53872c5ef1b6d07e27",
+      image: "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600876/1_aqbrsk.jpg",
     },
     {
       name: "Lakshita and Rachit",
       quote:
         "We never imagined finding someone so perfect for us. Thank you for bringing us together!",
-      image: "https://asset.cloudinary.com/dkbzoosmm/961947140f945d2a90b59e9329b6f02a",
+      image: "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600876/4_u04hde.jpg",
     },
   ];
 
