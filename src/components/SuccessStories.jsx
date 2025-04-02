@@ -377,7 +377,7 @@ const SuccessStories = () => {
       name: "Shalini and Vicky",
       quote:
         "We found love and companionship on this amazing platform. It was everything we dreamed of and more!",
-      image: "https://punjabi-rishtey.com/uploads/stories/20230329152147.jpg",
+      image: "/src/assets/1.jpg",
     },
     {
       name: "Taranjeet and Simran",
