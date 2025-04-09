@@ -17,6 +17,7 @@ const MembershipPage = () => {
     phone: "",
     screenshot: null,
     couponCode: "",
+    membershipId: ""
   });
   const [couponApplied, setCouponApplied] = useState(false);
   const [discountPercentage, setDiscountPercentage] = useState(0);
@@ -114,12 +115,14 @@ const MembershipPage = () => {
     
     setSelectedPlan(plan);
     setShowModal(true);
+    // console.log(">>>> plan selected: (membershipId): ", plan._id)
     // Reset form and coupon state when opening modal
     setFormData({
       name: "",
       phone: "",
       screenshot: null,
-      couponCode: ""
+      couponCode: "",
+      membershipId: plan._id,
     });
     setPreviewUrl(null);
     setCouponApplied(false);
@@ -238,6 +241,7 @@ const MembershipPage = () => {
       formDataToSubmit.append('fullName', formData.name);
       formDataToSubmit.append('phoneNumber', formData.phone);
       formDataToSubmit.append('image', formData.screenshot);
+      formDataToSubmit.append('membershipId', formData.membershipId)
       
       // Include coupon code and discount information if applied
       if (couponApplied && formData.couponCode) {
