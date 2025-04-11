@@ -26,14 +26,25 @@ const HeroWithHeader = () => {
     setIsSidebarOpen(false);
   };
 
+
+  const handleMembershipPlanClick = () => {
+      if (user.status) {
+      navigate("/current-plan");
+      console.log("> isAuthenticated && getMembershipStatus(): ", user.status)
+    } else {
+      navigate("/membership");
+    }
+  }
+
   const navItems = [
     { label: "Home", path: "/" },
     { label: "About Us", path: "/about" },
     { label: "Find Your Partner", onClick: handleFindPartnerClick },
-    { label: "Membership Details", path: "/membership" },
+    { label: "Membership Details", onClick: handleMembershipPlanClick },
     { label: "Testimonials", path: "/testimonials" },
     { label: "Contact", path: "/contact" },
   ];
+
 
   const handleNavClick = (item) => {
     if (item.onClick) {

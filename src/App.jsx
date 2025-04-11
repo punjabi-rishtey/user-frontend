@@ -22,6 +22,7 @@ import CustomerReviews from "./components/CustomerReviews";
 import ResetPasswordPage from "./components/ResetPasswordPage";
 import BlockingPage from "./components/BlockingPage";
 import ProfileSettings from "./components/Profilepage";
+import CurrentMembershipPage from "./components/CurrentMembershipPage"
 
 // Promotional Message Component
 const PromotionalMessage = () => {
@@ -139,6 +140,7 @@ function App() {
             }
           />
           <Route path="/membership" element={<MembershipPage />} />
+          <Route path="/current-plan" element={<CurrentMembershipPage />} />
           <Route path="/findpartner" element={<FindPartner />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<ProfileDetail />} />

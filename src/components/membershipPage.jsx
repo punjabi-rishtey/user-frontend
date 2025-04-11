@@ -449,7 +449,7 @@ const MembershipPage = () => {
                     className="text-[#6B4132] text-lg ml-1"
                     style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
                   >
-                    /month
+                    for {plan.duration} month
                   </span>
                 </p>
 
