@@ -6,7 +6,7 @@ const CustomerReviews = () => {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
+    fetch("https://backend-nm1z.onrender.com/testimonials/all")
       .then(response => response.json())
       .then(data => {
         const formattedReviews = data.map(item => ({
@@ -14,7 +14,7 @@ const CustomerReviews = () => {
           title: "Featured Review",
           text: item.message,
           author: item.user_name,
-          image: item.image_url || `https://backend-nm1z.onrender.com${item.image}`, // Handling different image key scenarios
+          image: item.image_url || `http://localhost:5174${item.image}`, // Handling different image key scenarios
         }));
         setReviews(formattedReviews);
       })

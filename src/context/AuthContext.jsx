@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        'https://backend-nm1z.onrender.com/api/users/login',
+        'https://backend-nm1z.onrender.com/users/login',
         credentials,
         {
           headers: { 'Content-Type': 'application/json' }
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const response = await axios.put(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
+        `https://backend-nm1z.onrender.com/users/${user._id}`,
         updatedUserData,
         {
           headers: {
@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }) => {
       if (!token || !user) return;
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
+        `https://backend-nm1z.onrender.com/users/${user._id}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

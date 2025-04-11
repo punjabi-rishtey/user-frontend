@@ -12,7 +12,7 @@ const Testimonials = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
+    fetch("https://backend-nm1z.onrender.com/testimonials/all")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -24,7 +24,7 @@ const Testimonials = () => {
           name: client.user_name,
           photo:
             client.image_url ||
-            `https://backend-nm1z.onrender.com${client.image}`,
+            `http://localhost:5174${client.image}`,
           quote: client.message,
         }));
         setClients(formattedClients);

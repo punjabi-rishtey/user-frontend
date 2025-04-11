@@ -11,7 +11,7 @@ const ForgotPasswordPopup = ({ onClose }) => {
 
     try {
       const response = await fetch(
-        "https://backend-nm1z.onrender.com/api/users/forgot-password",
+        "https://backend-nm1z.onrender.com/users/forgot-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

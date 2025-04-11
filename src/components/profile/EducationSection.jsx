@@ -38,7 +38,7 @@ const EducationSection = ({ user, logout }) => {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
+        `https://backend-nm1z.onrender.com/educations/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -83,7 +83,7 @@ const EducationSection = ({ user, logout }) => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
+        `https://backend-nm1z.onrender.com/educations/${user._id}`,
         educationData,
         {
           headers: {

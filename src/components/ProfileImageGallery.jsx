@@ -5,7 +5,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-const API_URL = "https://backend-nm1z.onrender.com/api/users";
+const API_URL = "https://backend-nm1z.onrender.com/users";
 
 const ProfileImageGallery = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();

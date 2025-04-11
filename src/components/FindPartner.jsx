@@ -72,7 +72,7 @@ const FindPartner = () => {
       if (!isAuthenticated) return; // Don't check if not authenticated
       
       try {
-        await axios.get("https://backend-nm1z.onrender.com/api/users/find-my-partner", {
+        await axios.get("https://backend-nm1z.onrender.com/users/find-my-partner", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
@@ -101,7 +101,7 @@ const FindPartner = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("https://backend-nm1z.onrender.com/api/users/all-basic");
+      const response = await axios.get("https://backend-nm1z.onrender.com/users/all-basic");
       if (Array.isArray(response.data)) {
         setUsers(response.data);
       } else if (response.data && Array.isArray(response.data.users)) {
