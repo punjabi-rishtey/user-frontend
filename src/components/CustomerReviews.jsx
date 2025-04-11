@@ -6,7 +6,7 @@ const CustomerReviews = () => {
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    fetch("https://backend-nm1z.onrender.com/testimonials/all")
+    fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
       .then(response => response.json())
       .then(data => {
         const formattedReviews = data.map(item => ({

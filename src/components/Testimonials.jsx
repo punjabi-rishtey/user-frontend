@@ -12,7 +12,7 @@ const Testimonials = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://backend-nm1z.onrender.com/testimonials/all")
+    fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");

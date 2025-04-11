@@ -41,7 +41,7 @@ const FamilyDetailsSection = ({ user, logout }) => {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/families/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -94,7 +94,7 @@ const FamilyDetailsSection = ({ user, logout }) => {
       }
 
       await axios.put(
-        `https://backend-nm1z.onrender.com/families/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
         familyData,
         {
           headers: {

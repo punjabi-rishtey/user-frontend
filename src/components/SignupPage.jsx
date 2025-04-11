@@ -57,7 +57,7 @@ const SignupPage = () => {
 
     try {
       const response = await fetch(
-        "https://backend-nm1z.onrender.com/users/register",
+        "https://backend-nm1z.onrender.com/api/users/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

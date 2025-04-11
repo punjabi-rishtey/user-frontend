@@ -93,7 +93,7 @@ const ProfileDetail = () => {
           throw new Error('Authentication required');
         }
 
-        const response = await axios.get(`https://backend-nm1z.onrender.com/users/${id}`, {
+        const response = await axios.get(`https://backend-nm1z.onrender.com/api/users/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

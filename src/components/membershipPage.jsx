@@ -83,7 +83,7 @@ const MembershipPage = () => {
   useEffect(() => {
     const fetchMemberships = async () => {
       try {
-        const response = await fetch("https://backend-nm1z.onrender.com/memberships/all");
+        const response = await fetch("https://backend-nm1z.onrender.com/api/memberships/all");
         if (!response.ok) throw new Error("Failed to fetch membership plans");
         
         const data = await response.json();
@@ -168,7 +168,7 @@ const MembershipPage = () => {
 
       // Call API to validate coupon
       const response = await axios.post(
-        'https://backend-nm1z.onrender.com/coupons/validate',
+        'https://backend-nm1z.onrender.com/api/coupons/validate',
         { code: formData.couponCode },
         { 
           headers: { 
@@ -251,7 +251,7 @@ const MembershipPage = () => {
       }
 
       const response = await axios.post(
-        'https://backend-nm1z.onrender.com/users/subscribe',
+        'https://backend-nm1z.onrender.com/api/users/subscribe',
         formDataToSubmit,
         {
           headers: {

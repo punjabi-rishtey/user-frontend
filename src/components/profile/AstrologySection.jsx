@@ -29,7 +29,7 @@ const AstrologySection = ({ user, logout }) => {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/astrologies/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ const AstrologySection = ({ user, logout }) => {
       }
 
       const response = await axios.put(
-        `https://backend-nm1z.onrender.com/astrologies/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
         astrologyData,
         {
           headers: {

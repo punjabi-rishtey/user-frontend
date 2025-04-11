@@ -95,7 +95,7 @@ function ProfileInfoSection({
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/users/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -192,7 +192,7 @@ function ProfileInfoSection({
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `https://backend-nm1z.onrender.com/users/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
         { ...basicData, ...personalData, hobbies: hobbiesData.hobbies },
         {
           headers: {

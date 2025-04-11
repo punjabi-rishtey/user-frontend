@@ -13,7 +13,7 @@ const CurrentMembershipPage = () => {
     const userId = user.id
     const fetchUserSubscriptionDetails = async () => {
       try {
-        // const response = await fetch(`https://backend-nm1z.onrender.com/users/subscription/${userId}`);
+        // const response = await fetch(`https://backend-nm1z.onrender.com/api/users/subscription/${userId}`);
         // if (!response.ok) throw new Error("Failed to fetch membership plans");
         
         // const data = await response.json();
@@ -24,7 +24,7 @@ const CurrentMembershipPage = () => {
         }
 
         const response = await axios.get(
-        `https://backend-nm1z.onrender.com/users/subscription/${userId}`,
+        `https://backend-nm1z.onrender.com/api/users/subscription/${userId}`,
         { 
           headers: { 
             Authorization: `Bearer ${token}`,

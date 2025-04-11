@@ -384,7 +384,7 @@ export default function ProfileSettings() {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/users/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -461,7 +461,7 @@ export default function ProfileSettings() {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/astrologies/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -498,7 +498,7 @@ export default function ProfileSettings() {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/professions/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -534,7 +534,7 @@ export default function ProfileSettings() {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/families/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -570,7 +570,7 @@ export default function ProfileSettings() {
       }
 
       const response = await axios.get(
-        `https://backend-nm1z.onrender.com/educations/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -818,7 +818,7 @@ export default function ProfileSettings() {
       };
   
       await axios.put(
-        `https://backend-nm1z.onrender.com/users/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
         requestBody,
         {
           headers: {
@@ -856,7 +856,7 @@ export default function ProfileSettings() {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `https://backend-nm1z.onrender.com/professions/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
         professionData,
         {
           headers: {
@@ -891,7 +891,7 @@ export default function ProfileSettings() {
       }
 
       await axios.put(
-        `https://backend-nm1z.onrender.com/families/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
         familyData,
         {
           headers: {
@@ -921,7 +921,7 @@ export default function ProfileSettings() {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `https://backend-nm1z.onrender.com/educations/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
         educationData,
         {
           headers: {
@@ -957,7 +957,7 @@ export default function ProfileSettings() {
       }
 
       const response = await axios.put(
-        `https://backend-nm1z.onrender.com/astrologies/${user._id}`,
+        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
         astrologyData,
         {
           headers: {
