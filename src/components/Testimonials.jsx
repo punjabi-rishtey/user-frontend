@@ -24,7 +24,7 @@ const Testimonials = () => {
           name: client.user_name,
           photo:
             client.image_url ||
-            `http://localhost:5174${client.image}`,
+            `https://backend-nm1z.onrender.com${client.image}`,
           quote: client.message,
         }));
         setClients(formattedClients);
