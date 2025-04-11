@@ -28,7 +28,7 @@ const HeroWithHeader = () => {
 
 
   const handleMembershipPlanClick = () => {
-      if (user.status) {
+      if (user.status == "Approved") {
       navigate("/current-plan");
       console.log("> isAuthenticated && getMembershipStatus(): ", user.status)
     } else {
