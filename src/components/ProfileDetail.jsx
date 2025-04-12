@@ -231,8 +231,8 @@ const ProfileDetail = () => {
   // Physical and lifestyle information
   const lifestyleDetails = {
     'Physical Disability': profileData.physical_attributes?.physical_disability ? 'Yes' : 'No',
-    'Smoke': profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : 'NO',
-    'Drink': !profileData.lifestyle?.drink ? profileData.lifestyle.drink : 'NO',
+    'Smoke': profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : 'No',
+    'Drink': profileData.lifestyle?.drink ? profileData.lifestyle.drink : 'No',
     'NRI Status': profileData.lifestyle?.nri_status ? profileData.lifestyle.nri_status : 'No'
   };
 
