@@ -231,9 +231,9 @@ const ProfileDetail = () => {
   // Physical and lifestyle information
   const lifestyleDetails = {
     'Physical Disability': profileData.physical_attributes?.physical_disability ? 'Yes' : 'No',
-    'Smoke': profileData.lifestyle?.smoke ? 'Yes' : 'No',
-    'Drink': profileData.lifestyle?.drink ? 'Yes' : 'No',
-    'NRI Status': profileData.lifestyle?.nri_status ? 'Yes' : 'No'
+    'Smoke': profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : 'NO',
+    'Drink': !profileData.lifestyle?.drink ? profileData.lifestyle.drink : 'NO',
+    'NRI Status': profileData.lifestyle?.nri_status ? profileData.lifestyle.nri_status : 'No'
   };
 
   // Astrology details
