@@ -488,7 +488,7 @@ const ProfileDetail = () => {
                 Manglik Status:
               </strong>
               <span style={{ color: cardColorSchemes.horoscope.value }} className="ml-2">
-                {profileData.mangalik ? 'Yes' : 'No'}
+                {profileData.mangalik ? profileData.mangalik : 'No'}
               </span>
             </p>
           </div>
