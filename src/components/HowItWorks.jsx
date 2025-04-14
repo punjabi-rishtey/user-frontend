@@ -15,7 +15,7 @@ const HowItWorks = () => {
         },
         {
             title: 'Express Interest',
-            description: 'Send requests and connect with potential partners.',
+            description: 'Connect with potential partners.',
             icon: <Heart className="text-orange-800 w-10 h-10" />
         },
         {
