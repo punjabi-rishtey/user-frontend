@@ -141,6 +141,7 @@ function App() {
           />
           <Route path="/membership" element={<MembershipPage />} />
           <Route path="/current-plan" element={<CurrentMembershipPage />} />
+          <Route path="/current-plan-test" element={<CurrentMembershipPage />} />
           <Route path="/findpartner" element={<FindPartner />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/profile/:id" element={<ProfileDetail />} />
