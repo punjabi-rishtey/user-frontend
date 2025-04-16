@@ -180,8 +180,6 @@ const SignupPage = () => {
                     { value: "", label: "Select Religion" },
                     { value: "hindu", label: "Hindu" },
                     { value: "sikh", label: "Sikh" },
-                    { value: "jain", label: "Jain" },
-                    { value: "buddhist", label: "Buddhist" },
                   ],
                 },
                 {
@@ -194,7 +192,6 @@ const SignupPage = () => {
                     { value: "divorced", label: "Divorced" },
                     { value: "widow_widower", label: "Widow/Widower" },
                     { value: "awaiting_divorce", label: "Awaiting Divorce" },
-                    { value: "annulled", label: "Annulled" },
                   ],
                 },
                 { label: "Email", name: "email", type: "email" },

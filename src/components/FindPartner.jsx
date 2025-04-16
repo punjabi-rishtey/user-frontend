@@ -327,8 +327,8 @@ const FindPartner = () => {
       name: "nriStatus",
       options: [
         { value: "", label: "Any" },
+        { value: "false", label: "No" },
         { value: "true", label: "Yes" },
-        { value: "false", label: "No" }
       ],
     },
     {
