@@ -127,7 +127,8 @@ const PreferencesPopup = ({ onClose, initialPreferences = null }) => {
               options: [
                 { value: "", label: "Select Family Values" },
                 { value: "traditional", label: "Traditional" },
-                { value: "moderate", label: "Moderate" },
+                { value: "orthodox", label: "Orthodox" },
+                { value: "modern", label: "Modern" },
                 { value: "liberal", label: "Liberal" },
               ],
             },

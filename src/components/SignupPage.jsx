@@ -6,8 +6,11 @@ import Header from "./Header";
 import PreferencesPopup from "./PreferencesPopup";
 // Import eye icons for password visibility toggle
 import { Eye, EyeOff } from "lucide-react";
+import Modal from "./TermsConditionModal";
+import { option } from "framer-motion/client";
 
 const SignupPage = () => {
+  const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -45,10 +48,19 @@ const SignupPage = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  const onTermsConditionAccept = () => {
+    setShowModal(false);
+    handleSubmit();
+  };
 
+  const TermsCondition = (e) => {
+    e.preventDefault();
+
+    setShowModal(true);
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
     const selectedPreferences = Object.values(preferences).filter(
       (pref) => pref !== ""
     );
@@ -140,7 +152,29 @@ const SignupPage = () => {
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#FCF9F2]">
       <Header />
-
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onAccept={onTermsConditionAccept}
+      >
+        <p>
+          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex molestiae
+          molestias quae impedit, ipsam aperiam provident laborum dignissimos
+          voluptate debitis eum totam minima reiciendis tempora sit dolorum qui
+          dicta nostrum? Lorem ipsum dolor sit amet consectetur adipisicing
+          elit. Vel itaque voluptas, esse voluptate veniam ratione blanditiis
+          harum neque sunt enim sed corporis amet, ex expedita explicabo velit
+          id earum nesciunt dolor? At nostrum, ab asperiores tenetur libero
+          aspernatur blanditiis odit illum corporis fuga, perspiciatis beatae
+          voluptatibus. Temporibus error reprehenderit dolorum aliquid
+          blanditiis porro magni doloremque, natus ex, explicabo rem aperiam
+          officia harum atque sit suscipit molestiae consequuntur odio eligendi
+          eos minus maiores sint veniam. Eaque maxime quae aut nobis, officia
+          tempore voluptates doloremque ut exercitationem fugiat dolorem velit
+          odio nulla nemo quisquam rerum dolore voluptatem ullam deleniti.
+          Molestias, voluptate suscipit!
+        </p>
+      </Modal>
       {/* Signup Form */}
       <div className="flex-grow flex items-center justify-center my-16">
         <div className="flex space-x-10">
@@ -157,7 +191,7 @@ const SignupPage = () => {
             >
               Sign Up
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={TermsCondition} className="space-y-4">
               {[
                 { label: "Name", name: "name", type: "text" },
                 { label: "Mobile", name: "mobile", type: "text" },
@@ -180,8 +214,19 @@ const SignupPage = () => {
                     { value: "", label: "Select Religion" },
                     { value: "hindu", label: "Hindu" },
                     { value: "sikh", label: "Sikh" },
-                    { value: "jain", label: "Jain" },
-                    { value: "buddhist", label: "Buddhist" },
+                  ],
+                },
+                {
+                  label: "Casete",
+                  name: "caste",
+                  type: "select",
+                  options: [
+                    { value: "", label: "Select Caste" },
+                    { value: "khatri", label: "Khatri" },
+                    { value: "arora", label: "Arora" },
+                    { value: "brahmin", label: "Brahmin" },
+                    { value: "multani", label: "Multani" },
+                    { value: "other", label: "Other" },
                   ],
                 },
                 {
@@ -194,7 +239,6 @@ const SignupPage = () => {
                     { value: "divorced", label: "Divorced" },
                     { value: "widow_widower", label: "Widow/Widower" },
                     { value: "awaiting_divorce", label: "Awaiting Divorce" },
-                    { value: "annulled", label: "Annulled" },
                   ],
                 },
                 { label: "Email", name: "email", type: "email" },

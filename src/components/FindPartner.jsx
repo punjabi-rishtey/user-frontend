@@ -9,7 +9,6 @@ import ProfileSlider from "./ProfileSlider";
 import { motion } from "framer-motion";
 import axios from "axios"; // Make sure axios is installed
 
-
 const FindPartner = () => {
   const [filters, setFilters] = useState({
     manglik: "",
@@ -29,7 +28,7 @@ const FindPartner = () => {
   const [currentUserGender, setCurrentUserGender] = useState(null);
   const [profileComplete, setProfileComplete] = useState(true);
   const [authChecked, setAuthChecked] = useState(false); // Add state to track if auth has been checked
-  
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
@@ -39,7 +38,7 @@ const FindPartner = () => {
     const timer = setTimeout(() => {
       setAuthChecked(true);
     }, 1000);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -70,13 +69,16 @@ const FindPartner = () => {
   useEffect(() => {
     const checkProfileCompleteness = async () => {
       if (!isAuthenticated) return; // Don't check if not authenticated
-      
+
       try {
-        await axios.get("https://backend-nm1z.onrender.com/api/users/find-my-partner", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+        await axios.get(
+          "https://backend-nm1z.onrender.com/api/users/find-my-partner",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
-        });
+        );
         // If we get here, the profile is complete enough (no 403 error)
         setProfileComplete(true);
         fetchUsers(); // Fetch users only if profile is complete
@@ -84,9 +86,13 @@ const FindPartner = () => {
         console.error("Error checking profile completeness:", err);
         if (err.response && err.response.status === 403) {
           setProfileComplete(false);
-          setError("Your profile must be at least 70% complete to access this feature.");
+          setError(
+            "Your profile must be at least 70% complete to access this feature."
+          );
         } else {
-          setError("Failed to check profile completeness. Please try again later.");
+          setError(
+            "Failed to check profile completeness. Please try again later."
+          );
         }
         setLoading(false);
       }
@@ -97,17 +103,30 @@ const FindPartner = () => {
     }
   }, [isAuthenticated, authChecked]);
 
+  useEffect(() => {
+    // console.log("> user status: ", user?.status, user && user.status);
+    alert("No active membership.");
+    if (user && user.status != "Approved") {
+      navigate("/membership", { replace: true });
+    }
+  }, []);
+
   // Fetch users from API
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("https://backend-nm1z.onrender.com/api/users/all-basic");
+      const response = await axios.get(
+        "https://backend-nm1z.onrender.com/api/users/all-basic"
+      );
       if (Array.isArray(response.data)) {
         setUsers(response.data);
       } else if (response.data && Array.isArray(response.data.users)) {
         setUsers(response.data.users);
       } else {
-        console.warn("API response data is not in expected format:", response.data);
+        console.warn(
+          "API response data is not in expected format:",
+          response.data
+        );
         setUsers([]);
       }
       setError(null);
@@ -120,7 +139,7 @@ const FindPartner = () => {
   };
 
   // Rest of the component remains the same
-  
+
   // Handle all input changes including range inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -160,92 +179,105 @@ const FindPartner = () => {
   // Normalize API response fields to match filter structure
   const normalizeMaritalStatus = (status) => {
     if (!status) return "";
-    
+
     // Map various API values to our standardized options
     const statusMap = {
-      'never_married': 'Never Married',
-      'divorced': 'Divorced',
-      'widow_widower': 'Widowed',
-      'separated': 'Separated',
-      'single': 'Never Married',
-      'unmarried': 'Never Married',
-      'maried': 'Never Married', // Assuming this is a typo for "married"
-      'married': 'Never Married'
+      never_married: "Never Married",
+      divorced: "Divorced",
+      widow_widower: "Widowed",
+      separated: "Separated",
+      single: "Never Married",
+      unmarried: "Never Married",
+      maried: "Never Married", // Assuming this is a typo for "married"
+      married: "Never Married",
     };
-    
+
     // Check if it's in our map
     const lowerCaseStatus = status.toLowerCase();
     if (statusMap[lowerCaseStatus]) {
       return statusMap[lowerCaseStatus];
     }
-    
+
     // Convert snake_case to title case as fallback
-    if (status.includes('_')) {
-      return status.split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+    if (status.includes("_")) {
+      return status
+        .split("_")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
     }
-    
+
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   };
 
   // Get opposite gender of the logged in user using the currentUserGender state
   const getOppositeGender = () => {
     if (!currentUserGender) return null;
-    
-    return currentUserGender === 'male' ? 'female' : 'male';
+
+    return currentUserGender === "male" ? "female" : "male";
   };
 
-  const filteredData = Array.isArray(users) ? users.filter((item) => {
-    if (!item) return false;
-    
-    const normalizedMaritalStatus = normalizeMaritalStatus(item.marital_status);
-    const isManglik = item.mangalik === true || item.mangalik === "true";
-    const oppositeGender = getOppositeGender();
-    const age = parseInt(item.age);
-    const isNRI = item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes";
-    const userOccupation = item.occupation || "";
-    
-    // Only show profiles of opposite gender based on currentUserGender
-    if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
-      return false;
-    }
-    
-    // Apply age filter if values are set
-    if (filters.ageMin && !isNaN(age) && age < parseInt(filters.ageMin)) {
-      return false;
-    }
-    
-    if (filters.ageMax && !isNaN(age) && age > parseInt(filters.ageMax)) {
-      return false;
-    }
-    
-    return (
-      (filters.manglik === "" || 
-       (filters.manglik === "true" && isManglik) || 
-       (filters.manglik === "false" && !isManglik)) &&
-      (filters.maritalStatus === "" || 
-       normalizedMaritalStatus === filters.maritalStatus) &&
-      (filters.nriStatus === "" || 
-       (filters.nriStatus === "true" && isNRI) || 
-       (filters.nriStatus === "false" && !isNRI)) &&
-      (filters.occupation === "" ||
-       userOccupation === filters.occupation) &&
-      (searchTerm === "" || 
-       item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  }) : [];
-  
+  const filteredData = Array.isArray(users)
+    ? users.filter((item) => {
+        if (!item) return false;
+
+        const normalizedMaritalStatus = normalizeMaritalStatus(
+          item.marital_status
+        );
+        const isManglik = item.mangalik === true || item.mangalik === "true";
+        const oppositeGender = getOppositeGender();
+        const age = parseInt(item.age);
+        const isNRI =
+          item.nri_status === true ||
+          item.nri_status === "true" ||
+          item.nri_status === "yes";
+        const userOccupation = item.occupation || "";
+
+        // Only show profiles of opposite gender based on currentUserGender
+        if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
+          return false;
+        }
+
+        // Apply age filter if values are set
+        if (filters.ageMin && !isNaN(age) && age < parseInt(filters.ageMin)) {
+          return false;
+        }
+
+        if (filters.ageMax && !isNaN(age) && age > parseInt(filters.ageMax)) {
+          return false;
+        }
+
+        return (
+          (filters.manglik === "" ||
+            (filters.manglik === "true" && isManglik) ||
+            (filters.manglik === "false" && !isManglik)) &&
+          (filters.maritalStatus === "" ||
+            normalizedMaritalStatus === filters.maritalStatus) &&
+          (filters.nriStatus === "" ||
+            (filters.nriStatus === "true" && isNRI) ||
+            (filters.nriStatus === "false" && !isNRI)) &&
+          (filters.occupation === "" ||
+            userOccupation === filters.occupation) &&
+          (searchTerm === "" ||
+            item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+      })
+    : [];
+
   // Sort filtered data by name alphabetically for better user experience
-  const sortedFilteredData = [...filteredData].sort((a, b) => 
+  const sortedFilteredData = [...filteredData].sort((a, b) =>
     a.name?.toLowerCase() > b.name?.toLowerCase() ? 1 : -1
   );
 
   // Get current profiles for pagination
   const indexOfLastProfile = currentPage * profilesPerPage;
   const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
-  const currentProfiles = sortedFilteredData.slice(indexOfFirstProfile, indexOfLastProfile);
-  
+  const currentProfiles = sortedFilteredData.slice(
+    indexOfFirstProfile,
+    indexOfLastProfile
+  );
+
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -253,27 +285,34 @@ const FindPartner = () => {
   const uniqueValues = (key) => {
     const values = [];
     if (!Array.isArray(users)) return values;
-    
-    users.forEach(user => {
+
+    users.forEach((user) => {
       if (!user) return;
-      
+
       let value;
-      
+
       if (key === "maritalStatus") {
         value = normalizeMaritalStatus(user.marital_status);
       } else if (key === "manglik") {
         value = user.mangalik?.toString();
       } else if (key === "gender") {
-        value = user.gender?.charAt(0).toUpperCase() + user.gender?.slice(1).toLowerCase();
+        value =
+          user.gender?.charAt(0).toUpperCase() +
+          user.gender?.slice(1).toLowerCase();
       } else {
         value = user[key === "maritalStatus" ? "marital_status" : key];
       }
-      
-      if (value && !values.includes(value) && value !== "undefined" && value !== "null") {
+
+      if (
+        value &&
+        !values.includes(value) &&
+        value !== "undefined" &&
+        value !== "null"
+      ) {
         values.push(value);
       }
     });
-    
+
     // Sort values alphabetically
     return values.sort();
   };
@@ -282,10 +321,10 @@ const FindPartner = () => {
   const formatOption = (option) => {
     // Check if option is undefined, null, or not a string
     if (option === undefined || option === null) return "";
-    
+
     // Convert to string if it's not already
     const optionStr = String(option);
-    
+
     return optionStr
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -319,7 +358,7 @@ const FindPartner = () => {
         { value: "", label: "Any" },
         { value: "Private Job", label: "Private Job" },
         { value: "Government Job", label: "Government Job" },
-        { value: "Business Owner", label: "Business Owner" }
+        { value: "Business Owner", label: "Business Owner" },
       ],
     },
     {
@@ -327,8 +366,8 @@ const FindPartner = () => {
       name: "nriStatus",
       options: [
         { value: "", label: "Any" },
+        { value: "false", label: "No" },
         { value: "true", label: "Yes" },
-        { value: "false", label: "No" }
       ],
     },
     {
@@ -343,94 +382,110 @@ const FindPartner = () => {
       options: [
         { value: "", label: "Any" },
         { value: "true", label: "Yes" },
-        { value: "false", label: "No" }
+        { value: "false", label: "No" },
       ],
     },
   ];
 
   // Pagination component
-  const Pagination = ({ profilesPerPage, totalProfiles, currentPage, paginate }) => {
+  const Pagination = ({
+    profilesPerPage,
+    totalProfiles,
+    currentPage,
+    paginate,
+  }) => {
     const pageNumbers = [];
-    
+
     for (let i = 1; i <= Math.ceil(totalProfiles / profilesPerPage); i++) {
       pageNumbers.push(i);
     }
-    
+
     // Determine which page numbers to show
     let displayedPageNumbers = [];
     const totalPages = pageNumbers.length;
-    
+
     if (totalPages <= 5) {
       // If 5 or fewer pages, show all
       displayedPageNumbers = pageNumbers;
     } else {
       // Always include current page
       displayedPageNumbers.push(currentPage);
-      
+
       // Add page numbers before current page
       for (let i = 1; i <= 2; i++) {
         if (currentPage - i > 0) {
           displayedPageNumbers.unshift(currentPage - i);
         }
       }
-      
+
       // Add page numbers after current page
       for (let i = 1; i <= 2; i++) {
         if (currentPage + i <= totalPages) {
           displayedPageNumbers.push(currentPage + i);
         }
       }
-      
+
       // If we have room to add more pages at the beginning
       while (displayedPageNumbers.length < 5 && displayedPageNumbers[0] > 1) {
         displayedPageNumbers.unshift(displayedPageNumbers[0] - 1);
       }
-      
+
       // If we have room to add more pages at the end
-      while (displayedPageNumbers.length < 5 && displayedPageNumbers[displayedPageNumbers.length - 1] < totalPages) {
-        displayedPageNumbers.push(displayedPageNumbers[displayedPageNumbers.length - 1] + 1);
+      while (
+        displayedPageNumbers.length < 5 &&
+        displayedPageNumbers[displayedPageNumbers.length - 1] < totalPages
+      ) {
+        displayedPageNumbers.push(
+          displayedPageNumbers[displayedPageNumbers.length - 1] + 1
+        );
       }
-      
+
       // Add ellipsis indicators
       if (displayedPageNumbers[0] > 1) {
-        displayedPageNumbers = [1, '...', ...displayedPageNumbers.slice(displayedPageNumbers[0] === 2 ? 1 : 0)];
+        displayedPageNumbers = [
+          1,
+          "...",
+          ...displayedPageNumbers.slice(displayedPageNumbers[0] === 2 ? 1 : 0),
+        ];
       }
-      
+
       if (displayedPageNumbers[displayedPageNumbers.length - 1] < totalPages) {
-        displayedPageNumbers = [...displayedPageNumbers, '...', totalPages];
+        displayedPageNumbers = [...displayedPageNumbers, "...", totalPages];
       }
     }
-    
+
     return (
       <nav className="flex justify-center mt-8">
         <ul className="flex space-x-2">
           {/* Previous button */}
           <li>
             <button
-              onClick={() => currentPage > 1 ? paginate(currentPage - 1) : null}
+              onClick={() =>
+                currentPage > 1 ? paginate(currentPage - 1) : null
+              }
               disabled={currentPage === 1}
               className={`px-3 py-2 rounded-md ${
                 currentPage === 1
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-[#4F2F1D] text-white hover:bg-[#6B4132]'
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-[#4F2F1D] text-white hover:bg-[#6B4132]"
               } transition duration-300`}
             >
               &laquo;
             </button>
           </li>
-          
+
           {/* Page numbers */}
           {displayedPageNumbers.map((number, index) => (
             <li key={index}>
-              {number === '...' ? (
+              {number === "..." ? (
                 <span className="px-3 py-2">...</span>
               ) : (
                 <button
                   onClick={() => paginate(number)}
                   className={`px-3 py-2 rounded-md ${
                     currentPage === number
-                      ? 'bg-[#990000] text-white'
-                      : 'bg-[#F5EDE7] text-[#4F2F1D] hover:bg-[#E5D3C8]'
+                      ? "bg-[#990000] text-white"
+                      : "bg-[#F5EDE7] text-[#4F2F1D] hover:bg-[#E5D3C8]"
                   } transition duration-300`}
                 >
                   {number}
@@ -438,16 +493,22 @@ const FindPartner = () => {
               )}
             </li>
           ))}
-          
+
           {/* Next button */}
           <li>
             <button
-              onClick={() => currentPage < pageNumbers.length ? paginate(currentPage + 1) : null}
-              disabled={currentPage === pageNumbers.length || pageNumbers.length === 0}
+              onClick={() =>
+                currentPage < pageNumbers.length
+                  ? paginate(currentPage + 1)
+                  : null
+              }
+              disabled={
+                currentPage === pageNumbers.length || pageNumbers.length === 0
+              }
               className={`px-3 py-2 rounded-md ${
                 currentPage === pageNumbers.length || pageNumbers.length === 0
-                  ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'bg-[#4F2F1D] text-white hover:bg-[#6B4132]'
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-[#4F2F1D] text-white hover:bg-[#6B4132]"
               } transition duration-300`}
             >
               &raquo;
@@ -464,7 +525,9 @@ const FindPartner = () => {
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
         <Header />
         <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">Checking authentication...</div>
+          <div className="text-[#4F2F1D] text-xl">
+            Checking authentication...
+          </div>
         </div>
         <Footer />
       </div>
@@ -478,23 +541,33 @@ const FindPartner = () => {
         <Header />
         <div className="flex-grow flex items-center justify-center">
           <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2 
+            <h2
               className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
             >
               Profile Incomplete
             </h2>
-            <p 
+            <p
               className="text-[#6B4132] mb-6 text-center"
-              style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
             >
-              Your profile must be at least 70% complete to access the partner search feature.
+              Your profile must be at least 70% complete to access the partner
+              search feature.
             </p>
             <div className="flex justify-center">
               <button
-                onClick={() => navigate('/profilepage')}
+                onClick={() => navigate("/profilepage")}
                 className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
               >
                 Complete Your Profile
               </button>
@@ -657,21 +730,27 @@ const FindPartner = () => {
                   }}
                 >
                   <option value="">Select {label}</option>
-                  {Array.isArray(options) ? options.map((option, idx) => {
-                    if (option && typeof option === 'object' && 'value' in option) {
-                      return (
-                        <option key={idx} value={option.value}>
-                          {option.label || formatOption(option.value)}
-                        </option>
-                      );
-                    } else {
-                      return (
-                        <option key={idx} value={option}>
-                          {formatOption(option)}
-                        </option>
-                      );
-                    }
-                  }) : null}
+                  {Array.isArray(options)
+                    ? options.map((option, idx) => {
+                        if (
+                          option &&
+                          typeof option === "object" &&
+                          "value" in option
+                        ) {
+                          return (
+                            <option key={idx} value={option.value}>
+                              {option.label || formatOption(option.value)}
+                            </option>
+                          );
+                        } else {
+                          return (
+                            <option key={idx} value={option}>
+                              {formatOption(option)}
+                            </option>
+                          );
+                        }
+                      })
+                    : null}
                 </select>
               </div>
             ))}
@@ -764,22 +843,28 @@ const FindPartner = () => {
                 }}
               >
                 <option value="">Any {label}</option>
-                {Array.isArray(options) ? options.map((option, idx) => {
-                  // Handle both object options and string options
-                  if (option && typeof option === 'object' && 'value' in option) {
-                    return (
-                      <option key={idx} value={option.value}>
-                        {option.label || formatOption(option.value)}
-                      </option>
-                    );
-                  } else {
-                    return (
-                      <option key={idx} value={option}>
-                        {formatOption(option)}
-                      </option>
-                    );
-                  }
-                }) : null}
+                {Array.isArray(options)
+                  ? options.map((option, idx) => {
+                      // Handle both object options and string options
+                      if (
+                        option &&
+                        typeof option === "object" &&
+                        "value" in option
+                      ) {
+                        return (
+                          <option key={idx} value={option.value}>
+                            {option.label || formatOption(option.value)}
+                          </option>
+                        );
+                      } else {
+                        return (
+                          <option key={idx} value={option}>
+                            {formatOption(option)}
+                          </option>
+                        );
+                      }
+                    })
+                  : null}
               </select>
             </div>
           ))}
@@ -797,99 +882,110 @@ const FindPartner = () => {
         <div className="w-full md:w-3/4 p-4 sm:p-8">
           {/* Results count */}
           <div className="mb-4 text-[#4F2F1D]">
-            <p>Showing {currentProfiles.length} of {sortedFilteredData.length} profiles</p>
-            </div>
-
-<div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-  {sortedFilteredData.length === 0 ? (
-    <div className="col-span-2 text-center py-8 text-[#4F2F1D]">
-      No profiles match your search criteria.
-    </div>
-  ) : (
-    currentProfiles.map((item) => (
-      <motion.div
-        key={item._id}
-        variants={cardVariants}
-        initial="initial"
-        animate="animate"
-        whileHover="hover"
-        className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
-        onClick={() => handleProfileClick(item)}
-      >
-        <div className="flex items-center flex-col sm:flex-row">
-          <img
-            src={item.profile_picture || profileIcon}
-            alt={item.name}
-            className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6 object-cover"
-          />
-          <div className="text-center sm:text-left">
-            <h3
-              className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              {item.name}
-            </h3>
-            <p
-              className="text-sm sm:text-base text-[#6B4132] mb-1"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              <strong>Age:</strong> {item.age || "Not specified"}
-            </p>
-            <p
-              className="text-sm sm:text-base text-[#6B4132] mb-1"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              <strong>Occupation:</strong> {formatOption(item.occupation) || "Not specified"}
-            </p>
-            <p
-              className="text-sm sm:text-base text-[#6B4132] mb-1"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              <strong>NRI:</strong> {item.nri_status === true || item.nri_status === "true" || item.nri_status === "yes" ? "Yes" : "No"}
-            </p>
-            <p
-              className="text-sm sm:text-base text-[#6B4132] mb-1"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              <strong>Marital Status:</strong> {normalizeMaritalStatus(item.marital_status) || "Not specified"}
+            <p>
+              Showing {currentProfiles.length} of {sortedFilteredData.length}{" "}
+              profiles
             </p>
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+            {sortedFilteredData.length === 0 ? (
+              <div className="col-span-2 text-center py-8 text-[#4F2F1D]">
+                No profiles match your search criteria.
+              </div>
+            ) : (
+              currentProfiles.map((item) => (
+                <motion.div
+                  key={item._id}
+                  variants={cardVariants}
+                  initial="initial"
+                  animate="animate"
+                  whileHover="hover"
+                  className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
+                  onClick={() => handleProfileClick(item)}
+                >
+                  <div className="flex items-center flex-col sm:flex-row">
+                    <img
+                      src={item.profile_picture || profileIcon}
+                      alt={item.name}
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6 object-cover"
+                    />
+                    <div className="text-center sm:text-left">
+                      <h3
+                        className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
+                        style={{
+                          fontFamily: "'Tiempos Headline', serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        {item.name}
+                      </h3>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>Age:</strong> {item.age || "Not specified"}
+                      </p>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>Occupation:</strong>{" "}
+                        {formatOption(item.occupation) || "Not specified"}
+                      </p>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>NRI:</strong>{" "}
+                        {item.nri_status === true ||
+                        item.nri_status === "true" ||
+                        item.nri_status === "yes"
+                          ? "Yes"
+                          : "No"}
+                      </p>
+                      <p
+                        className="text-sm sm:text-base text-[#6B4132] mb-1"
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
+                      >
+                        <strong>Marital Status:</strong>{" "}
+                        {normalizeMaritalStatus(item.marital_status) ||
+                          "Not specified"}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+
+          {/* Pagination */}
+          {sortedFilteredData.length > 0 && (
+            <Pagination
+              profilesPerPage={profilesPerPage}
+              totalProfiles={sortedFilteredData.length}
+              currentPage={currentPage}
+              paginate={paginate}
+            />
+          )}
         </div>
-      </motion.div>
-    ))
-  )}
-</div>
+      </div>
 
-{/* Pagination */}
-{sortedFilteredData.length > 0 && (
-  <Pagination 
-    profilesPerPage={profilesPerPage}
-    totalProfiles={sortedFilteredData.length}
-    currentPage={currentPage}
-    paginate={paginate}
-  />
-)}
-</div>
-</div>
-
-<Footer />
-</div>
-);
+      <Footer />
+    </div>
+  );
 };
 
 export default FindPartner;

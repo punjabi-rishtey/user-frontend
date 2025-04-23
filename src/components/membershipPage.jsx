@@ -71,14 +71,14 @@ const MembershipPage = () => {
   }, [isAuthenticated]);
 
   // Debug authentication state
-  useEffect(() => {
-    console.log("Auth state:", { 
-      isAuthenticated, 
-      hasToken: !!localStorage.getItem('token'),
-      authChecked,
-      user
-    });
-  }, [isAuthenticated, authChecked, user]);
+  // useEffect(() => {
+  //   console.log("Auth state:", { 
+  //     isAuthenticated, 
+  //     hasToken: !!localStorage.getItem('token'),
+  //     authChecked,
+  //     user
+  //   });
+  // }, [isAuthenticated, authChecked, user]);
 
   useEffect(() => {
     const fetchMemberships = async () => {

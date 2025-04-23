@@ -14,6 +14,9 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 import ProfileImageGallery from "./ProfileImageGallery";
+import { PiPassword, PiPasswordBold } from "react-icons/pi";
+import { TbPassword } from "react-icons/tb";
+import { MdPrivacyTip } from "react-icons/md";
 
 // Helper functions moved outside the component for better performance
 const generateFeetOptions = () => {
@@ -170,8 +173,8 @@ function TabButton({ active, onClick, children }) {
     <button
       onClick={onClick}
       className={`px-3 py-2 text-sm sm:px-4 sm:py-2 sm:text-base font-medium rounded-t-lg transition-colors ${
-        active 
-          ? "bg-white text-[#B31312] border-b-2 border-[#B31312]" 
+        active
+          ? "bg-white text-[#B31312] border-b-2 border-[#B31312]"
           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
       }`}
     >
@@ -186,14 +189,14 @@ function ActionButtons({ isEditing, onSave, onCancel, onEdit, loading }) {
     <div className="mt-6 flex flex-wrap gap-2">
       {isEditing ? (
         <>
-          <button 
-            onClick={onSave} 
+          <button
+            onClick={onSave}
             disabled={loading}
             className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg disabled:bg-gray-400"
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>
-          <button 
+          <button
             onClick={onCancel}
             className="px-4 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg"
           >
@@ -201,7 +204,7 @@ function ActionButtons({ isEditing, onSave, onCancel, onEdit, loading }) {
           </button>
         </>
       ) : (
-        <button 
+        <button
           onClick={onEdit}
           className="px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg"
         >
@@ -334,7 +337,9 @@ export default function ProfileSettings() {
   const parseHeight = (heightString) => {
     if (!heightString) return { feet: "5", inches: "0" };
     const match = heightString.match(/(\d+)'(\d+)"/);
-    return match ? { feet: match[1], inches: match[2] } : { feet: "5", inches: "0" };
+    return match
+      ? { feet: match[1], inches: match[2] }
+      : { feet: "5", inches: "0" };
   };
 
   // Initialize userImages when user data changes
@@ -369,7 +374,12 @@ export default function ProfileSettings() {
     }
   }, [user?._id]);
 
-  if (!user) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (!user)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
 
   // Fetch user details from API
   const fetchUserDetails = async () => {
@@ -417,8 +427,10 @@ export default function ProfileSettings() {
         physical_attributes: {
           skin_tone: userData.physical_attributes?.skin_tone || "",
           body_type: userData.physical_attributes?.body_type || "",
-          physical_disability: userData.physical_attributes?.physical_disability || false,
-          disability_reason: userData.physical_attributes?.disability_reason || "",
+          physical_disability:
+            userData.physical_attributes?.physical_disability || false,
+          disability_reason:
+            userData.physical_attributes?.disability_reason || "",
         },
         lifestyle: {
           smoke: userData.lifestyle?.smoke || false,
@@ -434,12 +446,12 @@ export default function ProfileSettings() {
       });
 
       setHobbiesData({
-        hobbies: Array.isArray(userData.hobbies) && userData.hobbies.length > 0
-          ? userData.hobbies.filter(hobby => hobby !== "None")
-          : [],
+        hobbies:
+          Array.isArray(userData.hobbies) && userData.hobbies.length > 0
+            ? userData.hobbies.filter((hobby) => hobby !== "None")
+            : [],
         newHobby: "",
       });
-      
     } catch (error) {
       console.error("Error fetching user details:", error);
       alert("Failed to fetch user details.");
@@ -672,7 +684,9 @@ export default function ProfileSettings() {
             const updatedUser = { ...user, profilePicture: imageUrl };
             updateUser(updatedUser);
 
-            const sidebarImages = document.querySelectorAll(".sidebar-profile-image");
+            const sidebarImages = document.querySelectorAll(
+              ".sidebar-profile-image"
+            );
             sidebarImages.forEach((img) => {
               img.src = imageUrl;
             });
@@ -789,11 +803,11 @@ export default function ProfileSettings() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-  
+
       // Since we no longer convert "yes"/"no"/"occasionally" to booleans,
       // we keep drink/smoke as strings in personalData.lifestyle
       const fixedLifestyle = { ...personalData.lifestyle };
-  
+
       // Convert "fullName" -> "name", and include "caste" in the request
       const requestBody = {
         name: basicData.fullName,
@@ -806,34 +820,34 @@ export default function ProfileSettings() {
         height: personalData.height,
         language: personalData.language,
         mangalik: personalData.mangalik,
-        caste: personalData.caste,  //  <-- Include caste here
+        caste: personalData.caste, //  <-- Include caste here
         birth_details: personalData.birth_details,
         physical_attributes: personalData.physical_attributes,
         lifestyle: fixedLifestyle,
         location: {
           city: personalData.home_address.city,
-          address: personalData.home_address.address
+          address: personalData.home_address.address,
         },
-        hobbies: hobbiesData.hobbies
+        hobbies: hobbiesData.hobbies,
       };
-  
+
       await axios.put(
         `https://backend-nm1z.onrender.com/api/users/${user._id}`,
         requestBody,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         }
       );
-  
+
       // Refetch user details so UI is in sync
       await fetchUserDetails();
-  
+
       setIsEditing(false);
       setIsEditingPersonal(false);
-  
+
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -842,8 +856,6 @@ export default function ProfileSettings() {
       setLoading(false);
     }
   };
-  
-  
 
   const handleCancel = () => {
     fetchUserDetails();
@@ -997,7 +1009,7 @@ export default function ProfileSettings() {
       ...user,
       hobbies: hobbiesData.hobbies,
     };
-  
+
     try {
       const success = await updateUser(updatedUser);
       if (success) {
@@ -1007,7 +1019,7 @@ export default function ProfileSettings() {
       console.error("Error updating hobbies:", error);
     }
   };
-  
+
   const handleCancelHobbies = () => {
     setHobbiesData({
       hobbies: user?.hobbies || [],
@@ -1016,9 +1028,28 @@ export default function ProfileSettings() {
     setIsEditingHobbies(false);
   };
 
+  const handleResetPassword = async () => {
+    const email = user?.email;
+
+    try {
+      const response = await axios.post(
+        `https://backend-nm1z.onrender.com/api/users/forgot-password/`,
+        { email }
+      );
+      alert("Password reset link sent successful");
+    } catch (error) {
+      console.error(
+        "Error resetting password:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    if (confirm("Do you want to Logout?") == true) {
+      logout();
+      navigate("/");
+    }
   };
 
   // Calculate profile completion percentage
@@ -1074,52 +1105,274 @@ export default function ProfileSettings() {
       case "basic":
         return (
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg md:text-xl text-[#111111] mb-4">Profile Information</h3>
-            
+            <h3 className="text-lg md:text-xl text-[#111111] mb-4">
+              Profile Information
+            </h3>
+
             {/* Basic Info Section */}
             <h4 className="text-md font-semibold mb-4">Basic Information</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <InfoRow label="Full Name" value={basicData.fullName} isEditing={isEditing} name="fullName" onChange={handleBasicChange} />
-              <InfoRow label="Mobile" value={basicData.mobile} isEditing={isEditing} name="mobile" onChange={handleBasicChange} />
-              <InfoRow label="Email" value={basicData.email} isEditing={isEditing} name="email" onChange={handleBasicChange} />
-              <InfoRow label="Date of Birth" value={basicData.dob} isEditing={isEditing} name="dob" onChange={handleBasicChange} type="date" />
-              <InfoRow label="Gender" value={basicData.gender} isEditing={isEditing} name="gender" onChange={handleBasicChange} type="select" options={[{ value: "male", label: "Male" }, { value: "female", label: "Female" }]} />
-              <InfoRow label="Religion" value={basicData.religion} isEditing={isEditing} name="religion" onChange={handleBasicChange} type="select" options={[{ value: "hindu", label: "Hindu" }, { value: "sikh", label: "Sikh" }, { value: "jain", label: "Jain" }, { value: "buddhist", label: "Buddhist" }]} />
-              <InfoRow label="Marital Status" value={basicData.marital_status} isEditing={isEditing} name="marital_status" onChange={handleBasicChange} type="select" options={[{ value: "never_married", label: "Never Married" }, { value: "divorced", label: "Divorced" }, { value: "widow_widower", label: "Widow/Widower" }, { value: "awaiting_divorce", label: "Awaiting Divorce" }]} />
-              <InfoRow label="Age" value={basicData.age} isEditing={isEditing} name="age" onChange={handleBasicChange} />
+              <InfoRow
+                label="Full Name"
+                value={basicData.fullName}
+                isEditing={isEditing}
+                name="fullName"
+                onChange={handleBasicChange}
+              />
+              <InfoRow
+                label="Mobile"
+                value={basicData.mobile}
+                isEditing={isEditing}
+                name="mobile"
+                onChange={handleBasicChange}
+              />
+              <InfoRow
+                label="Email"
+                value={basicData.email}
+                isEditing={isEditing}
+                name="email"
+                onChange={handleBasicChange}
+              />
+              <InfoRow
+                label="Date of Birth"
+                value={basicData.dob}
+                isEditing={isEditing}
+                name="dob"
+                onChange={handleBasicChange}
+                type="date"
+              />
+              <InfoRow
+                label="Gender"
+                value={basicData.gender}
+                isEditing={isEditing}
+                name="gender"
+                onChange={handleBasicChange}
+                type="select"
+                options={[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                ]}
+              />
+              <InfoRow
+                label="Religion"
+                value={basicData.religion}
+                isEditing={isEditing}
+                name="religion"
+                onChange={handleBasicChange}
+                type="select"
+                options={[
+                  { value: "hindu", label: "Hindu" },
+                  { value: "sikh", label: "Sikh" },
+                  { value: "jain", label: "Jain" },
+                  { value: "buddhist", label: "Buddhist" },
+                ]}
+              />
+              <InfoRow
+                label="Marital Status"
+                value={basicData.marital_status}
+                isEditing={isEditing}
+                name="marital_status"
+                onChange={handleBasicChange}
+                type="select"
+                options={[
+                  { value: "never_married", label: "Never Married" },
+                  { value: "divorced", label: "Divorced" },
+                  { value: "widow_widower", label: "Widow/Widower" },
+                  { value: "awaiting_divorce", label: "Awaiting Divorce" },
+                ]}
+              />
+              <InfoRow
+                label="Age"
+                value={basicData.age}
+                isEditing={isEditing}
+                name="age"
+                onChange={handleBasicChange}
+              />
             </div>
 
             {/* Personal Details Section */}
-            <h4 className="text-md font-semibold mb-4 border-t pt-6">Personal Details</h4>
+            <h4 className="text-md font-semibold mb-4 border-t pt-6">
+              Personal Details
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <InfoRow label="Height (Feet)" value={personalData.height.feet} isEditing={isEditingPersonal || isEditing} name="height.feet" onChange={handlePersonalChange} />
-              <InfoRow label="Height (Inches)" value={personalData.height.inches} isEditing={isEditing || isEditingPersonal} name="height.inches" onChange={handlePersonalChange} />
-              <InfoRow label="Caste" value={personalData.caste} isEditing={isEditing || isEditingPersonal} name="caste" onChange={handlePersonalChange} type="select" options={[{ value: "khatri", label: "Khatri" }, { value: "arora", label: "Arora" }, { value: "brahmin", label: "Brahmin" }, { value: "other", label: "Other" }]} />
-              <InfoRow label="Mangalik Status" value={personalData.mangalik} isEditing={isEditing || isEditingPersonal} name="mangalik" onChange={handlePersonalChange} type="select" options={[{ value: "manglik", label: "Manglik" }, { value: "partial_manglik", label: "Partial Manglik" }, { value: "non_manglik", label: "Non Manglik" }]} />
-              <InfoRow label="Birth Time" value={personalData.birth_details.birth_time} isEditing={isEditing || isEditingPersonal} name="birth_details.birth_time" onChange={handlePersonalChange} type="time" />
-              <InfoRow label="Birth Place" value={personalData.birth_details.birth_place} isEditing={isEditing || isEditingPersonal} name="birth_details.birth_place" onChange={handlePersonalChange} />
-              <InfoRow label="Skin Tone" value={personalData.physical_attributes.skin_tone} isEditing={isEditing || isEditingPersonal} name="physical_attributes.skin_tone" onChange={handlePersonalChange} type="select" options={[{ value: "fair", label: "Fair" }, { value: "wheatish", label: "Wheatish" }, { value: "dark", label: "Dark" }]} />
-              <InfoRow label="Body Type" value={personalData.physical_attributes.body_type} isEditing={isEditing || isEditingPersonal} name="physical_attributes.body_type" onChange={handlePersonalChange} type="select" options={[{ value: "slim", label: "Slim" }, { value: "athletic", label: "Athletic" }, { value: "average", label: "Average" }]} />
-              <InfoRow label="Physical Disability" value={personalData.physical_attributes.physical_disability} isEditing={isEditing || isEditingPersonal} name="physical_attributes.physical_disability" onChange={handlePersonalChange} type="select" options={[{ value: "true", label: "Yes" }, { value: "false", label: "No" }]} />
-              <InfoRow label="Disability Details" value={personalData.physical_attributes.disability_reason} isEditing={isEditing || isEditingPersonal} name="physical_attributes.disability_reason" onChange={handlePersonalChange} />
-              <InfoRow label="Smoking" value={personalData.lifestyle.smoke} isEditing={isEditing || isEditingPersonal} name="lifestyle.smoke" onChange={handlePersonalChange} type="select" options={[{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "occasionally", label: "Occasionally" }]} />
-              <InfoRow label="Drinking" value={personalData.lifestyle.drink} isEditing={isEditing || isEditingPersonal} name="lifestyle.drink" onChange={handlePersonalChange} type="select" options={[{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "occasionally", label: "Occasionally" }]} />
-              <InfoRow label="Diet Preference" value={personalData.lifestyle.veg_nonveg} isEditing={isEditing || isEditingPersonal} name="lifestyle.veg_nonveg" onChange={handlePersonalChange} type="select" options={[{ value: "veg", label: "Vegetarian" }, { value: "nonveg", label: "Non-Vegetarian" }, { value: "occasionally_nonveg", label: "Occasionally Non-Vegetarian" }]} />
-              <InfoRow label="NRI Status" value={personalData.lifestyle.nri_status} isEditing={isEditing || isEditingPersonal} name="lifestyle.nri_status" onChange={handlePersonalChange} type="select" options={[{ value: "true", label: "Yes" }, { value: "false", label: "No" }]} />
+              <InfoRow
+                label="Height (Feet)"
+                value={personalData.height.feet}
+                isEditing={isEditingPersonal || isEditing}
+                name="height.feet"
+                onChange={handlePersonalChange}
+              />
+              <InfoRow
+                label="Height (Inches)"
+                value={personalData.height.inches}
+                isEditing={isEditing || isEditingPersonal}
+                name="height.inches"
+                onChange={handlePersonalChange}
+              />
+              <InfoRow
+                label="Caste"
+                value={personalData.caste}
+                isEditing={isEditing || isEditingPersonal}
+                name="caste"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "khatri", label: "Khatri" },
+                  { value: "arora", label: "Arora" },
+                  { value: "brahmin", label: "Brahmin" },
+                  { value: "other", label: "Other" },
+                ]}
+              />
+              <InfoRow
+                label="Mangalik Status"
+                value={personalData.mangalik}
+                isEditing={isEditing || isEditingPersonal}
+                name="mangalik"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "manglik", label: "Manglik" },
+                  { value: "partial_manglik", label: "Partial Manglik" },
+                  { value: "non_manglik", label: "Non Manglik" },
+                ]}
+              />
+              <InfoRow
+                label="Birth Time"
+                value={personalData.birth_details.birth_time}
+                isEditing={isEditing || isEditingPersonal}
+                name="birth_details.birth_time"
+                onChange={handlePersonalChange}
+                type="time"
+              />
+              <InfoRow
+                label="Birth Place"
+                value={personalData.birth_details.birth_place}
+                isEditing={isEditing || isEditingPersonal}
+                name="birth_details.birth_place"
+                onChange={handlePersonalChange}
+              />
+              <InfoRow
+                label="Skin Tone"
+                value={personalData.physical_attributes.skin_tone}
+                isEditing={isEditing || isEditingPersonal}
+                name="physical_attributes.skin_tone"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "very_fair", label: "Very Fair" },
+                  { value: "fair", label: "Fair" },
+                  { value: "wheatish", label: "Wheatish" },
+                  { value: "dark", label: "Dark" },
+                ]}
+              />
+              <InfoRow
+                label="Body Type"
+                value={personalData.physical_attributes.body_type}
+                isEditing={isEditing || isEditingPersonal}
+                name="physical_attributes.body_type"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "slim", label: "Slim" },
+                  { value: "athletic", label: "Athletic" },
+                  { value: "average", label: "Average" },
+                  { value: "heavy", label: "Heavy" },
+                ]}
+              />
+              <InfoRow
+                label="Physical Disability"
+                value={personalData.physical_attributes.physical_disability}
+                isEditing={isEditing || isEditingPersonal}
+                name="physical_attributes.physical_disability"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "false", label: "No" },
+                  { value: "true", label: "Yes" },
+                ]}
+              />
+              <InfoRow
+                label="Disability Details"
+                value={personalData.physical_attributes.disability_reason}
+                isEditing={isEditing || isEditingPersonal}
+                name="physical_attributes.disability_reason"
+                onChange={handlePersonalChange}
+              />
+              <InfoRow
+                label="Smoking"
+                value={personalData.lifestyle.smoke}
+                isEditing={isEditing || isEditingPersonal}
+                name="lifestyle.smoke"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "no", label: "No" },
+                  { value: "yes", label: "Yes" },
+                  { value: "occasionally", label: "Occasionally" },
+                ]}
+              />
+              <InfoRow
+                label="Drinking"
+                value={personalData.lifestyle.drink}
+                isEditing={isEditing || isEditingPersonal}
+                name="lifestyle.drink"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "no", label: "No" },
+                  { value: "yes", label: "Yes" },
+                  { value: "occasionally", label: "Occasionally" },
+                ]}
+              />
+              <InfoRow
+                label="Diet Preference"
+                value={personalData.lifestyle.veg_nonveg}
+                isEditing={isEditing || isEditingPersonal}
+                name="lifestyle.veg_nonveg"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "veg", label: "Vegetarian" },
+                  { value: "nonveg", label: "Non-Vegetarian" },
+                  {
+                    value: "occasionally_nonveg",
+                    label: "Occasionally Non-Vegetarian",
+                  },
+                ]}
+              />
+              <InfoRow
+                label="NRI Status"
+                value={personalData.lifestyle.nri_status}
+                isEditing={isEditing || isEditingPersonal}
+                name="lifestyle.nri_status"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "false", label: "No" },
+                  { value: "true", label: "Yes" },
+                ]}
+              />
             </div>
 
             {/* Hobbies Section */}
-            <h4 className="text-md font-semibold mb-4 border-t pt-6">Hobbies</h4>
+            <h4 className="text-md font-semibold mb-4 border-t pt-6">
+              Hobbies
+            </h4>
             <div className="flex flex-wrap gap-2">
               {hobbiesData.hobbies.map((hobby, index) => (
-                <div key={index} className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+                <div
+                  key={index}
+                  className="flex items-center bg-gray-100 rounded-full px-4 py-2"
+                >
                   <span>{hobby}</span>
                   {isEditing && (
-                    <button 
-                      onClick={() => setHobbiesData((prev) => ({
-                        ...prev, 
-                        hobbies: prev.hobbies.filter((_, i) => i !== index) 
-                      }))}
+                    <button
+                      onClick={() =>
+                        setHobbiesData((prev) => ({
+                          ...prev,
+                          hobbies: prev.hobbies.filter((_, i) => i !== index),
+                        }))
+                      }
                       className="ml-2 text-gray-500 hover:text-red-500"
                       aria-label="Remove hobby"
                     >
@@ -1135,7 +1388,9 @@ export default function ProfileSettings() {
                 <input
                   type="text"
                   value={hobbiesData.newHobby}
-                  onChange={(e) => setHobbiesData({ ...hobbiesData, newHobby: e.target.value })}
+                  onChange={(e) =>
+                    setHobbiesData({ ...hobbiesData, newHobby: e.target.value })
+                  }
                   className="border rounded px-2 py-1"
                   placeholder="Add new hobby"
                 />
@@ -1156,7 +1411,7 @@ export default function ProfileSettings() {
             )}
 
             {/* Action Buttons */}
-            <ActionButtons 
+            <ActionButtons
               isEditing={isEditing || isEditingPersonal || isEditingHobbies}
               onSave={handleSave}
               onCancel={handleCancel}
@@ -1165,11 +1420,13 @@ export default function ProfileSettings() {
             />
           </div>
         );
-        
+
       case "family":
         return (
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
-            <h3 className="text-lg md:text-xl text-[#111111] mb-4">Family Details</h3>
+            <h3 className="text-lg md:text-xl text-[#111111] mb-4">
+              Family Details
+            </h3>
 
             {loadingFamily ? (
               <p className="text-gray-600">Loading...</p>
@@ -1183,9 +1440,8 @@ export default function ProfileSettings() {
                   onChange={handleFamilyChange}
                   type="select"
                   options={[
-                    { value: "orthodox", label: "Orthodox" },
                     { value: "traditional", label: "Traditional" },
-                    { value: "moderate", label: "Moderate" },
+                    { value: "orthodox", label: "Orthodox" },
                     { value: "liberal", label: "Liberal" },
                     { value: "modern", label: "Modern" },
                   ]}
@@ -1249,7 +1505,7 @@ export default function ProfileSettings() {
               </div>
             )}
 
-            <ActionButtons 
+            <ActionButtons
               isEditing={isEditingFamily}
               onSave={handleSaveFamily}
               onCancel={handleCancelFamily}
@@ -1258,7 +1514,7 @@ export default function ProfileSettings() {
             />
           </div>
         );
-      
+
       case "education":
         return (
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
@@ -1360,7 +1616,7 @@ export default function ProfileSettings() {
               </div>
             )}
 
-            <ActionButtons 
+            <ActionButtons
               isEditing={isEditingEducation}
               onSave={handleSaveEducation}
               onCancel={handleCancelEducation}
@@ -1369,7 +1625,7 @@ export default function ProfileSettings() {
             />
           </div>
         );
-      
+
       // Modified portion of the profession case in renderTabContent function
       case "profession":
         return (
@@ -1387,7 +1643,7 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
                 type="select"
                 options={[
-                  { value: "Unemployed", label: "Unemployed" },
+                  { value: "Not Working", label: "NotWorking" },
                   { value: "Private Job", label: "Private Job" },
                   { value: "Government Job", label: "Government Job" },
                   { value: "Business Owner", label: "Business Owner" },
@@ -1451,7 +1707,7 @@ export default function ProfileSettings() {
               />
             </div>
 
-            <ActionButtons 
+            <ActionButtons
               isEditing={isEditingProfession}
               onSave={handleSaveProfession}
               onCancel={handleCancelProfession}
@@ -1488,7 +1744,7 @@ export default function ProfileSettings() {
               </div>
             )}
 
-            <ActionButtons 
+            <ActionButtons
               isEditing={isEditingAstrology}
               onSave={handleSaveAstrology}
               onCancel={handleCancelAstrology}
@@ -1497,7 +1753,7 @@ export default function ProfileSettings() {
             />
           </div>
         );
-      
+
       default:
         return <div>Select a tab to view details</div>;
     }
@@ -1529,7 +1785,11 @@ export default function ProfileSettings() {
           <div className="p-5">
             <div className="text-center">
               <img
-                src={user?.profile_pictures?.length > 0 ? user.profile_pictures[0] : "/profile.jpg"}
+                src={
+                  user?.profile_pictures?.length > 0
+                    ? user.profile_pictures[0]
+                    : "/profile.jpg"
+                }
                 alt="Profile"
                 className="w-32 h-32 rounded-full mx-auto border-2 border-[#B31312] object-cover object-top sidebar-profile-image"
               />
@@ -1551,6 +1811,13 @@ export default function ProfileSettings() {
                   <span>{item.label}</span>
                 </button>
               ))}
+              <button
+                onClick={handleResetPassword}
+                className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
+              >
+                <MdPrivacyTip />
+                <span>Change Password</span>
+              </button>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
@@ -1620,12 +1887,14 @@ export default function ProfileSettings() {
           <ProfileImageGallery
             images={userImages}
             onAddImage={handleAddImage}
-            onRemoveImage={handleRemoveImage} 
+            onRemoveImage={handleRemoveImage}
             onEditImage={handleEditImage}
           />
 
           <div className="bg-[#FEF3F3] border border-[#B31312] rounded-md p-3 mb-6 text-center">
-            <p className="text-[#B31312] font-medium">First photo you upload will be the profile photo</p>
+            <p className="text-[#B31312] font-medium">
+              First photo you upload will be the profile photo
+            </p>
           </div>
 
           {/* Profile Completion Progress Card */}
@@ -1658,32 +1927,32 @@ export default function ProfileSettings() {
 
           {/* Tabs Navigation - Scrollable on mobile */}
           <div className="flex overflow-x-auto pb-2 mb-4 border-b">
-            <TabButton 
-              active={activeTab === "basic"} 
+            <TabButton
+              active={activeTab === "basic"}
               onClick={() => setActiveTab("basic")}
             >
               Basic Info
             </TabButton>
-            <TabButton 
-              active={activeTab === "family"} 
+            <TabButton
+              active={activeTab === "family"}
               onClick={() => setActiveTab("family")}
             >
               Family
             </TabButton>
-            <TabButton 
-              active={activeTab === "education"} 
+            <TabButton
+              active={activeTab === "education"}
               onClick={() => setActiveTab("education")}
             >
               Education
             </TabButton>
-            <TabButton 
-              active={activeTab === "profession"} 
+            <TabButton
+              active={activeTab === "profession"}
               onClick={() => setActiveTab("profession")}
             >
               Profession
             </TabButton>
-            <TabButton 
-              active={activeTab === "astrology"} 
+            <TabButton
+              active={activeTab === "astrology"}
               onClick={() => setActiveTab("astrology")}
             >
               Astrology

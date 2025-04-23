@@ -131,7 +131,6 @@ const FamilyDetailsSection = ({ user, logout }) => {
           options={[
             { value: "orthodox", label: "Orthodox" },
             { value: "traditional", label: "Traditional" },
-            { value: "moderate", label: "Moderate" },
             { value: "liberal", label: "Liberal" },
             { value: "modern", label: "Modern" },
           ]}

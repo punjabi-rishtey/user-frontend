@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
@@ -24,13 +24,13 @@ const Header = () => {
   };
 
   const handleMembershipPlanClick = () => {
-      if (user.status == "Approved") {
+    if (user.status == "Approved") {
       navigate("/current-plan");
-      console.log("> isAuthenticated && getMembershipStatus(): ", user.status)
+      console.log("> isAuthenticated && getMembershipStatus(): ", user.status);
     } else {
       navigate("/membership");
     }
-  }
+  };
 
   const navItems = [
     { label: "Home", path: "/" },
@@ -78,16 +78,18 @@ const Header = () => {
         {/* Mobile Menu and Profile/Auth Buttons */}
         <div className="flex items-center space-x-4">
           {isAuthenticated && (
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E5D3C8] cursor-pointer">
-              {/* user.profile_pictures[0] is updated automatically if
+            <>
+              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E5D3C8] cursor-pointer">
+                {/* user.profile_pictures[0] is updated automatically if
                   ProfileImageGallery calls refreshUser() after uploading */}
-              <img
-                src={user?.profile_pictures?.[0] || profileIcon}
-                alt="Profile"
-                className="w-full h-full object-cover object-top"
-                onClick={handleProfileClick}
-              />
-            </div>
+                <img
+                  src={user?.profile_pictures?.[0] || profileIcon}
+                  alt="Profile"
+                  className="w-full h-full object-cover object-top"
+                  onClick={handleProfileClick}
+                />
+              </div>
+            </>
           )}
 
           {!isAuthenticated && (
@@ -119,10 +121,16 @@ const Header = () => {
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
             </svg>
           </button>
         </div>
+        {/* <p>{user?.name}</p> */}
 
         {/* Mobile Sidebar */}
         {isSidebarOpen && (
@@ -134,8 +142,8 @@ const Header = () => {
             <div
               className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] p-4 shadow-lg z-50"
               style={{
-                transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)',
-                transition: 'transform 0.3s ease-in-out'
+                transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
+                transition: "transform 0.3s ease-in-out",
               }}
             >
               <div className="flex justify-end">
@@ -150,7 +158,12 @@ const Header = () => {
                     viewBox="0 0 24 24"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
