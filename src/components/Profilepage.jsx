@@ -14,6 +14,9 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 import ProfileImageGallery from "./ProfileImageGallery";
+import { PiPassword, PiPasswordBold } from "react-icons/pi";
+import { TbPassword } from "react-icons/tb";
+import { MdPrivacyTip } from "react-icons/md";
 
 // Helper functions moved outside the component for better performance
 const generateFeetOptions = () => {
@@ -1025,6 +1028,23 @@ export default function ProfileSettings() {
     setIsEditingHobbies(false);
   };
 
+  const handleResetPassword = async () => {
+    const email = user?.email;
+
+    try {
+      const response = await axios.post(
+        `https://backend-nm1z.onrender.com/api/users/forgot-password/`,
+        { email }
+      );
+      alert("Password reset link sent successful");
+    } catch (error) {
+      console.error(
+        "Error resetting password:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
   const handleLogout = () => {
     if (confirm("Do you want to Logout?") == true) {
       logout();
@@ -1789,6 +1809,13 @@ export default function ProfileSettings() {
                   <span>{item.label}</span>
                 </button>
               ))}
+              <button
+                onClick={handleResetPassword}
+                className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
+              >
+                <MdPrivacyTip />
+                <span>Change Password</span>
+              </button>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
