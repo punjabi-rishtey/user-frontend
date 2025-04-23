@@ -285,6 +285,8 @@ function ProfileInfoSection({
           options={[
             { value: "hindu", label: "Hindu" },
             { value: "sikh", label: "Sikh" },
+            { value: "jain", label: "Jain" },
+            { value: "buddhist", label: "Buddhist" },
           ]}
         />
         <InfoRow

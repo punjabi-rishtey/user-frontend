@@ -7,6 +7,7 @@ import PreferencesPopup from "./PreferencesPopup";
 // Import eye icons for password visibility toggle
 import { Eye, EyeOff } from "lucide-react";
 import Modal from "./TermsConditionModal";
+import { option } from "framer-motion/client";
 
 const SignupPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -213,6 +214,19 @@ const SignupPage = () => {
                     { value: "", label: "Select Religion" },
                     { value: "hindu", label: "Hindu" },
                     { value: "sikh", label: "Sikh" },
+                  ],
+                },
+                {
+                  label: "Casete",
+                  name: "caste",
+                  type: "select",
+                  options: [
+                    { value: "", label: "Select Caste" },
+                    { value: "khatri", label: "Khatri" },
+                    { value: "arora", label: "Arora" },
+                    { value: "brahmin", label: "Brahmin" },
+                    { value: "multani", label: "Multani" },
+                    { value: "other", label: "Other" },
                   ],
                 },
                 {

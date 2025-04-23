@@ -1163,6 +1163,8 @@ export default function ProfileSettings() {
                 options={[
                   { value: "hindu", label: "Hindu" },
                   { value: "sikh", label: "Sikh" },
+                  { value: "jain", label: "Jain" },
+                  { value: "buddhist", label: "Buddhist" },
                 ]}
               />
               <InfoRow
@@ -1641,7 +1643,7 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
                 type="select"
                 options={[
-                  { value: "Not Workin", label: "NotWorking" },
+                  { value: "Not Working", label: "NotWorking" },
                   { value: "Private Job", label: "Private Job" },
                   { value: "Government Job", label: "Government Job" },
                   { value: "Business Owner", label: "Business Owner" },
