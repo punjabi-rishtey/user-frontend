@@ -104,15 +104,18 @@ const HeroWithHeader = () => {
           </nav>
 
           {/* Profile / Auth Buttons */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 text-white">
             {isAuthenticated && (
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white cursor-pointer">
-                <img
-                  src={user?.profile_pictures?.[0] || profileIcon}
-                  alt="Profile"
-                  className="w-full h-full object-cover object-top"
-                  onClick={handleProfileClick}
-                />
+              <div>
+                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white cursor-pointer">
+                  <img
+                    src={user?.profile_pictures?.[0] || profileIcon}
+                    alt="Profile"
+                    className="w-full h-full object-cover object-top"
+                    onClick={handleProfileClick}
+                  />
+                </div>
+                <span>{user?.name.match(/^\s*([^\s]+)/)?.[1]}</span>
               </div>
             )}
             {!isAuthenticated && (
@@ -217,8 +220,8 @@ const HeroWithHeader = () => {
           style={{ fontFamily: "'Playfair Display', serif" }}
         >
           Join us in celebrating the journey of love and partnership, as we
-          forge connections that stand the test of time and create memories
-          that last a lifetime.
+          forge connections that stand the test of time and create memories that
+          last a lifetime.
         </p>
         <button
           className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-3 px-8 rounded-md transition duration-300 shadow-lg"

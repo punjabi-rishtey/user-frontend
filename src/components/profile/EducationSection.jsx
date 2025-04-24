@@ -144,9 +144,7 @@ const EducationSection = ({ user, logout }) => {
 
         {/* School Details */}
         <div className="col-span-2">
-          <h4 className="text-md font-semibold mb-2 mt-4">
-            School Details
-          </h4>
+          <h4 className="text-md font-semibold mb-2 mt-4">School Details</h4>
         </div>
         <InfoRow
           label="School Name"
@@ -165,9 +163,7 @@ const EducationSection = ({ user, logout }) => {
 
         {/* College Details */}
         <div className="col-span-2">
-          <h4 className="text-md font-semibold mb-2 mt-4">
-            College Details
-          </h4>
+          <h4 className="text-md font-semibold mb-2 mt-4">College Details</h4>
         </div>
         <InfoRow
           label="College Name"
