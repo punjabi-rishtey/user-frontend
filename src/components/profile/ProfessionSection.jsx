@@ -157,9 +157,7 @@ const ProfessionSection = ({ user, logout }) => {
         />
 
         <div className="col-span-2">
-          <h4 className="text-md font-semibold mb-2 mt-4">
-            Work Address
-          </h4>
+          <h4 className="text-md font-semibold mb-2 mt-4">Work Address</h4>
         </div>
         <InfoRow
           label="Address"

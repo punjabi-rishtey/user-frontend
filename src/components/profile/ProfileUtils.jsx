@@ -129,6 +129,7 @@ export function InfoRow({
             value={value}
             onChange={onChange}
           >
+            <option value="">Select {label}</option>
             {options.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
