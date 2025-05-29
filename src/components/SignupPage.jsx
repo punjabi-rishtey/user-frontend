@@ -107,7 +107,7 @@ const SignupPage = () => {
           className="w-full p-3 border border-[#6B4132] rounded-lg"
           required
         >
-          <option value="">Select value</option>
+          {/* <option value="">Select value</option> */}
           {field.options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -218,7 +218,7 @@ const SignupPage = () => {
                   ],
                 },
                 {
-                  label: "Casete",
+                  label: "caste",
                   name: "caste",
                   type: "select",
                   options: [

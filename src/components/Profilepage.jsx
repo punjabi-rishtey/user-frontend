@@ -309,7 +309,7 @@ export default function ProfileSettings() {
     },
     caste: "",
     language: "",
-    mangalik: false,
+    manglik: false,
     birth_details: {
       birth_time: "",
       birth_place: "",
@@ -419,7 +419,7 @@ export default function ProfileSettings() {
         height: parseHeight(userData.height),
         caste: userData.caste || "",
         language: userData.language || "",
-        mangalik: userData.mangalik || false,
+        manglik: userData.manglik || false,
         birth_details: {
           birth_time: userData.birth_details?.birth_time || "",
           birth_place: userData.birth_details?.birth_place || "",
@@ -819,7 +819,7 @@ export default function ProfileSettings() {
         marital_status: basicData.marital_status,
         height: personalData.height,
         language: personalData.language,
-        mangalik: personalData.mangalik,
+        manglik: personalData.manglik,
         caste: personalData.caste, //  <-- Include caste here
         birth_details: personalData.birth_details,
         physical_attributes: personalData.physical_attributes,
@@ -1224,10 +1224,10 @@ export default function ProfileSettings() {
                 ]}
               />
               <InfoRow
-                label="Mangalik Status"
-                value={personalData.mangalik}
+                label="manglik Status"
+                value={personalData.manglik}
                 isEditing={isEditing || isEditingPersonal}
-                name="mangalik"
+                name="manglik"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[

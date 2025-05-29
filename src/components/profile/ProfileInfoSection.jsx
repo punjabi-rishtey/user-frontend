@@ -33,7 +33,7 @@ function ProfileInfoSection({
     },
     caste: "",
     language: "",
-    mangalik: false,
+    manglik: false,
     birth_details: {
       birth_time: "",
       birth_place: "",
@@ -128,7 +128,7 @@ function ProfileInfoSection({
         height: parseHeight(userData.height),
         caste: userData.caste || "",
         language: userData.language || "",
-        mangalik: userData.mangalik || false,
+        manglik: userData.manglik || false,
         birth_details: {
           birth_time: userData.birth_details?.birth_time || "",
           birth_place: userData.birth_details?.birth_place || "",
@@ -339,10 +339,10 @@ function ProfileInfoSection({
           ]}
         />
         <InfoRow
-          label="Mangalik Status"
-          value={personalData.mangalik}
+          label="manglik Status"
+          value={personalData.manglik}
           isEditing={isEditing}
-          name="mangalik"
+          name="manglik"
           onChange={handlePersonalChange}
           type="select"
           options={[

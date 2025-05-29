@@ -25,7 +25,7 @@ const cardColorSchemes = {
     title: "#1565C0",
     icon: "#1565C0",
     label: "#0D47A1",
-    value: "#1976D2"
+    value: "#1976D2",
   },
   lifestyle: {
     bg: "#F3E5F5", // Light purple
@@ -33,7 +33,7 @@ const cardColorSchemes = {
     title: "#7B1FA2",
     icon: "#7B1FA2",
     label: "#4A148C",
-    value: "#8E24AA"
+    value: "#8E24AA",
   },
   horoscope: {
     bg: "#FFF3E0", // Light orange
@@ -41,7 +41,7 @@ const cardColorSchemes = {
     title: "#E65100",
     icon: "#E65100",
     label: "#BF360C",
-    value: "#EF6C00"
+    value: "#EF6C00",
   },
   education: {
     bg: "#E8F5E9", // Light green
@@ -49,7 +49,7 @@ const cardColorSchemes = {
     title: "#2E7D32",
     icon: "#2E7D32",
     label: "#1B5E20",
-    value: "#388E3C"
+    value: "#388E3C",
   },
   profession: {
     bg: "#E0F7FA", // Light cyan
@@ -57,7 +57,7 @@ const cardColorSchemes = {
     title: "#00838F",
     icon: "#00838F",
     label: "#006064",
-    value: "#0097A7"
+    value: "#0097A7",
   },
   family: {
     bg: "#FFF8E1", // Light amber
@@ -65,8 +65,8 @@ const cardColorSchemes = {
     title: "#FF8F00",
     icon: "#FF8F00",
     label: "#FF6F00",
-    value: "#FFA000"
-  }
+    value: "#FFA000",
+  },
 };
 
 const ProfileDetail = () => {
@@ -84,28 +84,31 @@ const ProfileDetail = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    
+
     const fetchProfileData = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token) {
-          throw new Error('Authentication required');
+          throw new Error("Authentication required");
         }
 
-        const response = await axios.get(`https://backend-nm1z.onrender.com/api/users/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await axios.get(
+          `https://backend-nm1z.onrender.com/api/users/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         setProfileData(response.data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching profile data:', err);
-        setError('Failed to load profile data. Please try again later.');
-        if (err.message === 'Authentication required') {
-          navigate('/login', { replace: true });
+        console.error("Error fetching profile data:", err);
+        setError("Failed to load profile data. Please try again later.");
+        if (err.message === "Authentication required") {
+          navigate("/login", { replace: true });
         }
       } finally {
         setLoading(false);
@@ -123,17 +126,20 @@ const ProfileDetail = () => {
 
   // Format values for better display
   const formatValue = (value) => {
-    if (value === undefined || value === null) return 'Not specified';
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    if (value === '') return 'Not specified';
-    
+    if (value === undefined || value === null) return "Not specified";
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (value === "") return "Not specified";
+
     // Format snake_case to Title Case
-    if (typeof value === 'string' && value.includes('_')) {
-      return value.split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+    if (typeof value === "string" && value.includes("_")) {
+      return value
+        .split("_")
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join(" ");
     }
-    
+
     return value;
   };
 
@@ -168,7 +174,7 @@ const ProfileDetail = () => {
                 className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-md transition duration-300"
                 onClick={() => {
                   logout();
-                  navigate('/');
+                  navigate("/");
                 }}
               >
                 Logout
@@ -195,12 +201,15 @@ const ProfileDetail = () => {
 
   // Calculate age from DOB
   const calculateAge = (dob) => {
-    if (!dob) return 'Not specified';
+    if (!dob) return "Not specified";
     const birthDate = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--;
     }
     return age;
@@ -208,57 +217,66 @@ const ProfileDetail = () => {
 
   // Format date to readable format
   const formatDate = (dateString) => {
-    if (!dateString) return 'Not specified';
+    if (!dateString) return "Not specified";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   // Organize profile data into sections for display
   const basicDetails = {
-    'Age': calculateAge(profileData.dob),
-    'Date of Birth': formatDate(profileData.dob),
-    'Gender': formatValue(profileData.gender),
-    'Religion': formatValue(profileData.religion),
-    'Marital Status': formatValue(profileData.marital_status),
-    'Email': profileData.email || 'Not specified',
-    'Mobile': profileData.mobile || 'Not specified'
+    Age: calculateAge(profileData.dob),
+    "Date of Birth": formatDate(profileData.dob),
+    Gender: formatValue(profileData.gender),
+    Religion: formatValue(profileData.religion),
+    "Marital Status": formatValue(profileData.marital_status),
+    Email: profileData.email || "Not specified",
+    Mobile: profileData.mobile || "Not specified",
   };
 
   // Physical and lifestyle information
   const lifestyleDetails = {
-    'Physical Disability': profileData.physical_attributes?.physical_disability ? 'Yes' : 'No',
-    'Smoke': profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : 'No',
-    'Drink': profileData.lifestyle?.drink ? profileData.lifestyle.drink : 'No',
-    'NRI Status': profileData.lifestyle?.nri_status ? profileData.lifestyle.nri_status : 'No'
+    "Physical Disability": profileData.physical_attributes?.physical_disability
+      ? "Yes"
+      : "No",
+    Smoke: profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : "No",
+    Drink: profileData.lifestyle?.drink ? profileData.lifestyle.drink : "No",
+    "NRI Status": profileData.lifestyle?.nri_status
+      ? profileData.lifestyle.nri_status
+      : "No",
   };
 
   // Astrology details
   const astrologyDetails = {
-    'Manglik': profileData.mangalik ? 'Yes' : 'No',
-    ...profileData.astrology_details
+    Manglik: profileData.manglik ? "Yes" : "No",
+    ...profileData.astrology_details,
   };
-  
+
   // Education and profession details
   const educationDetails = {};
   if (profileData.education_details) {
     if (profileData.education_details.education_level) {
-      educationDetails['Education Level'] = profileData.education_details.education_level;
+      educationDetails["Education Level"] =
+        profileData.education_details.education_level;
     }
     if (profileData.education_details.education_field) {
-      educationDetails['Field of Study'] = profileData.education_details.education_field;
+      educationDetails["Field of Study"] =
+        profileData.education_details.education_field;
     }
     if (profileData.education_details.college_details?.name) {
-      educationDetails['College'] = profileData.education_details.college_details.name;
+      educationDetails["College"] =
+        profileData.education_details.college_details.name;
     }
     if (profileData.education_details.college_details?.city) {
-      educationDetails['College City'] = profileData.education_details.college_details.city;
+      educationDetails["College City"] =
+        profileData.education_details.college_details.city;
     }
     if (profileData.education_details.school_details?.name) {
-      educationDetails['School'] = profileData.education_details.school_details.name;
+      educationDetails["School"] =
+        profileData.education_details.school_details.name;
     }
   }
 
@@ -266,16 +284,19 @@ const ProfileDetail = () => {
   const professionDetails = {};
   if (profileData.profession_details) {
     if (profileData.profession_details.occupation) {
-      professionDetails['Occupation'] = profileData.profession_details.occupation;
+      professionDetails["Occupation"] =
+        profileData.profession_details.occupation;
     }
     if (profileData.profession_details.annual_income) {
-      professionDetails['Annual Income'] = profileData.profession_details.annual_income;
+      professionDetails["Annual Income"] =
+        profileData.profession_details.annual_income;
     }
     if (profileData.profession_details.company) {
-      professionDetails['Company'] = profileData.profession_details.company;
+      professionDetails["Company"] = profileData.profession_details.company;
     }
     if (profileData.profession_details.work_address?.city) {
-      professionDetails['Work City'] = profileData.profession_details.work_address.city;
+      professionDetails["Work City"] =
+        profileData.profession_details.work_address.city;
     }
   }
 
@@ -283,27 +304,31 @@ const ProfileDetail = () => {
   const familyDetails = {};
   if (profileData.family_details) {
     if (profileData.family_details.family_type) {
-      familyDetails['Family Type'] = profileData.family_details.family_type;
+      familyDetails["Family Type"] = profileData.family_details.family_type;
     }
     if (profileData.family_details.family_value) {
-      familyDetails['Family Values'] = profileData.family_details.family_value;
+      familyDetails["Family Values"] = profileData.family_details.family_value;
     }
     if (profileData.family_details.father?.name) {
-      familyDetails['Father'] = profileData.family_details.father.name;
+      familyDetails["Father"] = profileData.family_details.father.name;
     }
     if (profileData.family_details.father?.occupation) {
-      familyDetails["Father's Occupation"] = profileData.family_details.father.occupation;
+      familyDetails["Father's Occupation"] =
+        profileData.family_details.father.occupation;
     }
     if (profileData.family_details.mother?.name) {
-      familyDetails['Mother'] = profileData.family_details.mother.name;
+      familyDetails["Mother"] = profileData.family_details.mother.name;
     }
     if (profileData.family_details.mother?.occupation) {
-      familyDetails["Mother's Occupation"] = profileData.family_details.mother.occupation;
+      familyDetails["Mother's Occupation"] =
+        profileData.family_details.mother.occupation;
     }
     if (profileData.family_details.siblings) {
       const brothers = profileData.family_details.siblings.brother_count || 0;
       const sisters = profileData.family_details.siblings.sister_count || 0;
-      familyDetails['Siblings'] = `${brothers} Brother(s), ${sisters} Sister(s)`;
+      familyDetails[
+        "Siblings"
+      ] = `${brothers} Brother(s), ${sisters} Sister(s)`;
     }
   }
 
@@ -350,7 +375,7 @@ const ProfileDetail = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">
         {/* Basic Details */}
         <motion.div
-          variants={getCardVariants('basicDetails')}
+          variants={getCardVariants("basicDetails")}
           initial="initial"
           animate="animate"
           whileHover="hover"
@@ -359,7 +384,7 @@ const ProfileDetail = () => {
             backgroundColor: cardColorSchemes.basicDetails.bg,
             borderColor: cardColorSchemes.basicDetails.border,
             borderWidth: "2px",
-            borderStyle: "solid"
+            borderStyle: "solid",
           }}
         >
           <h3
@@ -367,10 +392,14 @@ const ProfileDetail = () => {
             style={{
               fontFamily: "'Tiempos Headline', serif",
               fontWeight: 400,
-              color: cardColorSchemes.basicDetails.title
+              color: cardColorSchemes.basicDetails.title,
             }}
           >
-            <FaUser className="mr-2" style={{ color: cardColorSchemes.basicDetails.icon }} /> Basic Details
+            <FaUser
+              className="mr-2"
+              style={{ color: cardColorSchemes.basicDetails.icon }}
+            />{" "}
+            Basic Details
           </h3>
           <div className="space-y-2">
             {Object.entries(basicDetails).map(([key, value]) => (
@@ -385,7 +414,10 @@ const ProfileDetail = () => {
                 <strong style={{ color: cardColorSchemes.basicDetails.label }}>
                   {key}:
                 </strong>
-                <span style={{ color: cardColorSchemes.basicDetails.value }} className="ml-2">
+                <span
+                  style={{ color: cardColorSchemes.basicDetails.value }}
+                  className="ml-2"
+                >
                   {value}
                 </span>
               </p>
@@ -395,7 +427,7 @@ const ProfileDetail = () => {
 
         {/* Lifestyle Details */}
         <motion.div
-          variants={getCardVariants('lifestyle')}
+          variants={getCardVariants("lifestyle")}
           initial="initial"
           animate="animate"
           whileHover="hover"
@@ -404,7 +436,7 @@ const ProfileDetail = () => {
             backgroundColor: cardColorSchemes.lifestyle.bg,
             borderColor: cardColorSchemes.lifestyle.border,
             borderWidth: "2px",
-            borderStyle: "solid"
+            borderStyle: "solid",
           }}
         >
           <h3
@@ -412,10 +444,14 @@ const ProfileDetail = () => {
             style={{
               fontFamily: "'Tiempos Headline', serif",
               fontWeight: 400,
-              color: cardColorSchemes.lifestyle.title
+              color: cardColorSchemes.lifestyle.title,
             }}
           >
-            <FaHeart className="mr-2" style={{ color: cardColorSchemes.lifestyle.icon }} /> Lifestyle
+            <FaHeart
+              className="mr-2"
+              style={{ color: cardColorSchemes.lifestyle.icon }}
+            />{" "}
+            Lifestyle
           </h3>
           <div className="space-y-2">
             {Object.entries(lifestyleDetails).map(([key, value]) => (
@@ -430,22 +466,28 @@ const ProfileDetail = () => {
                 <strong style={{ color: cardColorSchemes.lifestyle.label }}>
                   {key}:
                 </strong>
-                <span style={{ color: cardColorSchemes.lifestyle.value }} className="ml-2">
+                <span
+                  style={{ color: cardColorSchemes.lifestyle.value }}
+                  className="ml-2"
+                >
                   {value}
                 </span>
               </p>
             ))}
-            <p 
-              className="text-lg" 
-              style={{ 
-                fontFamily: "'Modern Era', sans-serif", 
-                fontWeight: 400 
+            <p
+              className="text-lg"
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
               }}
             >
               <strong style={{ color: cardColorSchemes.lifestyle.label }}>
                 Registration Date:
               </strong>
-              <span style={{ color: cardColorSchemes.lifestyle.value }} className="ml-2">
+              <span
+                style={{ color: cardColorSchemes.lifestyle.value }}
+                className="ml-2"
+              >
                 {formatDate(profileData.metadata?.register_date)}
               </span>
             </p>
@@ -454,7 +496,7 @@ const ProfileDetail = () => {
 
         {/* Horoscope Details */}
         <motion.div
-          variants={getCardVariants('horoscope')}
+          variants={getCardVariants("horoscope")}
           initial="initial"
           animate="animate"
           whileHover="hover"
@@ -463,7 +505,7 @@ const ProfileDetail = () => {
             backgroundColor: cardColorSchemes.horoscope.bg,
             borderColor: cardColorSchemes.horoscope.border,
             borderWidth: "2px",
-            borderStyle: "solid"
+            borderStyle: "solid",
           }}
         >
           <h3
@@ -471,10 +513,14 @@ const ProfileDetail = () => {
             style={{
               fontFamily: "'Tiempos Headline', serif",
               fontWeight: 400,
-              color: cardColorSchemes.horoscope.title
+              color: cardColorSchemes.horoscope.title,
             }}
           >
-            <FaHeart className="mr-2" style={{ color: cardColorSchemes.horoscope.icon }} /> Horoscope
+            <FaHeart
+              className="mr-2"
+              style={{ color: cardColorSchemes.horoscope.icon }}
+            />{" "}
+            Horoscope
           </h3>
           <div className="space-y-2">
             <p
@@ -487,8 +533,11 @@ const ProfileDetail = () => {
               <strong style={{ color: cardColorSchemes.horoscope.label }}>
                 Manglik Status:
               </strong>
-              <span style={{ color: cardColorSchemes.horoscope.value }} className="ml-2">
-                {profileData.mangalik ? profileData.mangalik : 'No'}
+              <span
+                style={{ color: cardColorSchemes.horoscope.value }}
+                className="ml-2"
+              >
+                {profileData.manglik ? profileData.manglik : "No"}
               </span>
             </p>
           </div>
@@ -497,7 +546,7 @@ const ProfileDetail = () => {
         {/* Education Details */}
         {Object.keys(educationDetails).length > 0 && (
           <motion.div
-            variants={getCardVariants('education')}
+            variants={getCardVariants("education")}
             initial="initial"
             animate="animate"
             whileHover="hover"
@@ -506,7 +555,7 @@ const ProfileDetail = () => {
               backgroundColor: cardColorSchemes.education.bg,
               borderColor: cardColorSchemes.education.border,
               borderWidth: "2px",
-              borderStyle: "solid"
+              borderStyle: "solid",
             }}
           >
             <h3
@@ -514,10 +563,14 @@ const ProfileDetail = () => {
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
-                color: cardColorSchemes.education.title
+                color: cardColorSchemes.education.title,
               }}
             >
-              <FaGraduationCap className="mr-2" style={{ color: cardColorSchemes.education.icon }} /> Education
+              <FaGraduationCap
+                className="mr-2"
+                style={{ color: cardColorSchemes.education.icon }}
+              />{" "}
+              Education
             </h3>
             <div className="space-y-2">
               {Object.entries(educationDetails).map(([key, value]) => (
@@ -532,8 +585,11 @@ const ProfileDetail = () => {
                   <strong style={{ color: cardColorSchemes.education.label }}>
                     {key}:
                   </strong>
-                  <span style={{ color: cardColorSchemes.education.value }} className="ml-2">
-                    {value || 'Not specified'}
+                  <span
+                    style={{ color: cardColorSchemes.education.value }}
+                    className="ml-2"
+                  >
+                    {value || "Not specified"}
                   </span>
                 </p>
               ))}
@@ -544,7 +600,7 @@ const ProfileDetail = () => {
         {/* Profession Details */}
         {Object.keys(professionDetails).length > 0 && (
           <motion.div
-            variants={getCardVariants('profession')}
+            variants={getCardVariants("profession")}
             initial="initial"
             animate="animate"
             whileHover="hover"
@@ -553,7 +609,7 @@ const ProfileDetail = () => {
               backgroundColor: cardColorSchemes.profession.bg,
               borderColor: cardColorSchemes.profession.border,
               borderWidth: "2px",
-              borderStyle: "solid"
+              borderStyle: "solid",
             }}
           >
             <h3
@@ -561,10 +617,14 @@ const ProfileDetail = () => {
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
-                color: cardColorSchemes.profession.title
+                color: cardColorSchemes.profession.title,
               }}
             >
-              <FaGraduationCap className="mr-2" style={{ color: cardColorSchemes.profession.icon }} /> Profession
+              <FaGraduationCap
+                className="mr-2"
+                style={{ color: cardColorSchemes.profession.icon }}
+              />{" "}
+              Profession
             </h3>
             <div className="space-y-2">
               {Object.entries(professionDetails).map(([key, value]) => (
@@ -579,8 +639,11 @@ const ProfileDetail = () => {
                   <strong style={{ color: cardColorSchemes.profession.label }}>
                     {key}:
                   </strong>
-                  <span style={{ color: cardColorSchemes.profession.value }} className="ml-2">
-                    {value || 'Not specified'}
+                  <span
+                    style={{ color: cardColorSchemes.profession.value }}
+                    className="ml-2"
+                  >
+                    {value || "Not specified"}
                   </span>
                 </p>
               ))}
@@ -591,7 +654,7 @@ const ProfileDetail = () => {
         {/* Family Details */}
         {Object.keys(familyDetails).length > 0 && (
           <motion.div
-            variants={getCardVariants('family')}
+            variants={getCardVariants("family")}
             initial="initial"
             animate="animate"
             whileHover="hover"
@@ -600,7 +663,7 @@ const ProfileDetail = () => {
               backgroundColor: cardColorSchemes.family.bg,
               borderColor: cardColorSchemes.family.border,
               borderWidth: "2px",
-              borderStyle: "solid"
+              borderStyle: "solid",
             }}
           >
             <h3
@@ -608,10 +671,14 @@ const ProfileDetail = () => {
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
-                color: cardColorSchemes.family.title
+                color: cardColorSchemes.family.title,
               }}
             >
-              <FaUsers className="mr-2" style={{ color: cardColorSchemes.family.icon }} /> Family
+              <FaUsers
+                className="mr-2"
+                style={{ color: cardColorSchemes.family.icon }}
+              />{" "}
+              Family
             </h3>
             <div className="space-y-2">
               {Object.entries(familyDetails).map(([key, value]) => (
@@ -626,8 +693,11 @@ const ProfileDetail = () => {
                   <strong style={{ color: cardColorSchemes.family.label }}>
                     {key}:
                   </strong>
-                  <span style={{ color: cardColorSchemes.family.value }} className="ml-2">
-                    {value || 'Not specified'}
+                  <span
+                    style={{ color: cardColorSchemes.family.value }}
+                    className="ml-2"
+                  >
+                    {value || "Not specified"}
                   </span>
                 </p>
               ))}
