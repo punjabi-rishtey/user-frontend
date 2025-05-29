@@ -158,23 +158,31 @@ const SignupPage = () => {
         onClose={() => setShowModal(false)}
         onAccept={onTermsConditionAccept}
       >
-        <p>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex molestiae
-          molestias quae impedit, ipsam aperiam provident laborum dignissimos
-          voluptate debitis eum totam minima reiciendis tempora sit dolorum qui
-          dicta nostrum? Lorem ipsum dolor sit amet consectetur adipisicing
-          elit. Vel itaque voluptas, esse voluptate veniam ratione blanditiis
-          harum neque sunt enim sed corporis amet, ex expedita explicabo velit
-          id earum nesciunt dolor? At nostrum, ab asperiores tenetur libero
-          aspernatur blanditiis odit illum corporis fuga, perspiciatis beatae
-          voluptatibus. Temporibus error reprehenderit dolorum aliquid
-          blanditiis porro magni doloremque, natus ex, explicabo rem aperiam
-          officia harum atque sit suscipit molestiae consequuntur odio eligendi
-          eos minus maiores sint veniam. Eaque maxime quae aut nobis, officia
-          tempore voluptates doloremque ut exercitationem fugiat dolorem velit
-          odio nulla nemo quisquam rerum dolore voluptatem ullam deleniti.
-          Molestias, voluptate suscipit!
-        </p>
+        <div>
+          <p>I declare that:</p>
+          <ol type="1">
+            <li>
+              The information filled up by me in this form is correct and if any
+              error, I shall be responsible for the same.
+            </li>
+
+            <li>
+              2. Before fixing up my marriage, with my future partner, I shall
+              know satisfactory information about the family and the partner
+              herself/himself. The Punjabi Marriage Forum (punjabi-rishtey.com)
+              is not responsible for any mishap.
+            </li>
+
+            <li>
+              After getting married, I shall inform the website incharge about
+              the same.
+            </li>
+            <li>
+              I will respectfully follow all the terms and conditions provided
+              by PUNJABI MARRIAGE FORUM.
+            </li>
+          </ol>
+        </div>
       </Modal>
       {/* Signup Form */}
       <div className="flex-grow flex items-center justify-center my-16">
