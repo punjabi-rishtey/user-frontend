@@ -13,7 +13,7 @@ const features = [
   {
     icon: "🤝",
     title: "Most Trusted",
-    description: "22+ years of trusted matchmaking experience",
+    description: "24+ years of trusted matchmaking experience",
   },
   {
     icon: "💍",
@@ -145,7 +145,7 @@ const AboutPage = () => {
               >
                 "Punjabi Marriage Forum (Now
                 Punjabi-Rishtey, our digital platform)" in 2000 and has been
-                running successfully for 22 years.
+                running successfully for 25 years.
               </p>
 
               <div className="flex flex-col md:flex-row items-center mt-8 space-y-4 md:space-y-0 md:space-x-12">

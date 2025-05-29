@@ -103,13 +103,13 @@ const FindPartner = () => {
     }
   }, [isAuthenticated, authChecked]);
 
-  useEffect(() => {
-    // console.log("> user status: ", user?.status, user && user.status);
-    alert("No active membership.");
-    if (user && user.status != "Approved") {
-      navigate("/membership", { replace: true });
-    }
-  }, []);
+  // useEffect(() => {
+  //   // console.log("> user status: ", user?.status, user && user.status);
+  //   alert("No active membership.");
+  //   if (user && user.status != "Approved") {
+  //     navigate("/membership", { replace: true });
+  //   }
+  // }, []);
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -225,7 +225,7 @@ const FindPartner = () => {
         const normalizedMaritalStatus = normalizeMaritalStatus(
           item.marital_status
         );
-        const isManglik = item.mangalik === true || item.mangalik === "true";
+        const isManglik = item.manglik === true || item.manglik === "true";
         const oppositeGender = getOppositeGender();
         const age = parseInt(item.age);
         const isNRI =
@@ -294,7 +294,7 @@ const FindPartner = () => {
       if (key === "maritalStatus") {
         value = normalizeMaritalStatus(user.marital_status);
       } else if (key === "manglik") {
-        value = user.mangalik?.toString();
+        value = user.manglik?.toString();
       } else if (key === "gender") {
         value =
           user.gender?.charAt(0).toUpperCase() +
