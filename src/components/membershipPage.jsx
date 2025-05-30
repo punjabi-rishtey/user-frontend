@@ -38,12 +38,12 @@ const MembershipPage = () => {
   }, [isAuthenticated, refreshUser]);
 
   // Improved authentication check - prevent premature redirects
-  useEffect(() => {
-    // Only perform redirection after we've confirmed authentication status
-    if (authChecked && !isAuthenticated) {
-      navigate("/login", { replace: true });
-    }
-  }, [authChecked, isAuthenticated, navigate]);
+  // useEffect(() => {
+  //   // Only perform redirection after we've confirmed authentication status
+  //   if (authChecked && !isAuthenticated) {
+  //     navigate("/login", { replace: true });
+  //   }
+  // }, [authChecked, isAuthenticated, navigate]);
 
   // Check authentication properly with timeout for initialization
   useEffect(() => {
@@ -328,48 +328,48 @@ const MembershipPage = () => {
   }
 
   // If not authenticated, show a message
-  if (authChecked && !isAuthenticated) {
-    return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2
-              className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              Authentication Required
-            </h2>
-            <p
-              className="text-[#6B4132] mb-6 text-center"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              Please log in to access membership plans.
-            </p>
-            <div className="flex justify-center">
-              <button
-                onClick={() => navigate("/login")}
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                Log In
-              </button>
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  // if (authChecked && !isAuthenticated) {
+  //   return (
+  //     <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+  //       <Header />
+  //       <div className="flex-grow flex items-center justify-center">
+  //         <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+  //           <h2
+  //             className="text-2xl mb-4 text-[#4F2F1D] text-center"
+  //             style={{
+  //               fontFamily: "'Tiempos Headline', serif",
+  //               fontWeight: 400,
+  //             }}
+  //           >
+  //             Authentication Required
+  //           </h2>
+  //           <p
+  //             className="text-[#6B4132] mb-6 text-center"
+  //             style={{
+  //               fontFamily: "'Modern Era', sans-serif",
+  //               fontWeight: 400,
+  //             }}
+  //           >
+  //             Please log in to access membership plans.
+  //           </p>
+  //           <div className="flex justify-center">
+  //             <button
+  //               onClick={() => navigate("/login")}
+  //               className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+  //               style={{
+  //                 fontFamily: "'Modern Era', sans-serif",
+  //                 fontWeight: 400,
+  //               }}
+  //             >
+  //               Log In
+  //             </button>
+  //           </div>
+  //         </div>
+  //       </div>
+  //       <Footer />
+  //     </div>
+  //   );
+  // }
 
   // If payment was successful, show success message
   if (success) {

@@ -10,7 +10,7 @@ const CurrentMembershipPage = () => {
   useEffect(() => {
     // /api/users/subscription/
     const userId = user.id;
-    const fetchUserSubscriptionDetails = async () => {
+    const fetchUserSubscriptionDetails = async (userId) => {
       try {
         // const response = await fetch(`https://backend-nm1z.onrender.com/api/users/subscription/${userId}`);
         // if (!response.ok) throw new Error("Failed to fetch membership plans");
@@ -23,6 +23,7 @@ const CurrentMembershipPage = () => {
         }
 
         const response = await axios.get(
+          // `https://backend-nm1z.onrender.com/api/users/subscription/67fb71fa1790bc25ccdece47`,
           `https://backend-nm1z.onrender.com/api/users/subscription/${userId}`,
           {
             headers: {
@@ -32,6 +33,7 @@ const CurrentMembershipPage = () => {
           }
         );
 
+        console.log(">fetching user subscription details: ", response.data);
         if (response.data) {
           // console.log(response.data.data)
           const details = response.data.data;
@@ -45,8 +47,8 @@ const CurrentMembershipPage = () => {
       }
     };
     if (userId) {
-      // console.log("userId: ", userId)
-      fetchUserSubscriptionDetails();
+      console.log("userId: ", userId);
+      fetchUserSubscriptionDetails(userId);
     }
   }, []);
 
@@ -83,7 +85,7 @@ const CurrentMembershipPage = () => {
           // variants={cardVariants}
           initial="initial"
           animate="animate"
-          whileHover="hover"
+          // whileHover="hover"
           // transition={{ duration: 0.3, delay: index * 0.1 }}
           className="relative w-full md:w-[380px] p-8 rounded-lg shadow-lg hover:ring-2 hover:ring-[#4F2F1D] bg-[#F5EDE7] cursor-pointer"
           // onClick={() => handlePlanClick(plan)}
