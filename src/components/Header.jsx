@@ -24,6 +24,11 @@ const Header = () => {
   };
 
   const handleMembershipPlanClick = () => {
+    if (!isAuthenticated) {
+      navigate("/membership");
+      return;
+    }
+
     if (user.status == "Approved") {
       navigate("/current-plan");
       console.log("> isAuthenticated && getMembershipStatus(): ", user.status);

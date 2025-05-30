@@ -26,15 +26,19 @@ const HeroWithHeader = () => {
     setIsSidebarOpen(false);
   };
 
-
   const handleMembershipPlanClick = () => {
-      if (user.status == "Approved") {
+    if (!isAuthenticated) {
+      navigate("/membership");
+      return;
+    }
+
+    if (user.status == "Approved") {
       navigate("/current-plan");
-      console.log("> isAuthenticated && getMembershipStatus(): ", user.status)
+      console.log("> isAuthenticated && getMembershipStatus(): ", user.status);
     } else {
       navigate("/membership");
     }
-  }
+  };
 
   const navItems = [
     { label: "Home", path: "/" },
@@ -44,7 +48,6 @@ const HeroWithHeader = () => {
     { label: "Testimonials", path: "/testimonials" },
     { label: "Contact", path: "/contact" },
   ];
-
 
   const handleNavClick = (item) => {
     if (item.onClick) {
