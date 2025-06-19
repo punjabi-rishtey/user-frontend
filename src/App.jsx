@@ -121,7 +121,6 @@ const MessageAlert = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [messages, setMessages] = useState([]);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -149,16 +148,6 @@ const MessageAlert = () => {
     fetchMessages();
   }, []);
 
-  // Cycle through messages every 5 seconds when open
-  useEffect(() => {
-    if (isOpen && messages.length > 1) {
-      const interval = setInterval(() => {
-        setCurrentMessageIndex((prev) => (prev + 1) % messages.length);
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [isOpen, messages.length]);
-
   const toggleOpen = () => {
     setIsOpen(!isOpen);
   };
@@ -167,12 +156,6 @@ const MessageAlert = () => {
     e.stopPropagation();
     setIsVisible(false);
   };
-
-  if (!isVisible || loading || error || messages.length === 0) {
-    return null;
-  }
-
-  const currentMessage = messages[currentMessageIndex];
 
   const dataTimeConverter = (datetime) => {
     if (!datetime) return "";
@@ -186,6 +169,10 @@ const MessageAlert = () => {
       hour12: true,
     });
   };
+
+  if (!isVisible || loading || error || messages.length === 0) {
+    return null;
+  }
 
   return (
     <AnimatePresence>
@@ -227,33 +214,39 @@ const MessageAlert = () => {
             </motion.div>
 
             {/* Close button */}
-            <button
+            {/* <button
               className="absolute -top-2 -right-2 bg-white/90 p-1 rounded-full shadow-md hover:bg-white text-gray-700 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
               onClick={closePromo}
             >
-              <FaBell size={12} />
-            </button>
+              <FaTimes size={12} />
+            </button> */}
 
-            {/* Expanded Message */}
+            {/* Expanded Message List */}
             <AnimatePresence>
               {isOpen && (
                 <motion.div
-                  key={currentMessage._id}
-                  className="absolute top-0 right-20 w-64 p-4 rounded-lg bg-white shadow-xl border-l-4 border-[#990000]"
+                  className="absolute top-0 right-20 w-64 max-h-96 overflow-y-auto p-4 rounded-lg bg-white shadow-xl border-l-4 border-[#990000]"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ type: "spring", bounce: 0.3 }}
                 >
-                  <h3 className="text-lg font-bold text-[#4F2F1D] mb-1">
-                    New Message!
+                  <h3 className="text-lg font-bold text-[#4F2F1D] mb-2">
+                    Messages
                   </h3>
-                  <div className="text-gray-700 mb-2 bg-gray-100 px-2 py-1 rounded-r-md border-l-4 border-[#990000]">
-                    <p>{currentMessage.message}</p>
-                    <p className="text-xs text-gray-500">
-                      {/* Expires: {dataTimeConverter(currentMessage.expiresAt)} */}
-                    </p>
-                  </div>
+                  <ul className="space-y-2">
+                    {messages.map((message) => (
+                      <li
+                        key={message._id}
+                        className="text-gray-700 bg-gray-100 px-2 py-1 rounded-r-md border-l-4 border-[#990000]"
+                      >
+                        <p className="text-sm">{message.message}</p>
+                        <p className="text-xs text-gray-500">
+                          Expires: {dataTimeConverter(message.expiresAt)}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
                 </motion.div>
               )}
             </AnimatePresence>
