@@ -242,7 +242,7 @@ const MessageAlert = () => {
                       >
                         <p className="text-sm">{message.message}</p>
                         <p className="text-xs text-gray-500">
-                          Expires: {dataTimeConverter(message.expiresAt)}
+                          {/* Expires: {dataTimeConverter(message.expiresAt)} */}
                         </p>
                       </li>
                     ))}
