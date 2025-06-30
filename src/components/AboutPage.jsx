@@ -190,7 +190,7 @@ const AboutPage = () => {
                       className="font-bold text-[#111111] text-lg"
                       style={{ fontFamily: "'Lora', serif" }}
                     >
-                      info@example.com
+                      support@punjabi-rishtey.com
                     </p>
                   </div>
                 </motion.div>
