@@ -196,7 +196,7 @@ const Testimonials = () => {
                         <img
                           src={client.photo}
                           alt={client.name}
-                          className="object-cover w-full h-full"
+                          className="object-cover w-3xs h-72"
                         />
                       </div>
                       <div className="p-2 text-center">
