@@ -6,7 +6,7 @@ const SuccessStories = () => {
   const navigate = useNavigate();
   const stories = [
     {
-      name: "Sakshi and Vivek Manchanda",
+      name: "Sakshi and Vivek",
       quote:
         "The perfect match! This platform made it so easy to find someone who truly understands me.",
       image:
