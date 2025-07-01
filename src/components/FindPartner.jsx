@@ -575,7 +575,7 @@ const FindPartner = () => {
     <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
       <div className="container mx-auto px-4 sm:px-8 my-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
           <input
             type="text"
             placeholder="Search by name..."
