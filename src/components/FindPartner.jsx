@@ -18,7 +18,7 @@ const FindPartner = () => {
     ageMin: "",
     ageMax: "",
   });
-  const [searchTerm, setSearchTerm] = windings("react");
+  const [searchTerm, setSearchTerm] = useState(""); // Fixed typo: replaced windings("react") with useState("")
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -30,8 +30,7 @@ const FindPartner = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
-  // New state for sorting
-  const [sortOption, setSortOption] = useState("newest"); // Default: newest first
+  const [sortOption, setSortOption] = useState("newest");
 
   // Give auth context time to initialize before checking
   useEffect(() => {
@@ -57,7 +56,7 @@ const FindPartner = () => {
     }
   }, [user]);
 
-  // Only redirect if we've confirmed the user is not authenticated
+  // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated && authChecked) {
       navigate("/login", { replace: true });
@@ -337,7 +336,7 @@ const FindPartner = () => {
   const predefinedOptions = {
     manglik: ["true", "false"],
     nriStatus: ["true", "false"],
-    maritalStatus: ["Never Married", "Divorced", "Widowed", "Separated"],
+    maritalStatus: ["Never Married", "Divowed", "Widowed", "Separated"],
   };
 
   const filterOptions = [
@@ -575,7 +574,6 @@ const FindPartner = () => {
   return (
     <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
       <Header />
-      {/* Search Bar, Sort Dropdown, and Filter Toggle */}
       <div className="container mx-auto px-4 sm:px-8 my-4">
         <div className="flex flex-col sm:flex-row gap-4 items-center">
           <input
@@ -606,15 +604,12 @@ const FindPartner = () => {
       </div>
 
       <div className="flex flex-col md:flex-row flex-grow">
-        {/* Mobile Filter Overlay */}
         <div
           className={`fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
             showFilters ? "opacity-100" : "opacity-0 pointer-events-none"
           }`}
           onClick={() => setShowFilters(false)}
         />
-
-        {/* Mobile Filters Sidebar */}
         <div
           className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#6B4132] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 overflow-y-auto ${
             showFilters ? "translate-x-0" : "-translate-x-full"
@@ -737,8 +732,6 @@ const FindPartner = () => {
             </button>
           </div>
         </div>
-
-        {/* Desktop Filters Sidebar */}
         <div className="hidden md:block w-1/4 p-6 bg-[#F5EDE7] shadow-lg md:sticky md:top-0 md:h-screen md:overflow-y-auto ml-8 rounded-lg border border-[#E5D3C8]">
           <h2
             className="text-2xl mb-6 text-[#4F2F1D]"
@@ -842,8 +835,6 @@ const FindPartner = () => {
             Clear Filters
           </button>
         </div>
-
-        {/* Profile List */}
         <div className="w-full md:w-3/4 p-4 sm:p-8">
           <div className="mb-4 text-[#4F2F1D]">
             <p>
