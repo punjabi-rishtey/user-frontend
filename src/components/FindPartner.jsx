@@ -862,7 +862,7 @@ const FindPartner = () => {
                     <img
                       src={item.profile_picture || profileIcon}
                       alt={item.name}
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full mb-4 sm:mb-0 sm:mr-6 object-cover"
+                      className="w-28 h-28 sm:w-32 sm:h-36 rounded-md mb-4 sm:mb-0 sm:mr-6 object-cover"
                     />
                     <div className="text-center sm:text-left">
                       <h3
