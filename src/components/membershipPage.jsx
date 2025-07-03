@@ -618,7 +618,7 @@ const MembershipPage = () => {
                         {qr && (
                           <div className="mb-6 text-center w-full h-full bg-[#F1F1F1] flex items-center justify-center">
                             <img
-                              src={qr.imageUrl}
+                              src={qr?.imageUrl}
                               alt="QR Code"
                               className="w-48 h-48 object-contain mx-auto"
                             />
@@ -634,7 +634,7 @@ const MembershipPage = () => {
                         fontWeight: 400,
                       }}
                     >
-                      <p className="mb-1 text-sm">UPI ID: {qr.name || "yourcompany@upi"}</p>
+                      <p className="mb-1 text-sm">UPI ID: {qr?.name || "yourcompany@upi"}</p>
                       <p className="text-sm">
                         After payment, please fill the form →
                       </p>
