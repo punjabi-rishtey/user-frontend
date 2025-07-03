@@ -148,6 +148,7 @@ const MembershipPage = () => {
     try {
       const res = await fetch("https://backend-nm1z.onrender.com/api/admin/auth/qr");
       const data = await res.json();
+      console.log(data)
       setQr(data);
     } catch (err) {
       console.error("Failed to fetch QR:", err);
