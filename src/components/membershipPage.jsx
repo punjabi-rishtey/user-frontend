@@ -142,6 +142,22 @@ const MembershipPage = () => {
     }));
   };
 
+  
+  const [qr, setQr] = useState(null);
+    const fetchQR = async () => {
+    try {
+      const res = await fetch("https://backend-nm1z.onrender.com/api/admin/auth/qr");
+      const data = await res.json();
+      setQr(data);
+    } catch (err) {
+      console.error("Failed to fetch QR:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchQR();
+  }, []);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -595,9 +611,19 @@ const MembershipPage = () => {
                     <div className="flex justify-center mb-4">
                       {/* QR code container with white background */}
                       <div className="w-48 h-48 bg-white p-4 rounded-lg flex items-center justify-center">
+                        {!qr && (
                         <div className="w-full h-full bg-[#F1F1F1] flex items-center justify-center">
                           <span className="text-gray-500">QR Code</span>
-                        </div>
+                        </div>)}
+                        {qr && (
+                          <div className="mb-6 text-center w-full h-full bg-[#F1F1F1] flex items-center justify-center">
+                            <img
+                              src={qr.imageUrl}
+                              alt="QR Code"
+                              className="w-48 h-48 object-contain mx-auto"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -608,7 +634,7 @@ const MembershipPage = () => {
                         fontWeight: 400,
                       }}
                     >
-                      <p className="mb-1 text-sm">UPI ID: yourcompany@upi</p>
+                      <p className="mb-1 text-sm">UPI ID: {qr.name || "yourcompany@upi"}</p>
                       <p className="text-sm">
                         After payment, please fill the form →
                       </p>
