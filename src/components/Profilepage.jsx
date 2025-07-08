@@ -222,6 +222,7 @@ export default function ProfileSettings() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
+  const [loadingPassword, setLoadingPassword] = useState(false); // Added loading state for password reset
 
   // States for different sections
   const [userImages, setUserImages] = useState([]);
@@ -1029,19 +1030,22 @@ export default function ProfileSettings() {
   };
 
   const handleResetPassword = async () => {
-    const email = user?.email;
-
+    setLoadingPassword(true);
     try {
+      const email = user?.email;
       const response = await axios.post(
         `https://backend-nm1z.onrender.com/api/users/forgot-password/`,
         { email }
       );
-      alert("Password reset link sent successful");
+      alert("Password reset link sent successfully");
     } catch (error) {
       console.error(
         "Error resetting password:",
         error.response?.data || error.message
       );
+      alert("Failed to send password reset link. Please try again.");
+    } finally {
+      setLoadingPassword(false);
     }
   };
 
@@ -1088,10 +1092,6 @@ export default function ProfileSettings() {
 
   // Menu items for sidebar
   const menuItems = [
-    // { icon: <FaHeart className="text-[#B31312]" />, label: "My Matches" },
-    // { icon: <FaComments className="text-[#B31312]" />, label: "Interests" },
-    // { icon: <FaComments className="text-[#B31312]" />, label: "Chat List" },
-    // { icon: <FaMoneyBill className="text-[#B31312]" />, label: "Plan" },
     {
       icon: <FaCog className="text-[#B31312]" />,
       label: "Settings",
@@ -1149,7 +1149,7 @@ export default function ProfileSettings() {
                 onChange={handleBasicChange}
                 type="select"
                 options={[
-                  { value:"", label: "Select Gender" },
+                  { value: "", label: "Select Gender" },
                   { value: "male", label: "Male" },
                   { value: "female", label: "Female" },
                 ]}
@@ -1162,7 +1162,7 @@ export default function ProfileSettings() {
                 onChange={handleBasicChange}
                 type="select"
                 options={[
-                  { value:"", label: "Select Religion" },
+                  { value: "", label: "Select Religion" },
                   { value: "hindu", label: "Hindu" },
                   { value: "sikh", label: "Sikh" },
                   { value: "jain", label: "Jain" },
@@ -1176,13 +1176,13 @@ export default function ProfileSettings() {
                 name="marital_status"
                 onChange={handleBasicChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Marital Status" },
+                options=[
+                  { value: "", label: "Select Marital Status" },
                   { value: "never_married", label: "Never Married" },
                   { value: "divorced", label: "Divorced" },
                   { value: "widow_widower", label: "Widow/Widower" },
                   { value: "awaiting_divorce", label: "Awaiting Divorce" },
-                ]}
+                ]
               />
               <InfoRow
                 label="Age"
@@ -1220,7 +1220,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
-                  { value:"", label: "Select Caste" },
+                  { value: "", label: "Select Caste" },
                   { value: "khatri", label: "Khatri" },
                   { value: "arora", label: "Arora" },
                   { value: "brahmin", label: "Brahmin" },
@@ -1228,14 +1228,14 @@ export default function ProfileSettings() {
                 ]}
               />
               <InfoRow
-                label="manglik Status"
+                label="Manglik Status"
                 value={personalData.manglik}
                 isEditing={isEditing || isEditingPersonal}
                 name="manglik"
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
-                  { value:"", label: "Select Manglisk Status" },
+                  { value: "", label: "Select Manglik Status" },
                   { value: "manglik", label: "Manglik" },
                   { value: "partial_manglik", label: "Partial Manglik" },
                   { value: "non_manglik", label: "Non Manglik" },
@@ -1264,7 +1264,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
-                  { value:"", label: "Select Skin Tone" },
+                  { value: "", label: "Select Skin Tone" },
                   { value: "very_fair", label: "Very Fair" },
                   { value: "fair", label: "Fair" },
                   { value: "wheatish", label: "Wheatish" },
@@ -1278,13 +1278,13 @@ export default function ProfileSettings() {
                 name="physical_attributes.body_type"
                 onChange={handlePersonalChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Body Type" },
+                options=[
+                  { value: "", label: "Select Body Type" },
                   { value: "slim", label: "Slim" },
                   { value: "athletic", label: "Athletic" },
                   { value: "average", label: "Average" },
                   { value: "heavy", label: "Heavy" },
-                ]}
+                ]
               />
               <InfoRow
                 label="Physical Disability"
@@ -1293,11 +1293,11 @@ export default function ProfileSettings() {
                 name="physical_attributes.physical_disability"
                 onChange={handlePersonalChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Physical Disability" },
+                options=[
+                  { value: "", label: "Select Physical Disability" },
                   { value: "false", label: "No" },
                   { value: "true", label: "Yes" },
-                ]}
+                ]
               />
               <InfoRow
                 label="Disability Details"
@@ -1313,12 +1313,12 @@ export default function ProfileSettings() {
                 name="lifestyle.smoke"
                 onChange={handlePersonalChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Smoking" },
+                options=[
+                  { value: "", label: "Select Smoking" },
                   { value: "no", label: "No" },
                   { value: "yes", label: "Yes" },
                   { value: "occasionally", label: "Occasionally" },
-                ]}
+                ]
               />
               <InfoRow
                 label="Drinking"
@@ -1327,12 +1327,12 @@ export default function ProfileSettings() {
                 name="lifestyle.drink"
                 onChange={handlePersonalChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Drinking" },
+                options=[
+                  { value: "", label: "Select Drinking" },
                   { value: "no", label: "No" },
                   { value: "yes", label: "Yes" },
                   { value: "occasionally", label: "Occasionally" },
-                ]}
+                ]
               />
               <InfoRow
                 label="Diet Preference"
@@ -1341,15 +1341,15 @@ export default function ProfileSettings() {
                 name="lifestyle.veg_nonveg"
                 onChange={handlePersonalChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Diet Preference" },
+                options=[
+                  { value: "", label: "Select Diet Preference" },
                   { value: "veg", label: "Vegetarian" },
                   { value: "nonveg", label: "Non-Vegetarian" },
                   {
                     value: "occasionally_nonveg",
                     label: "Occasionally Non-Vegetarian",
                   },
-                ]}
+                ]
               />
               <InfoRow
                 label="NRI Status"
@@ -1358,11 +1358,11 @@ export default function ProfileSettings() {
                 name="lifestyle.nri_status"
                 onChange={handlePersonalChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select NRI Status" },
+                options=[
+                  { value: "", label: "Select NRI Status" },
                   { value: "false", label: "No" },
                   { value: "true", label: "Yes" },
-                ]}
+                ]
               />
             </div>
 
@@ -1451,13 +1451,13 @@ export default function ProfileSettings() {
                   name="family_value"
                   onChange={handleFamilyChange}
                   type="select"
-                  options={[
-                    { value:"", label: "Select Family Value" },
+                  options=[
+                    { value: "", label: "Select Family Value" },
                     { value: "traditional", label: "Traditional" },
                     { value: "orthodox", label: "Orthodox" },
                     { value: "liberal", label: "Liberal" },
                     { value: "modern", label: "Modern" },
-                  ]}
+                  ]
                 />
                 <InfoRow
                   label="Family Type"
@@ -1466,13 +1466,13 @@ export default function ProfileSettings() {
                   name="family_type"
                   onChange={handleFamilyChange}
                   type="select"
-                  options={[
-                    { value:"", label: "Select Family Type" },
+                  options=[
+                    { value: "", label: "Select Family Type" },
                     { value: "nuclear", label: "Nuclear Family" },
                     { value: "joint", label: "Joint Family" },
                     { value: "extended", label: "Extended Family" },
                     { value: "living_alone", label: "Living Alone" },
-                  ]}
+                  ]
                 />
                 <InfoRow
                   label="Mother's Name"
@@ -1553,14 +1553,14 @@ export default function ProfileSettings() {
                   name="education_level"
                   onChange={handleEducationChange}
                   type="select"
-                  options={[
-                    { value:"", label: "Select Education Level" },
+                  options=[
+                    { value: "", label: "Select Education Level" },
                     { value: "high_school", label: "High School" },
                     { value: "undergraduate", label: "Undergraduate" },
                     { value: "graduate", label: "Graduate" },
                     { value: "post_graduate", label: "Post Graduate" },
                     { value: "doctorate", label: "Doctorate" },
-                  ]}
+                  ]
                 />
                 <InfoRow
                   label="Education Field"
@@ -1569,15 +1569,15 @@ export default function ProfileSettings() {
                   name="education_field"
                   onChange={handleEducationChange}
                   type="select"
-                  options={[
-                    { value:"", label: "Select Education Field" },
+                  options=[
+                    { value: "", label: "Select Education Field" },
                     { value: "engineering", label: "Engineering" },
                     { value: "medical", label: "Medical" },
                     { value: "commerce", label: "Commerce" },
                     { value: "arts", label: "Arts" },
                     { value: "science", label: "Science" },
                     { value: "other", label: "Other" },
-                  ]}
+                  ]
                 />
 
                 {/* School Details */}
@@ -1642,7 +1642,6 @@ export default function ProfileSettings() {
           </div>
         );
 
-      // Modified portion of the profession case in renderTabContent function
       case "profession":
         return (
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg">
@@ -1658,13 +1657,13 @@ export default function ProfileSettings() {
                 name="occupation"
                 onChange={handleProfessionChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Occupation" },
-                  { value: "Not Working", label: "NotWorking" },
+                options=[
+                  { value: "", label: "Select Occupation" },
+                  { value: "Not Working", label: "Not Working" },
                   { value: "Private Job", label: "Private Job" },
                   { value: "Government Job", label: "Government Job" },
                   { value: "Business Owner", label: "Business Owner" },
-                ]}
+                ]
               />
               <InfoRow
                 label="Designation"
@@ -1687,8 +1686,8 @@ export default function ProfileSettings() {
                 name="income"
                 onChange={handleProfessionChange}
                 type="select"
-                options={[
-                  { value:"", label: "Select Annual Income" },
+                options=[
+                  { value: "", label: "Select Annual Income" },
                   { value: "0-3", label: "Up to 3 Lakhs" },
                   { value: "3-5", label: "3-5 Lakhs" },
                   { value: "5-7", label: "5-7 Lakhs" },
@@ -1701,7 +1700,7 @@ export default function ProfileSettings() {
                   { value: "50-75", label: "50-75 Lakhs" },
                   { value: "75-100", label: "75 Lakhs - 1 Crore" },
                   { value: "100+", label: "1 Crore+" },
-                ]}
+                ]
               />
 
               <div className="col-span-1 md:col-span-2">
@@ -1831,10 +1830,11 @@ export default function ProfileSettings() {
               ))}
               <button
                 onClick={handleResetPassword}
-                className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
+                disabled={loadingPassword}
+                className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300 disabled:bg-gray-400 disabled:text-white"
               >
                 <MdPrivacyTip />
-                <span>Change Password</span>
+                <span>{loadingPassword ? "Sending link..." : "Change Password"}</span>
               </button>
               <button
                 onClick={handleLogout}
@@ -1885,10 +1885,15 @@ export default function ProfileSettings() {
                     </button>
                   ))}
                   <button
-                    onClick={() => {
-                      logout();
-                      navigate("/");
-                    }}
+                    onClick={handleResetPassword}
+                    disabled={loadingPassword}
+                    className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300 disabled:bg-gray-400 disabled:text-white"
+                  >
+                    <MdPrivacyTip />
+                    <span>{loadingPassword ? "Sending link..." : "Change Password"}</span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
                     className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
                   >
                     <FaSignOutAlt />
