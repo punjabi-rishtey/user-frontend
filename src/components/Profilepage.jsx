@@ -1570,7 +1570,7 @@ export default function ProfileSettings() {
                   onChange={handleEducationChange}
                   type="select"
                   options={[
-                    { value:"", label: "Select Engineering Field" },
+                    { value:"", label: "Select Education Field" },
                     { value: "engineering", label: "Engineering" },
                     { value: "medical", label: "Medical" },
                     { value: "commerce", label: "Commerce" },
