@@ -1278,13 +1278,13 @@ export default function ProfileSettings() {
                 name="physical_attributes.body_type"
                 onChange={handlePersonalChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Body Type" },
                   { value: "slim", label: "Slim" },
                   { value: "athletic", label: "Athletic" },
                   { value: "average", label: "Average" },
                   { value: "heavy", label: "Heavy" },
-                ]
+                ]}
               />
               <InfoRow
                 label="Physical Disability"
@@ -1293,11 +1293,11 @@ export default function ProfileSettings() {
                 name="physical_attributes.physical_disability"
                 onChange={handlePersonalChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Physical Disability" },
                   { value: "false", label: "No" },
                   { value: "true", label: "Yes" },
-                ]
+                ]}
               />
               <InfoRow
                 label="Disability Details"
@@ -1313,12 +1313,12 @@ export default function ProfileSettings() {
                 name="lifestyle.smoke"
                 onChange={handlePersonalChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Smoking" },
                   { value: "no", label: "No" },
                   { value: "yes", label: "Yes" },
                   { value: "occasionally", label: "Occasionally" },
-                ]
+                ]}
               />
               <InfoRow
                 label="Drinking"
@@ -1327,12 +1327,12 @@ export default function ProfileSettings() {
                 name="lifestyle.drink"
                 onChange={handlePersonalChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Drinking" },
                   { value: "no", label: "No" },
                   { value: "yes", label: "Yes" },
                   { value: "occasionally", label: "Occasionally" },
-                ]
+                ]}
               />
               <InfoRow
                 label="Diet Preference"
@@ -1341,7 +1341,7 @@ export default function ProfileSettings() {
                 name="lifestyle.veg_nonveg"
                 onChange={handlePersonalChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Diet Preference" },
                   { value: "veg", label: "Vegetarian" },
                   { value: "nonveg", label: "Non-Vegetarian" },
@@ -1349,7 +1349,7 @@ export default function ProfileSettings() {
                     value: "occasionally_nonveg",
                     label: "Occasionally Non-Vegetarian",
                   },
-                ]
+                ]}
               />
               <InfoRow
                 label="NRI Status"
@@ -1358,11 +1358,11 @@ export default function ProfileSettings() {
                 name="lifestyle.nri_status"
                 onChange={handlePersonalChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select NRI Status" },
                   { value: "false", label: "No" },
                   { value: "true", label: "Yes" },
-                ]
+                ]}
               />
             </div>
 
@@ -1451,13 +1451,13 @@ export default function ProfileSettings() {
                   name="family_value"
                   onChange={handleFamilyChange}
                   type="select"
-                  options=[
+                  options={[
                     { value: "", label: "Select Family Value" },
                     { value: "traditional", label: "Traditional" },
                     { value: "orthodox", label: "Orthodox" },
                     { value: "liberal", label: "Liberal" },
                     { value: "modern", label: "Modern" },
-                  ]
+                  ]}
                 />
                 <InfoRow
                   label="Family Type"
@@ -1466,13 +1466,13 @@ export default function ProfileSettings() {
                   name="family_type"
                   onChange={handleFamilyChange}
                   type="select"
-                  options=[
+                  options={[
                     { value: "", label: "Select Family Type" },
                     { value: "nuclear", label: "Nuclear Family" },
                     { value: "joint", label: "Joint Family" },
                     { value: "extended", label: "Extended Family" },
                     { value: "living_alone", label: "Living Alone" },
-                  ]
+                  ]}
                 />
                 <InfoRow
                   label="Mother's Name"
@@ -1553,14 +1553,14 @@ export default function ProfileSettings() {
                   name="education_level"
                   onChange={handleEducationChange}
                   type="select"
-                  options=[
+                  options={[
                     { value: "", label: "Select Education Level" },
                     { value: "high_school", label: "High School" },
                     { value: "undergraduate", label: "Undergraduate" },
                     { value: "graduate", label: "Graduate" },
                     { value: "post_graduate", label: "Post Graduate" },
                     { value: "doctorate", label: "Doctorate" },
-                  ]
+                  ]}
                 />
                 <InfoRow
                   label="Education Field"
@@ -1569,7 +1569,7 @@ export default function ProfileSettings() {
                   name="education_field"
                   onChange={handleEducationChange}
                   type="select"
-                  options=[
+                  options={[
                     { value: "", label: "Select Education Field" },
                     { value: "engineering", label: "Engineering" },
                     { value: "medical", label: "Medical" },
@@ -1577,7 +1577,7 @@ export default function ProfileSettings() {
                     { value: "arts", label: "Arts" },
                     { value: "science", label: "Science" },
                     { value: "other", label: "Other" },
-                  ]
+                  ]}
                 />
 
                 {/* School Details */}
@@ -1657,13 +1657,13 @@ export default function ProfileSettings() {
                 name="occupation"
                 onChange={handleProfessionChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Occupation" },
                   { value: "Not Working", label: "Not Working" },
                   { value: "Private Job", label: "Private Job" },
                   { value: "Government Job", label: "Government Job" },
                   { value: "Business Owner", label: "Business Owner" },
-                ]
+                ]}
               />
               <InfoRow
                 label="Designation"
@@ -1686,7 +1686,7 @@ export default function ProfileSettings() {
                 name="income"
                 onChange={handleProfessionChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Annual Income" },
                   { value: "0-3", label: "Up to 3 Lakhs" },
                   { value: "3-5", label: "3-5 Lakhs" },
@@ -1700,7 +1700,7 @@ export default function ProfileSettings() {
                   { value: "50-75", label: "50-75 Lakhs" },
                   { value: "75-100", label: "75 Lakhs - 1 Crore" },
                   { value: "100+", label: "1 Crore+" },
-                ]
+                ]}
               />
 
               <div className="col-span-1 md:col-span-2">
