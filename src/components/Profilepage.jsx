@@ -1149,6 +1149,7 @@ export default function ProfileSettings() {
                 onChange={handleBasicChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Gender" },
                   { value: "male", label: "Male" },
                   { value: "female", label: "Female" },
                 ]}
@@ -1161,6 +1162,7 @@ export default function ProfileSettings() {
                 onChange={handleBasicChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Religion" },
                   { value: "hindu", label: "Hindu" },
                   { value: "sikh", label: "Sikh" },
                   { value: "jain", label: "Jain" },
@@ -1175,6 +1177,7 @@ export default function ProfileSettings() {
                 onChange={handleBasicChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Marital Status" },
                   { value: "never_married", label: "Never Married" },
                   { value: "divorced", label: "Divorced" },
                   { value: "widow_widower", label: "Widow/Widower" },
@@ -1217,6 +1220,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Caste" },
                   { value: "khatri", label: "Khatri" },
                   { value: "arora", label: "Arora" },
                   { value: "brahmin", label: "Brahmin" },
@@ -1231,6 +1235,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Manglisk Status" },
                   { value: "manglik", label: "Manglik" },
                   { value: "partial_manglik", label: "Partial Manglik" },
                   { value: "non_manglik", label: "Non Manglik" },
@@ -1259,6 +1264,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Skin Tone" },
                   { value: "very_fair", label: "Very Fair" },
                   { value: "fair", label: "Fair" },
                   { value: "wheatish", label: "Wheatish" },
@@ -1273,6 +1279,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Body Type" },
                   { value: "slim", label: "Slim" },
                   { value: "athletic", label: "Athletic" },
                   { value: "average", label: "Average" },
@@ -1287,6 +1294,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Physical Disability" },
                   { value: "false", label: "No" },
                   { value: "true", label: "Yes" },
                 ]}
@@ -1306,6 +1314,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Smoking" },
                   { value: "no", label: "No" },
                   { value: "yes", label: "Yes" },
                   { value: "occasionally", label: "Occasionally" },
@@ -1319,6 +1328,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Drinking" },
                   { value: "no", label: "No" },
                   { value: "yes", label: "Yes" },
                   { value: "occasionally", label: "Occasionally" },
@@ -1332,6 +1342,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Diet Preference" },
                   { value: "veg", label: "Vegetarian" },
                   { value: "nonveg", label: "Non-Vegetarian" },
                   {
@@ -1348,6 +1359,7 @@ export default function ProfileSettings() {
                 onChange={handlePersonalChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select NRI Status" },
                   { value: "false", label: "No" },
                   { value: "true", label: "Yes" },
                 ]}
@@ -1440,6 +1452,7 @@ export default function ProfileSettings() {
                   onChange={handleFamilyChange}
                   type="select"
                   options={[
+                    { value:"", label: "Select Family Value" },
                     { value: "traditional", label: "Traditional" },
                     { value: "orthodox", label: "Orthodox" },
                     { value: "liberal", label: "Liberal" },
@@ -1454,6 +1467,7 @@ export default function ProfileSettings() {
                   onChange={handleFamilyChange}
                   type="select"
                   options={[
+                    { value:"", label: "Select Family Type" },
                     { value: "nuclear", label: "Nuclear Family" },
                     { value: "joint", label: "Joint Family" },
                     { value: "extended", label: "Extended Family" },
@@ -1540,6 +1554,7 @@ export default function ProfileSettings() {
                   onChange={handleEducationChange}
                   type="select"
                   options={[
+                    { value:"", label: "Select Education Level" },
                     { value: "high_school", label: "High School" },
                     { value: "undergraduate", label: "Undergraduate" },
                     { value: "graduate", label: "Graduate" },
@@ -1555,6 +1570,7 @@ export default function ProfileSettings() {
                   onChange={handleEducationChange}
                   type="select"
                   options={[
+                    { value:"", label: "Select Engineering Field" },
                     { value: "engineering", label: "Engineering" },
                     { value: "medical", label: "Medical" },
                     { value: "commerce", label: "Commerce" },
@@ -1643,6 +1659,7 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Occupation" },
                   { value: "Not Working", label: "NotWorking" },
                   { value: "Private Job", label: "Private Job" },
                   { value: "Government Job", label: "Government Job" },
@@ -1671,6 +1688,7 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
                 type="select"
                 options={[
+                  { value:"", label: "Select Annual Income" },
                   { value: "0-3", label: "Up to 3 Lakhs" },
                   { value: "3-5", label: "3-5 Lakhs" },
                   { value: "5-7", label: "5-7 Lakhs" },
