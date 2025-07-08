@@ -1673,7 +1673,7 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
               />
               <InfoRow
-                label="Working With"
+                label="Company Name"
                 value={professionData.working_with}
                 isEditing={isEditingProfession}
                 name="working_with"
@@ -1685,7 +1685,10 @@ export default function ProfileSettings() {
                 isEditing={isEditingProfession}
                 name="income"
                 onChange={handleProfessionChange}
-                type="select"
+                type="text"
+                placeholder="Enter annual income (e.g., 5 Lakhs)"
+                
+{/*                 type="select"
                 options={[
                   { value: "", label: "Select Annual Income" },
                   { value: "0-3", label: "Up to 3 Lakhs" },
@@ -1700,7 +1703,7 @@ export default function ProfileSettings() {
                   { value: "50-75", label: "50-75 Lakhs" },
                   { value: "75-100", label: "75 Lakhs - 1 Crore" },
                   { value: "100+", label: "1 Crore+" },
-                ]}
+                ]} */}
               />
 
               <div className="col-span-1 md:col-span-2">
