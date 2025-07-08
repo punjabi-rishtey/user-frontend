@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom"; // Added useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
@@ -23,7 +23,7 @@ const FindPartner = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const location = useLocation(); // Added to access URL query parameters
+  const location = useLocation();
   const { isAuthenticated, user, refreshUser } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
   const [currentUserGender, setCurrentUserGender] = useState(null);
@@ -65,10 +65,10 @@ const FindPartner = () => {
     setSortOption(queryParams.sort);
   }, [location.search]);
 
-  // Update URL when state changes
-  const updateQueryParams = () => {
+  // Update URL with push to create new history entry
+  const updateQueryParams = (newPage) => {
     const params = new URLSearchParams({
-      page: currentPage,
+      page: newPage || currentPage,
       search: searchTerm,
       manglik: filters.manglik,
       maritalStatus: filters.maritalStatus,
@@ -78,10 +78,32 @@ const FindPartner = () => {
       ageMax: filters.ageMax,
       sort: sortOption,
     });
-    navigate(`${location.pathname}?${params.toString()}`, { replace: true });
+    navigate(`${location.pathname}?${params.toString()}`, { replace: false }); // Use push instead of replace
   };
 
-  // Update URL whenever relevant state changes
+  // Handle popstate for back/forward button navigation
+  useEffect(() => {
+    const handlePopstate = () => {
+      const queryParams = getQueryParams();
+      console.log("Popstate event: Setting currentPage to", queryParams.page);
+      setCurrentPage(queryParams.page);
+      setSearchTerm(queryParams.search);
+      setFilters({
+        manglik: queryParams.manglik,
+        maritalStatus: queryParams.maritalStatus,
+        nriStatus: queryParams.nriStatus,
+        occupation: queryParams.occupation,
+        ageMin: queryParams.ageMin,
+        ageMax: queryParams.ageMax,
+      });
+      setSortOption(queryParams.sort);
+    };
+
+    window.addEventListener("popstate", handlePopstate);
+    return () => window.removeEventListener("popstate", handlePopstate);
+  }, []);
+
+  // Update URL when state changes (except for initial load or popstate)
   useEffect(() => {
     updateQueryParams();
   }, [currentPage, searchTerm, filters, sortOption]);
@@ -318,7 +340,7 @@ const FindPartner = () => {
     } else if (sortOption === "alphabetical-asc") {
       return a.name?.toLowerCase().localeCompare(b.name?.toLowerCase());
     } else if (sortOption === "alphabetical-desc") {
-      return b.name?.toLowerCase().localeCompare(b.name?.toLowerCase());
+      return b.name?.toLowerCase().localeCompare(a.name?.toLowerCase());
     }
     return 0;
   });
@@ -331,7 +353,10 @@ const FindPartner = () => {
     indexOfLastProfile
   );
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    updateQueryParams(pageNumber); // Explicitly update URL with new page
+  };
 
   // Extract unique values for filters
   const uniqueValues = (key) => {
