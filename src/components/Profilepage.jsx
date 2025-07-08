@@ -1176,13 +1176,13 @@ export default function ProfileSettings() {
                 name="marital_status"
                 onChange={handleBasicChange}
                 type="select"
-                options=[
+                options={[
                   { value: "", label: "Select Marital Status" },
                   { value: "never_married", label: "Never Married" },
                   { value: "divorced", label: "Divorced" },
                   { value: "widow_widower", label: "Widow/Widower" },
                   { value: "awaiting_divorce", label: "Awaiting Divorce" },
-                ]
+                ]}
               />
               <InfoRow
                 label="Age"
