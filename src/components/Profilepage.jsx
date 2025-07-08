@@ -1680,7 +1680,7 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
               />
               <InfoRow
-                label="Annual Income"
+                label="Annual Income (per annum)"
                 value={professionData.income}
                 isEditing={isEditingProfession}
                 name="income"
