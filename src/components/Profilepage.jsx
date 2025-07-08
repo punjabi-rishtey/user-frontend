@@ -1688,22 +1688,6 @@ export default function ProfileSettings() {
                 type="text"
                 placeholder="Enter annual income (e.g., 5 Lakhs)"
                 
-{/*                 type="select"
-                options={[
-                  { value: "", label: "Select Annual Income" },
-                  { value: "0-3", label: "Up to 3 Lakhs" },
-                  { value: "3-5", label: "3-5 Lakhs" },
-                  { value: "5-7", label: "5-7 Lakhs" },
-                  { value: "7-10", label: "7-10 Lakhs" },
-                  { value: "10-15", label: "10-15 Lakhs" },
-                  { value: "15-20", label: "15-20 Lakhs" },
-                  { value: "20-25", label: "20-25 Lakhs" },
-                  { value: "25-35", label: "25-35 Lakhs" },
-                  { value: "35-50", label: "35-50 Lakhs" },
-                  { value: "50-75", label: "50-75 Lakhs" },
-                  { value: "75-100", label: "75 Lakhs - 1 Crore" },
-                  { value: "100+", label: "1 Crore+" },
-                ]} */}
               />
 
               <div className="col-span-1 md:col-span-2">
