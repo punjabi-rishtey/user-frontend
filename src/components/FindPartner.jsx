@@ -184,6 +184,7 @@ const FindPartner = () => {
         "https://backend-nm1z.onrender.com/api/users/all-basic"
       );
       if (Array.isArray(response.data)) {
+        console.log(response.data)
         setUsers(response.data);
       } else if (response.data && Array.isArray(response.data.users)) {
         setUsers(response.data.users);
