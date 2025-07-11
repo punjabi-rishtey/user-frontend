@@ -952,7 +952,7 @@ const FindPartner = () => {
                 >
                   <div className="flex items-center flex-col sm:flex-row">
                     <img
-                      src={item.profile_picture || profileIcon}
+                      src={item.profile_pictures || profileIcon}
                       alt={item.name}
                       className="w-28 h-28 sm:w-32 sm:h-36 rounded-md mb-4 sm:mb-0 sm:mr-6 object-cover"
                     />
