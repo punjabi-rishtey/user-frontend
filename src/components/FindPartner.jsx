@@ -240,8 +240,8 @@ const FindPartner = () => {
   };
 
   const handleProfileClick = (profile) => {
-    console.log(profile, profile.preferences?.user, profile._id)
-    navigate(`/profile/${profile.preferences?.user || profile._id}`);
+    console.log(profile, profile.user, profile._id)
+    navigate(`/profile/${profile.user || profile._id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
