@@ -51,7 +51,7 @@ const ProfessionSection = ({ user, logout }) => {
         logout();
       } else {
         console.error("Error fetching profession details:", error);
-        alert("Failed to fetch profession details.");
+        // alert("Failed to fetch profession details.");
       }
     }
     setLoading(false);
