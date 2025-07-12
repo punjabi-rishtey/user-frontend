@@ -46,7 +46,8 @@ const AstrologySection = ({ user, logout }) => {
         alert("Session expired. Please log in again.");
         logout();
       } else {
-        alert("Failed to fetch astrology details.");
+        // alert("Failed to fetch astrology details.");
+        console.log("Failed to fetch astrology details.", error);
       }
     }
     setLoading(false);
