@@ -54,7 +54,7 @@ const EducationSection = ({ user, logout }) => {
         logout();
       } else {
         console.error("Error fetching education details:", error);
-        alert("Failed to fetch education details.");
+        // alert("Failed to fetch education details.");
       }
     }
     setLoading(false);
