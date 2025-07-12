@@ -455,7 +455,7 @@ export default function ProfileSettings() {
       });
     } catch (error) {
       console.error("Error fetching user details:", error);
-      alert("Failed to fetch user details.");
+      // alert("Failed to fetch user details.");
     }
     setLoading(false);
   };
@@ -491,7 +491,8 @@ export default function ProfileSettings() {
         alert("Session expired. Please log in again.");
         logout();
       } else {
-        alert("Failed to fetch astrology details.");
+        console.log("Failed to fetch astrology details.")
+        // alert("Failed to fetch astrology details.");
       }
     }
     setLoadingAstrology(false);
@@ -527,7 +528,7 @@ export default function ProfileSettings() {
         logout();
       } else {
         console.error("Error fetching profession details:", error);
-        alert("Failed to fetch profession details.");
+        // alert("Failed to fetch profession details.");
       }
     }
     setLoadingProfession(false);
@@ -563,7 +564,7 @@ export default function ProfileSettings() {
         logout();
       } else {
         console.error("Error fetching family details:", error);
-        alert("Failed to fetch family details.");
+        // alert("Failed to fetch family details.");
       }
     }
     setLoadingFamily(false);
@@ -599,7 +600,7 @@ export default function ProfileSettings() {
         logout();
       } else {
         console.error("Error fetching education details:", error);
-        alert("Failed to fetch education details.");
+        // alert("Failed to fetch education details.");
       }
     }
     setLoadingEducation(false);
