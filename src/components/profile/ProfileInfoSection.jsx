@@ -163,7 +163,7 @@ function ProfileInfoSection({
       });
     } catch (error) {
       console.error("Error fetching user details:", error);
-      alert("Failed to fetch user details.");
+      // alert("Failed to fetch user details.");
     }
     setLoading(false);
   };
