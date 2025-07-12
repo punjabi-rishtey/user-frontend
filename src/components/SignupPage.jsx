@@ -41,6 +41,7 @@ const SignupPage = () => {
     setPreferences({ ...preferences, [name]: value });
   };
 
+  // Handle file input change for profile pictures
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + profilePictures.length > 10) {
@@ -50,6 +51,7 @@ const SignupPage = () => {
     setProfilePictures([...profilePictures, ...files]);
   };
 
+  // Remove a selected picture
   const removePicture = (index) => {
     setProfilePictures(profilePictures.filter((_, i) => i !== index));
   };
@@ -65,6 +67,11 @@ const SignupPage = () => {
 
   const TermsCondition = (e) => {
     e.preventDefault();
+    // Check if at least one profile picture is selected
+    if (profilePictures.length === 0) {
+      alert("Please upload at least one profile picture to sign up.");
+      return;
+    }
     setShowModal(true);
   };
 
@@ -74,6 +81,7 @@ const SignupPage = () => {
       (pref) => pref !== ""
     );
 
+    // Create FormData object to handle file uploads
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
       formDataToSend.append(key, formData[key]);
@@ -115,7 +123,7 @@ const SignupPage = () => {
           name={field.name}
           value={formData[field.name]}
           onChange={handleChange}
-          className="w-full p-3 border border-[#6B4132] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#990000]"
+          className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000]"
           required
         >
           {field.options.map((option) => (
@@ -125,7 +133,7 @@ const SignupPage = () => {
           ))}
         </select>
       );
-   documents } else if (field.name === "password") {
+    } else if (field.name === "password") {
       return (
         <div className="relative">
           <input
@@ -133,7 +141,7 @@ const SignupPage = () => {
             name={field.name}
             value={formData[field.name]}
             onChange={handleChange}
-            className="w-full p-3 border border-[#6B4132] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#990000]"
+            className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000]"
             required
           />
           <button
@@ -153,7 +161,7 @@ const SignupPage = () => {
           name={field.name}
           value={formData[field.name]}
           onChange={handleChange}
-          className="w-full p-3 border border-[#6B4132] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#990000]"
+          className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000]"
           required
         />
       );
@@ -261,7 +269,7 @@ const SignupPage = () => {
                 { label: "Password", name: "password", type: "password" },
               ].map((field) => (
                 <div key={field.name}>
-                  <label className="block text-[#6B4132] mb-2">
+                  <label className="block text-[#6B4132] mb-2 font-medium">
                     {field.label}
                   </label>
                   {renderField(field)}
@@ -270,7 +278,7 @@ const SignupPage = () => {
               {/* Enhanced Profile Pictures Upload Section */}
               <div>
                 <label className="block text-[#6B4132] mb-2 font-medium">
-                  Profile Pictures (up to 10)
+                  Profile Pictures (at least 1 required, up to 10)
                 </label>
                 <div className="relative">
                   <input
@@ -280,50 +288,34 @@ const SignupPage = () => {
                     onChange={handleFileChange}
                     className="hidden"
                     id="profile-pictures"
+                    required
                   />
                   <label
                     htmlFor="profile-pictures"
-                    className="flex items-center justify-center w-full p-3 border-2 border-dashed border-[#6B4132] rounded-lg bg-[#FFF7F0] text-[#6B4132] cursor-pointer hover:bg-[#FFE6D5] transition duration-300"
+                    className="w-full p-3 border border-[#6B4132] rounded-lg bg-white text-[#6B4132] text-center cursor-pointer hover:bg-[#F5EDE7] transition duration-300"
                   >
-                    <svg
-                      className="w-6 h-6 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M7 16V8m0 0l-3 3m3-3l3 3m7-3h-7m10 0h-3m3 0v8m0-8v-4a2 2 0 00-2-2h-4"
-                      ></path>
-                    </svg>
-                    Choose Images
+                    Choose Profile Pictures
                   </label>
                 </div>
                 {/* Preview selected pictures */}
                 {profilePictures.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-[#6B4132] text-sm mb-2">
-                      Selected Images ({profilePictures.length}/10)
+                    <p className="text-[#6B4132] mb-2">
+                      Selected Pictures ({profilePictures.length}/10)
                     </p>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-3 gap-4">
                       {profilePictures.map((file, index) => (
-                        <div
-                          key={index}
-                          className="relative group"
-                        >
+                        <div key={index} className="relative group">
                           <img
                             src={URL.createObjectURL(file)}
                             alt={`Preview ${index}`}
-                            className="w-full h-24 object-cover rounded-lg shadow-sm"
+                            className="w-full h-24 object-cover rounded-lg shadow-md"
                           />
                           <button
                             type="button"
                             className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                             onClick={() => removePicture(index)}
-                            aria-label="Remove image"
+                            aria-label="Remove picture"
                           >
                             ×
                           </button>
@@ -331,6 +323,11 @@ const SignupPage = () => {
                       ))}
                     </div>
                   </div>
+                )}
+                {profilePictures.length === 0 && (
+                  <p className="text-red-500 text-sm mt-1">
+                    At least one profile picture is required.
+                  </p>
                 )}
               </div>
               <div className="flex justify-end">
