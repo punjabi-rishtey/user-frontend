@@ -57,7 +57,7 @@ const FamilyDetailsSection = ({ user, logout }) => {
         logout();
       } else {
         console.error("Error fetching family details:", error);
-        alert("Failed to fetch family details.");
+        // alert("Failed to fetch family details.");
       }
     }
     setLoading(false);
