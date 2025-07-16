@@ -117,6 +117,12 @@ const FindPartner = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      console.log(user);
+    }
+  }, []);
+
   // Refresh user data when component mounts to get latest gender
   useEffect(() => {
     if (isAuthenticated) {
@@ -184,7 +190,7 @@ const FindPartner = () => {
         "https://backend-nm1z.onrender.com/api/users/all-basic"
       );
       if (Array.isArray(response.data)) {
-        console.log(response.data)
+        console.log(response.data);
         setUsers(response.data);
       } else if (response.data && Array.isArray(response.data.users)) {
         setUsers(response.data.users);
@@ -240,7 +246,7 @@ const FindPartner = () => {
   };
 
   const handleProfileClick = (profile) => {
-    console.log(profile, profile.user, profile._id)
+    console.log(profile, profile.user, profile._id);
     navigate(`/profile/${profile.user || profile._id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -630,6 +636,41 @@ const FindPartner = () => {
                 }}
               >
                 Complete Your Profile
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Membership status check (after profile completeness)
+  if (user && user.status !== "Approved") {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center h-[50vh]">
+          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h2
+              className="text-2xl mb-4 text-[#4F2F1D] text-center"
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
+            >
+              You don't have any active membership
+            </h2>
+            <div className="flex justify-center">
+              <button
+                onClick={() => navigate("/membership")}
+                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                Buy Membership
               </button>
             </div>
           </div>
