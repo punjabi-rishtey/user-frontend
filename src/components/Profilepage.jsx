@@ -283,7 +283,6 @@ export default function ProfileSettings() {
     college: {
       name: "",
       city: "",
-      passout_year: "",
     },
   });
 
@@ -1622,14 +1621,6 @@ export default function ProfileSettings() {
                   name="college_details.city"
                   onChange={handleEducationChange}
                 />
-                <InfoRow
-                  label="Passout Year"
-                  value={educationData?.college_details?.passout_year || ""}
-                  isEditing={isEditingEducation}
-                  name="college_details.passout_year"
-                  onChange={handleEducationChange}
-                  type="number"
-                />
               </div>
             )}
 
@@ -1657,14 +1648,6 @@ export default function ProfileSettings() {
                 isEditing={isEditingProfession}
                 name="occupation"
                 onChange={handleProfessionChange}
-                type="select"
-                options={[
-                  { value: "", label: "Select Occupation" },
-                  { value: "Not Working", label: "Not Working" },
-                  { value: "Private Job", label: "Private Job" },
-                  { value: "Government Job", label: "Government Job" },
-                  { value: "Business Owner", label: "Business Owner" },
-                ]}
               />
               <InfoRow
                 label="Designation"
