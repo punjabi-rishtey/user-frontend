@@ -294,8 +294,8 @@ const FindPartner = () => {
     ? users.filter((item) => {
         if (!item) return false;
 
-        // Exclude users who have status 'Unapproved'
-        if (item.status === "Unapproved") return false;
+        // Exclude users who have status 'Unapproved' or 'Pending'
+        if (item.status === "Unapproved" || item.status === "Pending") return false;
 
         const normalizedMaritalStatus = normalizeMaritalStatus(
           item.marital_status
