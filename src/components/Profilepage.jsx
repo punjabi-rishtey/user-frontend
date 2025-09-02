@@ -106,8 +106,8 @@ function InfoRow({
 }) {
   const getDisplayValue = () => {
     if (type === "select" && options) {
-      // Handle boolean values (but not for manglik field which should show proper string values)
-      if (typeof value === "boolean" && name !== "manglik") {
+      // Handle boolean values (but not for manglik and nri_status fields which have custom logic)
+      if (typeof value === "boolean" && name !== "manglik" && name !== "lifestyle.nri_status") {
         return value ? "Yes" : "No";
       }
       // Handle manglik field with smart display logic
@@ -121,6 +121,18 @@ function InfoRow({
           if (value === "partial_manglik") return "Partial Manglik";
         }
         if (!value) return "Not specified";
+      }
+      // Handle NRI status field with smart display logic
+      if (name === "lifestyle.nri_status") {
+        if (typeof value === "boolean") {
+          return value ? "NRI" : "India";
+        }
+        if (typeof value === "string") {
+          if (value === "true" || value.toLowerCase() === "yes") return "NRI";
+          if (value === "false" || value.toLowerCase() === "no") return "India";
+        }
+        if (!value && value !== false) return "Not specified";
+        return value ? "NRI" : "India";
       }
       if (value === undefined || value === null || value === "") {
         return "";
@@ -1377,8 +1389,8 @@ export default function ProfileSettings() {
                 type="select"
                 options={[
                   { value: "", label: "Select NRI Status" },
-                  { value: "false", label: "No" },
-                  { value: "true", label: "Yes" },
+                  { value: "false", label: "India" },
+                  { value: "true", label: "NRI" },
                 ]}
               />
             </div>

@@ -446,8 +446,8 @@ const FindPartner = () => {
       name: "nriStatus",
       options: [
         { value: "", label: "Any" },
-        { value: "false", label: "No" },
-        { value: "true", label: "Yes" },
+        { value: "false", label: "India" },
+        { value: "true", label: "NRI" },
       ],
     },
     {
@@ -1038,12 +1038,12 @@ const FindPartner = () => {
                           fontWeight: 400,
                         }}
                       >
-                        <strong>NRI:</strong>{" "}
+                        <strong>Location:</strong>{" "}
                         {item.nri_status === true ||
                         item.nri_status === "true" ||
                         item.nri_status === "yes"
-                          ? "Yes"
-                          : "No"}
+                          ? "NRI"
+                          : "India"}
                       </p>
                       <p
                         className="text-sm sm:text-base text-[#6B4132] mb-1"

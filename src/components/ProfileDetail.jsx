@@ -285,9 +285,7 @@ const ProfileDetail = () => {
       : "No",
     Smoke: profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : "No",
     Drink: profileData.lifestyle?.drink ? profileData.lifestyle.drink : "No",
-    "NRI Status": profileData.lifestyle?.nri_status
-      ? profileData.lifestyle.nri_status
-      : "No",
+    "NRI Status": formatNRIStatus(profileData.lifestyle?.nri_status),
   };
 
   // Helper function to format manglik status
@@ -300,6 +298,19 @@ const ProfileDetail = () => {
       if (value === "manglik") return "Manglik";
       if (value === "non_manglik") return "Non Manglik";
       if (value === "partial_manglik") return "Partial Manglik";
+    }
+    return formatValue(value);
+  };
+
+  // Helper function to format NRI status
+  const formatNRIStatus = (value) => {
+    if (!value && value !== false) return "Not specified";
+    if (typeof value === "boolean") {
+      return value ? "NRI" : "India";
+    }
+    if (typeof value === "string") {
+      if (value === "true" || value.toLowerCase() === "yes") return "NRI";
+      if (value === "false" || value.toLowerCase() === "no") return "India";
     }
     return formatValue(value);
   };
