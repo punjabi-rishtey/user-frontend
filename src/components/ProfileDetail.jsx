@@ -199,6 +199,43 @@ const ProfileDetail = () => {
     );
   }
 
+  // Subscription status check
+  const isSubscriptionExpired = user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+  
+  if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
+    return (
+      <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h2
+              className="text-2xl mb-4 text-[#4F2F1D] text-center"
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
+            >
+              {isSubscriptionExpired ? "Your subscription has expired" : "You don't have any active membership"}
+            </h2>
+            <div className="flex justify-center">
+              <button
+                onClick={() => navigate("/membership")}
+                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                {isSubscriptionExpired ? "Renew Membership" : "Buy Membership"}
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   // Calculate age from DOB
   const calculateAge = (dob) => {
     if (!dob) return "Not specified";
