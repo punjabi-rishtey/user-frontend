@@ -106,8 +106,13 @@ function InfoRow({
 }) {
   const getDisplayValue = () => {
     if (type === "select" && options) {
-      if (typeof value === "boolean") {
+      // Handle boolean values (but not for manglik field which should show proper string values)
+      if (typeof value === "boolean" && name !== "manglik") {
         return value ? "Yes" : "No";
+      }
+      // Handle legacy manglik boolean values
+      if (name === "manglik" && typeof value === "boolean") {
+        return value ? "Manglik" : "Non Manglik";
       }
       if (value === undefined || value === null || value === "") {
         return "";
@@ -309,7 +314,7 @@ export default function ProfileSettings() {
     },
     caste: "",
     language: "",
-    manglik: false,
+    manglik: "",
     birth_details: {
       birth_time: "",
       birth_place: "",
@@ -419,7 +424,7 @@ export default function ProfileSettings() {
         height: parseHeight(userData.height),
         caste: userData.caste || "",
         language: userData.language || "",
-        manglik: userData.manglik || false,
+        manglik: userData.manglik || "",
         birth_details: {
           birth_time: userData.birth_details?.birth_time || "",
           birth_place: userData.birth_details?.birth_place || "",

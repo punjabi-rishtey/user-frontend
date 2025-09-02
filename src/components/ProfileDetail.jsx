@@ -292,7 +292,7 @@ const ProfileDetail = () => {
 
   // Astrology details
   const astrologyDetails = {
-    Manglik: profileData.manglik ? "Yes" : "No",
+    Manglik: formatValue(profileData.manglik),
     ...profileData.astrology_details,
   };
 
@@ -578,7 +578,7 @@ const ProfileDetail = () => {
                 style={{ color: cardColorSchemes.horoscope.value }}
                 className="ml-2"
               >
-                {profileData.manglik ? profileData.manglik : "No"}
+                {formatValue(profileData.manglik)}
               </span>
             </p>
           </div>
