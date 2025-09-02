@@ -290,9 +290,23 @@ const ProfileDetail = () => {
       : "No",
   };
 
+  // Helper function to format manglik status
+  const formatManglikStatus = (value) => {
+    if (!value) return "Not specified";
+    if (typeof value === "boolean") {
+      return value ? "Manglik" : "Non Manglik";
+    }
+    if (typeof value === "string") {
+      if (value === "manglik") return "Manglik";
+      if (value === "non_manglik") return "Non Manglik";
+      if (value === "partial_manglik") return "Partial Manglik";
+    }
+    return formatValue(value);
+  };
+
   // Astrology details
   const astrologyDetails = {
-    Manglik: formatValue(profileData.manglik),
+    Manglik: formatManglikStatus(profileData.mangalik), // Use correct field name
     ...profileData.astrology_details,
   };
 
@@ -578,7 +592,7 @@ const ProfileDetail = () => {
                 style={{ color: cardColorSchemes.horoscope.value }}
                 className="ml-2"
               >
-                {formatValue(profileData.manglik)}
+                {formatManglikStatus(profileData.mangalik)}
               </span>
             </p>
           </div>
