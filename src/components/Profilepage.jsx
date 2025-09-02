@@ -110,9 +110,17 @@ function InfoRow({
       if (typeof value === "boolean" && name !== "manglik") {
         return value ? "Yes" : "No";
       }
-      // Handle legacy manglik boolean values
-      if (name === "manglik" && typeof value === "boolean") {
-        return value ? "Manglik" : "Non Manglik";
+      // Handle manglik field with smart display logic
+      if (name === "manglik") {
+        if (typeof value === "boolean") {
+          return value ? "Manglik" : "Non Manglik";
+        }
+        if (typeof value === "string") {
+          if (value === "manglik") return "Manglik";
+          if (value === "non_manglik") return "Non Manglik";
+          if (value === "partial_manglik") return "Partial Manglik";
+        }
+        if (!value) return "Not specified";
       }
       if (value === undefined || value === null || value === "") {
         return "";
@@ -424,7 +432,7 @@ export default function ProfileSettings() {
         height: parseHeight(userData.height),
         caste: userData.caste || "",
         language: userData.language || "",
-        manglik: userData.manglik || "",
+        manglik: userData.mangalik || "",
         birth_details: {
           birth_time: userData.birth_details?.birth_time || "",
           birth_place: userData.birth_details?.birth_place || "",
