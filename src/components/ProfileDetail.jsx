@@ -305,6 +305,15 @@ const ProfileDetail = () => {
     return formatValue(value);
   };
 
+  // Helper function to format diet preferences
+  const formatDietPreference = (value) => {
+    if (!value) return "Not specified";
+    if (value === "veg") return "Vegetarian";
+    if (value === "nonveg") return "Non-Vegetarian";
+    if (value === "occasionally_nonveg") return "Occasionally Non-Vegetarian";
+    return formatValue(value);
+  };
+
   // Physical and lifestyle information
   const lifestyleDetails = {
     "Physical Disability": profileData.physical_attributes?.physical_disability
@@ -312,7 +321,15 @@ const ProfileDetail = () => {
       : "No",
     Smoke: profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : "No",
     Drink: profileData.lifestyle?.drink ? profileData.lifestyle.drink : "No",
+    "Diet Preference": formatDietPreference(profileData.lifestyle?.veg_nonveg),
     "NRI Status": formatNRIStatus(profileData.lifestyle?.nri_status),
+  };
+
+  // Hobbies details
+  const hobbiesDetails = {
+    Hobbies: Array.isArray(profileData.hobbies) && profileData.hobbies.length > 0
+      ? profileData.hobbies.join(", ")
+      : "Not specified"
   };
 
   // Astrology details
@@ -540,25 +557,62 @@ const ProfileDetail = () => {
                 </span>
               </p>
             ))}
-            <p
-              className="text-lg"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              <strong style={{ color: cardColorSchemes.lifestyle.label }}>
-                Registration Date:
-              </strong>
-              <span
-                style={{ color: cardColorSchemes.lifestyle.value }}
-                className="ml-2"
-              >
-                {formatDate(profileData.metadata?.register_date)}
-              </span>
-            </p>
           </div>
         </motion.div>
+
+        {/* Hobbies Details */}
+        {Object.keys(hobbiesDetails).length > 0 && hobbiesDetails.Hobbies !== "Not specified" && (
+          <motion.div
+            variants={getCardVariants("basicDetails")}
+            initial="initial"
+            animate="animate"
+            whileHover="hover"
+            className="p-8 rounded-xl shadow-lg transition-all"
+            style={{
+              backgroundColor: cardColorSchemes.basicDetails.bg,
+              borderColor: cardColorSchemes.basicDetails.border,
+              borderWidth: "2px",
+              borderStyle: "solid",
+            }}
+          >
+            <h3
+              className="text-2xl mb-4 flex items-center"
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+                color: cardColorSchemes.basicDetails.title,
+              }}
+            >
+              <FaUser
+                className="mr-3"
+                style={{ color: cardColorSchemes.basicDetails.icon }}
+              />
+              Hobbies & Interests
+            </h3>
+            <div className="space-y-2">
+              {Object.entries(hobbiesDetails).map(([key, value]) => (
+                <p
+                  key={key}
+                  className="text-lg"
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
+                >
+                  <strong style={{ color: cardColorSchemes.basicDetails.label }}>
+                    {key}:
+                  </strong>
+                  <span
+                    style={{ color: cardColorSchemes.basicDetails.value }}
+                    className="ml-2"
+                  >
+                    {value}
+                  </span>
+                </p>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Horoscope Details */}
         <motion.div
