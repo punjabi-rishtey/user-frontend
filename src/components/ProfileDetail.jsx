@@ -414,6 +414,14 @@ const ProfileDetail = () => {
       ] = `${brothers} Brother(s), ${sisters} Sister(s)`;
     }
   }
+  
+  // Add permanent address and city from user location
+  if (profileData.location?.address) {
+    familyDetails["Permanent Address"] = profileData.location.address;
+  }
+  if (profileData.location?.city) {
+    familyDetails["City"] = profileData.location.city;
+  }
 
   // Card variants for animation
   const getCardVariants = (cardType) => {

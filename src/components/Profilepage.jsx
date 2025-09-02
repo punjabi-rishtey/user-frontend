@@ -1395,6 +1395,27 @@ export default function ProfileSettings() {
               />
             </div>
 
+            {/* Home Address Section */}
+            <h4 className="text-md font-semibold mb-4 border-t pt-6">
+              Home Address
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <InfoRow
+                label="Address"
+                value={personalData.home_address.address}
+                isEditing={isEditing || isEditingPersonal}
+                name="home_address.address"
+                onChange={handlePersonalChange}
+              />
+              <InfoRow
+                label="City"
+                value={personalData.home_address.city}
+                isEditing={isEditing || isEditingPersonal}
+                name="home_address.city"
+                onChange={handlePersonalChange}
+              />
+            </div>
+
             {/* Hobbies Section */}
             <h4 className="text-md font-semibold mb-4 border-t pt-6">
               Hobbies
