@@ -446,7 +446,7 @@ const FindPartner = () => {
       name: "nriStatus",
       options: [
         { value: "", label: "Any" },
-        { value: "false", label: "India" },
+        { value: "false", label: "Indian" },
         { value: "true", label: "NRI" },
       ],
     },
@@ -1043,7 +1043,7 @@ const FindPartner = () => {
                         item.nri_status === "true" ||
                         item.nri_status === "yes"
                           ? "NRI"
-                          : "India"}
+                          : "Indian"}
                       </p>
                       <p
                         className="text-sm sm:text-base text-[#6B4132] mb-1"

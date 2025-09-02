@@ -125,14 +125,14 @@ function InfoRow({
       // Handle NRI status field with smart display logic
       if (name === "lifestyle.nri_status") {
         if (typeof value === "boolean") {
-          return value ? "NRI" : "India";
+          return value ? "NRI" : "Indian";
         }
         if (typeof value === "string") {
           if (value === "true" || value.toLowerCase() === "yes") return "NRI";
-          if (value === "false" || value.toLowerCase() === "no") return "India";
+          if (value === "false" || value.toLowerCase() === "no") return "Indian";
         }
         if (!value && value !== false) return "Not specified";
-        return value ? "NRI" : "India";
+        return value ? "NRI" : "Indian";
       }
       if (value === undefined || value === null || value === "") {
         return "";
@@ -1389,7 +1389,7 @@ export default function ProfileSettings() {
                 type="select"
                 options={[
                   { value: "", label: "Select NRI Status" },
-                  { value: "false", label: "India" },
+                  { value: "false", label: "Indian" },
                   { value: "true", label: "NRI" },
                 ]}
               />

@@ -278,16 +278,6 @@ const ProfileDetail = () => {
     Mobile: profileData.mobile || "Not specified",
   };
 
-  // Physical and lifestyle information
-  const lifestyleDetails = {
-    "Physical Disability": profileData.physical_attributes?.physical_disability
-      ? "Yes"
-      : "No",
-    Smoke: profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : "No",
-    Drink: profileData.lifestyle?.drink ? profileData.lifestyle.drink : "No",
-    "NRI Status": formatNRIStatus(profileData.lifestyle?.nri_status),
-  };
-
   // Helper function to format manglik status
   const formatManglikStatus = (value) => {
     if (!value) return "Not specified";
@@ -306,13 +296,23 @@ const ProfileDetail = () => {
   const formatNRIStatus = (value) => {
     if (!value && value !== false) return "Not specified";
     if (typeof value === "boolean") {
-      return value ? "NRI" : "India";
+      return value ? "NRI" : "Indian";
     }
     if (typeof value === "string") {
       if (value === "true" || value.toLowerCase() === "yes") return "NRI";
-      if (value === "false" || value.toLowerCase() === "no") return "India";
+      if (value === "false" || value.toLowerCase() === "no") return "Indian";
     }
     return formatValue(value);
+  };
+
+  // Physical and lifestyle information
+  const lifestyleDetails = {
+    "Physical Disability": profileData.physical_attributes?.physical_disability
+      ? "Yes"
+      : "No",
+    Smoke: profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : "No",
+    Drink: profileData.lifestyle?.drink ? profileData.lifestyle.drink : "No",
+    "NRI Status": formatNRIStatus(profileData.lifestyle?.nri_status),
   };
 
   // Astrology details
