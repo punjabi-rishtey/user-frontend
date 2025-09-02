@@ -231,8 +231,12 @@ const ProfileDetail = () => {
     Age: calculateAge(profileData.dob),
     "Date of Birth": formatDate(profileData.dob),
     Gender: formatValue(profileData.gender),
+    Height: formatValue(profileData.height),
     Religion: formatValue(profileData.religion),
+    Caste: formatValue(profileData.caste),
     "Marital Status": formatValue(profileData.marital_status),
+    "Birth Time": formatValue(profileData.birth_details?.birth_time),
+    "Birth Place": formatValue(profileData.birth_details?.birth_place),
     Email: profileData.email || "Not specified",
     Mobile: profileData.mobile || "Not specified",
   };
