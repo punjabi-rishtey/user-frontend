@@ -836,6 +836,10 @@ export default function ProfileSettings() {
         },
         hobbies: hobbiesData.hobbies,
       };
+      
+      // Debug logging
+      console.log("Saving manglik value:", personalData.manglik);
+      console.log("Full request body:", requestBody);
 
       await axios.put(
         `https://backend-nm1z.onrender.com/api/users/${user._id}`,
