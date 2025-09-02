@@ -649,7 +649,9 @@ const FindPartner = () => {
   }
 
   // Membership status check (after profile completeness)
-  if (user && user.status !== "Approved") {
+  const isSubscriptionExpired = user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+  
+  if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
     return (
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
         <Header />
@@ -662,7 +664,7 @@ const FindPartner = () => {
                 fontWeight: 400,
               }}
             >
-              You don't have any active membership
+              {isSubscriptionExpired ? "Your subscription has expired" : "You don't have any active membership"}
             </h2>
             <div className="flex justify-center">
               <button
@@ -673,7 +675,7 @@ const FindPartner = () => {
                   fontWeight: 400,
                 }}
               >
-                Buy Membership
+                {isSubscriptionExpired ? "Renew Membership" : "Buy Membership"}
               </button>
             </div>
           </div>
