@@ -8,10 +8,6 @@ const EducationSection = ({ user, logout }) => {
   const [educationData, setEducationData] = useState({
     education_level: "",
     education_field: "",
-    school_details: {
-      name: "",
-      city: "",
-    },
     college_details: {
       name: "",
       city: "",
@@ -131,34 +127,8 @@ const EducationSection = ({ user, logout }) => {
           isEditing={isEditing}
           name="education_field"
           onChange={handleEducationChange}
-          type="select"
-          options={[
-            { value: "engineering", label: "Engineering" },
-            { value: "medical", label: "Medical" },
-            { value: "commerce", label: "Commerce" },
-            { value: "arts", label: "Arts" },
-            { value: "science", label: "Science" },
-            { value: "other", label: "Other" },
-          ]}
-        />
-
-        {/* School Details */}
-        <div className="col-span-2">
-          <h4 className="text-md font-semibold mb-2 mt-4">School Details</h4>
-        </div>
-        <InfoRow
-          label="School Name"
-          value={educationData?.school_details?.name || ""}
-          isEditing={isEditing}
-          name="school_details.name"
-          onChange={handleEducationChange}
-        />
-        <InfoRow
-          label="School City"
-          value={educationData?.school_details?.city || ""}
-          isEditing={isEditing}
-          name="school_details.city"
-          onChange={handleEducationChange}
+          type="text"
+          placeholder="Enter your field of education (e.g., Computer Science, Medicine, Business)"
         />
 
         {/* College Details */}

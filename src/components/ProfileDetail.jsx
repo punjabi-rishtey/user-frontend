@@ -364,10 +364,6 @@ const ProfileDetail = () => {
       educationDetails["College City"] =
         profileData.education_details.college_details.city;
     }
-    if (profileData.education_details.school_details?.name) {
-      educationDetails["School"] =
-        profileData.education_details.school_details.name;
-    }
   }
 
   // Profession details

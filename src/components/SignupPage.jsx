@@ -13,6 +13,7 @@ const SignupPage = () => {
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     mobile: "",
     gender: "",
     dob: "",
@@ -30,10 +31,22 @@ const SignupPage = () => {
   const navigate = useNavigate();
   const [showPreferences, setShowPreferences] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+    
+    // Password validation
+    if (name === "password" || name === "confirmPassword") {
+      setPasswordError("");
+      if (name === "confirmPassword" && formData.password && value && formData.password !== value) {
+        setPasswordError("Passwords do not match");
+      } else if (name === "password" && formData.confirmPassword && value && value !== formData.confirmPassword) {
+        setPasswordError("Passwords do not match");
+      }
+    }
   };
 
   const handlePreferenceChange = (e) => {
@@ -60,6 +73,19 @@ const SignupPage = () => {
     setShowPassword(!showPassword);
   };
 
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  // Password strength indicator
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: "", color: "" };
+    if (password.length < 6) return { strength: "Too short", color: "text-red-500" };
+    if (password.length < 8) return { strength: "Weak", color: "text-orange-500" };
+    if (password.length < 12) return { strength: "Good", color: "text-blue-500" };
+    return { strength: "Strong", color: "text-green-500" };
+  };
+
   const onTermsConditionAccept = () => {
     setShowModal(false);
     handleSubmit();
@@ -67,11 +93,26 @@ const SignupPage = () => {
 
   const TermsCondition = (e) => {
     e.preventDefault();
+    
+    // Check if passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setPasswordError("Passwords do not match");
+      return;
+    }
+    
+    // Check password strength
+    if (formData.password.length < 6) {
+      setPasswordError("Password must be at least 6 characters long");
+      return;
+    }
+    
     // Check if at least one profile picture is selected
     if (profilePictures.length === 0) {
       alert("Please upload at least one profile picture to sign up.");
       return;
     }
+    
+    setPasswordError("");
     setShowModal(true);
   };
 
@@ -84,7 +125,10 @@ const SignupPage = () => {
     // Create FormData object to handle file uploads
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
-      formDataToSend.append(key, formData[key]);
+      // Don't send confirmPassword to backend
+      if (key !== "confirmPassword") {
+        formDataToSend.append(key, formData[key]);
+      }
     });
     formDataToSend.append("preferences", JSON.stringify(selectedPreferences));
     profilePictures.forEach((file, index) => {
@@ -123,7 +167,7 @@ const SignupPage = () => {
           name={field.name}
           value={formData[field.name]}
           onChange={handleChange}
-          className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000]"
+          className="w-full p-3 md:p-4 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000] text-base md:text-sm"
           required
         >
           {field.options.map((option) => (
@@ -134,24 +178,65 @@ const SignupPage = () => {
         </select>
       );
     } else if (field.name === "password") {
+      const passwordStrength = getPasswordStrength(formData[field.name]);
       return (
-        <div className="relative">
-          <input
-            type={showPassword ? "text" : "password"}
-            name={field.name}
-            value={formData[field.name]}
-            onChange={handleChange}
-            className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000]"
-            required
-          />
-          <button
-            type="button"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#6B4132] hover:text-[#4F2F1D] focus:outline-none"
-            onClick={togglePasswordVisibility}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
+        <div>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              className="w-full p-3 md:p-4 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000] text-base md:text-sm"
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#6B4132] hover:text-[#4F2F1D] focus:outline-none p-1"
+              onClick={togglePasswordVisibility}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          {formData[field.name] && passwordStrength.strength && (
+            <p className={`text-xs sm:text-sm mt-1 ${passwordStrength.color}`}>
+              Password strength: {passwordStrength.strength}
+            </p>
+          )}
+        </div>
+      );
+    } else if (field.name === "confirmPassword") {
+      return (
+        <div>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              className="w-full p-3 md:p-4 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000] text-base md:text-sm"
+              required
+            />
+            <button
+              type="button"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#6B4132] hover:text-[#4F2F1D] focus:outline-none p-1"
+              onClick={toggleConfirmPasswordVisibility}
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+          </div>
+          {passwordError && (
+            <p className="text-red-500 text-xs sm:text-sm mt-1">
+              {passwordError}
+            </p>
+          )}
+          {!passwordError && formData.password && formData.confirmPassword && formData.password === formData.confirmPassword && (
+            <p className="text-green-500 text-xs sm:text-sm mt-1">
+              ✓ Passwords match
+            </p>
+          )}
         </div>
       );
     } else {
@@ -161,7 +246,7 @@ const SignupPage = () => {
           name={field.name}
           value={formData[field.name]}
           onChange={handleChange}
-          className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000]"
+          className="w-full p-3 md:p-4 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#990000] focus:border-[#990000] text-base md:text-sm"
           required
         />
       );
@@ -169,7 +254,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#FCF9F2]">
+    <div className="min-h-screen flex flex-col justify-between bg-[#FCF9F2] overflow-x-hidden">
       <Header />
       <Modal
         isOpen={showModal}
@@ -200,14 +285,11 @@ const SignupPage = () => {
           </ol>
         </div>
       </Modal>
-      <div className="flex-grow flex items-center justify-center my-16">
-        <div className="flex space-x-10">
-          <div
-            className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg"
-            style={{ width: "450px" }}
-          >
+      <div className="flex-grow flex items-center justify-center px-4 py-8 md:py-16">
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-[#F5EDE7] p-6 md:p-8 rounded-lg shadow-lg w-full">
             <h2
-              className="text-3xl mb-6 text-[#4F2F1D]"
+              className="text-2xl md:text-3xl mb-4 md:mb-6 text-[#4F2F1D] text-center"
               style={{
                 fontFamily: "'Tiempos Headline', serif",
                 fontWeight: 400,
@@ -215,7 +297,7 @@ const SignupPage = () => {
             >
               Sign Up
             </h2>
-            <form onSubmit={TermsCondition} className="space-y-4">
+            <form onSubmit={TermsCondition} className="space-y-4 sm:space-y-5">
               {[
                 { label: "Name", name: "name", type: "text" },
                 { label: "Mobile", name: "mobile", type: "text" },
@@ -267,9 +349,10 @@ const SignupPage = () => {
                 },
                 { label: "Email", name: "email", type: "email" },
                 { label: "Password", name: "password", type: "password" },
+                { label: "Confirm Password", name: "confirmPassword", type: "password" },
               ].map((field) => (
                 <div key={field.name}>
-                  <label className="block text-[#6B4132] mb-2 font-medium">
+                  <label className="block text-[#6B4132] mb-2 font-medium text-sm md:text-base">
                     {field.label}
                   </label>
                   {renderField(field)}
@@ -277,7 +360,7 @@ const SignupPage = () => {
               ))}
               {/* Enhanced Profile Pictures Upload Section */}
               <div>
-                <label className="block text-[#6B4132] mb-2 font-medium">
+                <label className="block text-[#6B4132] mb-2 font-medium text-sm md:text-base">
                   Profile Pictures (at least 1 required, up to 10)
                 </label>
                 <div className="relative">
@@ -292,28 +375,28 @@ const SignupPage = () => {
                   />
                   <label
                     htmlFor="profile-pictures"
-                    className="w-full p-3 border border-[#6B4132] rounded-lg bg-white text-[#6B4132] text-center cursor-pointer hover:bg-[#F5EDE7] transition duration-300"
+                    className="w-full p-3 md:p-4 border border-[#6B4132] rounded-lg bg-white text-[#6B4132] text-center cursor-pointer hover:bg-[#F5EDE7] transition duration-300 block text-base md:text-sm"
                   >
-                    Choose Profile Pictures
+                    📷 Choose Profile Pictures
                   </label>
                 </div>
                 {/* Preview selected pictures */}
                 {profilePictures.length > 0 && (
                   <div className="mt-4">
-                    <p className="text-[#6B4132] mb-2">
+                    <p className="text-[#6B4132] mb-2 text-sm">
                       Selected Pictures ({profilePictures.length}/10)
                     </p>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4">
                       {profilePictures.map((file, index) => (
                         <div key={index} className="relative group">
                           <img
                             src={URL.createObjectURL(file)}
                             alt={`Preview ${index}`}
-                            className="w-full h-24 object-cover rounded-lg shadow-md"
+                            className="w-full h-20 sm:h-24 object-cover rounded-lg shadow-md"
                           />
                           <button
                             type="button"
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-7 h-7 sm:w-6 sm:h-6 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200 text-sm"
                             onClick={() => removePicture(index)}
                             aria-label="Remove picture"
                           >
@@ -325,15 +408,15 @@ const SignupPage = () => {
                   </div>
                 )}
                 {profilePictures.length === 0 && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-red-500 text-xs sm:text-sm mt-1">
                     At least one profile picture is required.
                   </p>
                 )}
               </div>
-              <div className="flex justify-end">
+              <div className="flex justify-center mt-6">
                 <button
                   type="submit"
-                  className={`bg-[#990000] text-white font-bold py-2 px-6 rounded-lg transition duration-300 ${
+                  className={`w-full sm:w-auto bg-[#990000] text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-base ${
                     loading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:bg-[#800000]"
@@ -346,7 +429,7 @@ const SignupPage = () => {
             </form>
             <div className="mt-6 text-center space-y-2">
               <button
-                className="text-[#4A4A4A] hover:text-[#2D2D2D] hover:underline transition duration-300"
+                className="text-[#4A4A4A] hover:text-[#2D2D2D] hover:underline transition duration-300 text-sm sm:text-base"
                 onClick={() => navigate("/login")}
               >
                 Already have an account? Login
