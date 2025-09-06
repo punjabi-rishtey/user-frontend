@@ -112,15 +112,22 @@ function InfoRow({
       }
       // Handle manglik field with smart display logic
       if (name === "manglik") {
+        // Handle boolean values first (including false)
         if (typeof value === "boolean") {
           return value ? "Manglik" : "Non Manglik";
         }
+        // Handle string values
         if (typeof value === "string") {
           if (value === "manglik") return "Manglik";
           if (value === "non_manglik") return "Non Manglik";
           if (value === "partial_manglik") return "Partial Manglik";
+          if (value === "true") return "Manglik";
+          if (value === "false") return "Non Manglik";
         }
-        if (!value) return "Not specified";
+        // Handle null, undefined, or empty string
+        if (value === null || value === undefined || value === "") {
+          return "Not specified";
+        }
       }
       // Handle NRI status field with smart display logic
       if (name === "lifestyle.nri_status") {
@@ -399,12 +406,21 @@ export default function ProfileSettings() {
     }
   }, [user?._id]);
 
-  if (!user)
+  // Show loading state only if user is being fetched or if user doesn't have required data
+  if (!user || !user._id) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        Loading...
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex justify-center items-center">
+          <div className="text-center">
+            <div className="text-[#4F2F1D] text-xl mb-4">Loading your profile...</div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4F2F1D] mx-auto"></div>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
+  }
 
   // Fetch user details from API
   const fetchUserDetails = async () => {
@@ -415,6 +431,7 @@ export default function ProfileSettings() {
       const token = localStorage.getItem("token");
       if (!token) {
         alert("Session expired. Please log in again.");
+        navigate("/login");
         return;
       }
 
@@ -479,9 +496,21 @@ export default function ProfileSettings() {
       });
     } catch (error) {
       console.error("Error fetching user details:", error);
-      // alert("Failed to fetch user details.");
+      
+      // Handle authentication errors
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        alert("Session expired. Please log in again.");
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+        navigate("/login");
+        return;
+      }
+      
+      // For other errors, show a user-friendly message but don't block the UI
+      console.warn("Failed to fetch complete user details, using cached data");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Fetch astrology details from API

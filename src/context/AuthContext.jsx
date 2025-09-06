@@ -15,8 +15,24 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
     if (token) {
       const storedUser = localStorage.getItem("currentUser");
-      setUser(JSON.parse(storedUser));
-      setIsAuthenticated(true);
+      try {
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+        } else {
+          // If no stored user, clear the token and reset auth state
+          localStorage.removeItem("token");
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Error parsing stored user data:", error);
+        // If parsing fails, clear both token and user data
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+        setUser(null);
+        setIsAuthenticated(false);
+      }
     }
   }, []);
 

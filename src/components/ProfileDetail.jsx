@@ -280,14 +280,21 @@ const ProfileDetail = () => {
 
   // Helper function to format manglik status
   const formatManglikStatus = (value) => {
-    if (!value) return "Not specified";
+    // Handle boolean values first (including false)
     if (typeof value === "boolean") {
       return value ? "Manglik" : "Non Manglik";
     }
+    // Handle string values
     if (typeof value === "string") {
       if (value === "manglik") return "Manglik";
       if (value === "non_manglik") return "Non Manglik";
       if (value === "partial_manglik") return "Partial Manglik";
+      if (value === "true") return "Manglik";
+      if (value === "false") return "Non Manglik";
+    }
+    // Handle null, undefined, or empty string
+    if (value === null || value === undefined || value === "") {
+      return "Not specified";
     }
     return formatValue(value);
   };
