@@ -114,9 +114,9 @@ const Footer = () => {
         <div className="flex flex-col items-center space-y-4 text-sm text-[#E5D3C8]">
           <p className="text-center">&copy; 2025 PunjabiMarriageForum. All rights reserved.</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
+            <button onClick={() => handleNavigation("/privacy-policy")} className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Privacy Policy
-            </a>
+            </button>
             <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Terms of Service
             </a>

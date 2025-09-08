@@ -24,6 +24,7 @@ import ResetPasswordPage from "./components/ResetPasswordPage";
 import BlockingPage from "./components/BlockingPage";
 import ProfileSettings from "./components/Profilepage";
 import CurrentMembershipPage from "./components/CurrentMembershipPage";
+import PrivacyPolicy from "./components/PrivacyPolicy";
 
 // Promotional Message Component
 const PromotionalMessage = () => {
@@ -299,6 +300,7 @@ function App() {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/testimonials" element={<Testimonials />} />
           <Route path="/membership-expired" element={<BlockingPage />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </div>
     </AuthProvider>
