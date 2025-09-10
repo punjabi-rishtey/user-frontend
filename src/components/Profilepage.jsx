@@ -7,6 +7,7 @@ import {
   FaUser,
   FaComments,
   FaMoneyBill,
+  FaUserTimes,
 } from "react-icons/fa";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -1110,6 +1111,40 @@ export default function ProfileSettings() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to permanently delete your account? This action cannot be undone."
+    );
+    if (!confirmed) return;
+    
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Session expired. Please log in again.");
+      navigate("/login");
+      return;
+    }
+    
+    try {
+      const response = await fetch(
+        "https://backend-nm1z.onrender.com/api/users/me",
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!response.ok) {
+        const msg = await response.text();
+        throw new Error(msg || "Failed to delete account");
+      }
+      alert("Your account has been deleted.");
+      logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Delete account error:", error);
+      alert("Could not delete the account. Please try again.");
+    }
+  };
+
   // Calculate profile completion percentage
   const calculateProfileCompletion = () => {
     let filledFields = 0;
@@ -1854,6 +1889,13 @@ export default function ProfileSettings() {
                 <span>{loadingPassword ? "Sending link..." : "Change Password"}</span>
               </button>
               <button
+                onClick={handleDeleteAccount}
+                className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
+              >
+                <FaUserTimes />
+                <span>Delete Account</span>
+              </button>
+              <button
                 onClick={handleLogout}
                 className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
               >
@@ -1908,6 +1950,13 @@ export default function ProfileSettings() {
                   >
                     <MdPrivacyTip />
                     <span>{loadingPassword ? "Sending link..." : "Change Password"}</span>
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300"
+                  >
+                    <FaUserTimes />
+                    <span>Delete Account</span>
                   </button>
                   <button
                     onClick={handleLogout}
