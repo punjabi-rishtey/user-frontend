@@ -25,6 +25,7 @@ import BlockingPage from "./components/BlockingPage";
 import ProfileSettings from "./components/Profilepage";
 import CurrentMembershipPage from "./components/CurrentMembershipPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
+import SafetyStandards from "./components/SafetyStandards";
 
 // Promotional Message Component
 const PromotionalMessage = () => {
@@ -301,6 +302,7 @@ function App() {
           <Route path="/testimonials" element={<Testimonials />} />
           <Route path="/membership-expired" element={<BlockingPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/safety-standards" element={<SafetyStandards />} />
         </Routes>
       </div>
     </AuthProvider>

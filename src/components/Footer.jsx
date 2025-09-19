@@ -117,6 +117,9 @@ const Footer = () => {
             <button onClick={() => handleNavigation("/privacy-policy")} className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Privacy Policy
             </button>
+            <button onClick={() => handleNavigation("/safety-standards")} className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
+              Safety Standards
+            </button>
             <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
               Terms of Service
             </a>
