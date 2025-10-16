@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import { apiUrl } from "../config/constants";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logoSrc from "../assets/logo.png";
+// import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import Footer from "./Footer";
 import Header from "./Header";
-import ProfileSlider from "./ProfileSlider";
+// import ProfileSlider from "./ProfileSlider";
 import { motion } from "framer-motion";
 import axios from "axios";
+import PropTypes from "prop-types";
 
 const FindPartner = () => {
   const [filters, setFilters] = useState({
@@ -151,14 +153,11 @@ const FindPartner = () => {
       if (!isAuthenticated) return;
 
       try {
-        await axios.get(
-          "https://backend-nm1z.onrender.com/api/users/find-my-partner",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
+        await axios.get(apiUrl("/api/users/find-my-partner"), {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         setProfileComplete(true);
         fetchUsers();
       } catch (err) {
@@ -186,9 +185,7 @@ const FindPartner = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "https://backend-nm1z.onrender.com/api/users/all-basic"
-      );
+      const response = await axios.get(apiUrl("/api/users/all-basic"));
       if (Array.isArray(response.data)) {
         console.log(response.data);
         setUsers(response.data);
@@ -295,7 +292,8 @@ const FindPartner = () => {
         if (!item) return false;
 
         // Exclude users who have status 'Unapproved' or 'Pending'
-        if (item.status === "Unapproved" || item.status === "Pending") return false;
+        if (item.status === "Unapproved" || item.status === "Pending")
+          return false;
 
         const normalizedMaritalStatus = normalizeMaritalStatus(
           item.marital_status
@@ -369,39 +367,7 @@ const FindPartner = () => {
     updateQueryParams(pageNumber); // Explicitly update URL with new page
   };
 
-  // Extract unique values for filters
-  const uniqueValues = (key) => {
-    const values = [];
-    if (!Array.isArray(users)) return values;
-
-    users.forEach((user) => {
-      if (!user) return;
-
-      let value;
-      if (key === "maritalStatus") {
-        value = normalizeMaritalStatus(user.marital_status);
-      } else if (key === "manglik") {
-        value = user.manglik?.toString();
-      } else if (key === "gender") {
-        value =
-          user.gender?.charAt(0).toUpperCase() +
-          user.gender?.slice(1).toLowerCase();
-      } else {
-        value = user[key === "maritalStatus" ? "marital_status" : key];
-      }
-
-      if (
-        value &&
-        !values.includes(value) &&
-        value !== "undefined" &&
-        value !== "null"
-      ) {
-        values.push(value);
-      }
-    });
-
-    return values.sort();
-  };
+  // Extract unique values for filters (unused helper removed)
 
   // Format options
   const formatOption = (option) => {
@@ -588,6 +554,13 @@ const FindPartner = () => {
     );
   };
 
+  Pagination.propTypes = {
+    profilesPerPage: PropTypes.number.isRequired,
+    totalProfiles: PropTypes.number.isRequired,
+    currentPage: PropTypes.number.isRequired,
+    paginate: PropTypes.func.isRequired,
+  };
+
   // Loading indicator
   if (!authChecked) {
     return (
@@ -649,8 +622,9 @@ const FindPartner = () => {
   }
 
   // Membership status check (after profile completeness)
-  const isSubscriptionExpired = user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
-  
+  const isSubscriptionExpired =
+    user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+
   if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
     return (
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
@@ -664,7 +638,9 @@ const FindPartner = () => {
                 fontWeight: 400,
               }}
             >
-              {isSubscriptionExpired ? "Your subscription has expired" : "You don't have any active membership"}
+              {isSubscriptionExpired
+                ? "Your subscription has expired"
+                : "You don't have any active membership"}
             </h2>
             <div className="flex justify-center">
               <button

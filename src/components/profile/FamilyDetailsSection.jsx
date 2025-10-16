@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
+import { apiUrl } from "../../config/constants";
 
 const FamilyDetailsSection = ({ user, logout }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -40,15 +41,12 @@ const FamilyDetailsSection = ({ user, logout }) => {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/families/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setFamilyData(response.data);
     } catch (error) {
@@ -93,16 +91,12 @@ const FamilyDetailsSection = ({ user, logout }) => {
         return;
       }
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
-        familyData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/families/${user._id}`), familyData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setIsEditing(false);
       alert("Family details updated successfully!");

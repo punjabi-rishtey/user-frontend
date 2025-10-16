@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
+import { apiUrl } from "../../config/constants";
 
 const AstrologySection = ({ user, logout }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -28,16 +29,13 @@ const AstrologySection = ({ user, logout }) => {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/astrologies/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
       setAstrologyData(response.data);
     } catch (error) {
@@ -73,7 +71,7 @@ const AstrologySection = ({ user, logout }) => {
       }
 
       const response = await axios.put(
-        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
+        apiUrl(`/api/astrologies/${user._id}`),
         astrologyData,
         {
           headers: {

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom"; // Added for navigation
 import axios from "axios";
+import { apiUrl } from "../config/constants";
 
 const CurrentMembershipPage = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const [userStatusDetails, setUserStatusDetails] = useState();
   const [daysRemaining, setDaysRemaining] = useState();
   const navigate = useNavigate(); // Hook for navigation
@@ -19,7 +20,7 @@ const CurrentMembershipPage = () => {
         }
 
         const response = await axios.get(
-          `https://backend-nm1z.onrender.com/api/users/subscription/${userId}`,
+          apiUrl(`/api/users/subscription/${userId}`),
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -42,7 +43,7 @@ const CurrentMembershipPage = () => {
       console.log("userId: ", userId);
       fetchUserSubscriptionDetails(userId);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     const calculateDaysRemaining = () => {
@@ -81,9 +82,7 @@ const CurrentMembershipPage = () => {
           Back
         </button>
         <div className="flex flex-wrap justify-center gap-8">
-          <div
-            className="relative w-full md:w-[380px] p-8 rounded-lg shadow-lg hover:ring-2 hover:ring-[#4F2F1D] bg-[#F5EDE7] cursor-pointer"
-          >
+          <div className="relative w-full md:w-[380px] p-8 rounded-lg shadow-lg hover:ring-2 hover:ring-[#4F2F1D] bg-[#F5EDE7] cursor-pointer">
             <div
               className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#4F2F1D] text-[#E5D3C8] px-4 py-1 rounded-full z-10"
               style={{
@@ -96,13 +95,19 @@ const CurrentMembershipPage = () => {
 
             <h3
               className="text-2xl mb-4 text-[#4F2F1D]"
-              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
             >
               Expires at: {formatDateToDDMMYYYY(userStatusDetails)}
             </h3>
             <p
               className="text-3xl mb-2 text-[#4F2F1D]"
-              style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
             >
               {daysRemaining}
               <span

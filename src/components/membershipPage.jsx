@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
+import { apiUrl } from "../config/constants";
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
@@ -85,9 +86,7 @@ const MembershipPage = () => {
   useEffect(() => {
     const fetchMemberships = async () => {
       try {
-        const response = await fetch(
-          "https://backend-nm1z.onrender.com/api/memberships/all"
-        );
+        const response = await fetch(apiUrl("/api/memberships/all"));
         if (!response.ok) throw new Error("Failed to fetch membership plans");
 
         const data = await response.json();
@@ -142,13 +141,12 @@ const MembershipPage = () => {
     }));
   };
 
-  
   const [qr, setQr] = useState(null);
-    const fetchQR = async () => {
+  const fetchQR = async () => {
     try {
-      const res = await fetch("https://backend-nm1z.onrender.com/api/admin/auth/qr");
+      const res = await fetch(apiUrl("/api/admin/auth/qr"));
       const data = await res.json();
-      console.log(data)
+      console.log(data);
       setQr(data);
     } catch (err) {
       console.error("Failed to fetch QR:", err);
@@ -189,7 +187,7 @@ const MembershipPage = () => {
 
       // Call API to validate coupon
       const response = await axios.post(
-        "https://backend-nm1z.onrender.com/api/coupons/validate",
+        apiUrl("/api/coupons/validate"),
         { code: formData.couponCode },
         {
           headers: {
@@ -276,7 +274,7 @@ const MembershipPage = () => {
       }
 
       const response = await axios.post(
-        "https://backend-nm1z.onrender.com/api/users/subscribe",
+        apiUrl("/api/users/subscribe"),
         formDataToSubmit,
         {
           headers: {
@@ -613,9 +611,10 @@ const MembershipPage = () => {
                       {/* QR code container with white background */}
                       <div className="w-48 h-48 bg-white p-4 rounded-lg flex items-center justify-center">
                         {!qr && (
-                        <div className="w-full h-full bg-[#F1F1F1] flex items-center justify-center">
-                          <span className="text-gray-500">QR Code</span>
-                        </div>)}
+                          <div className="w-full h-full bg-[#F1F1F1] flex items-center justify-center">
+                            <span className="text-gray-500">QR Code</span>
+                          </div>
+                        )}
                         {qr && (
                           <div className="mb-6 text-center w-full h-full bg-[#F1F1F1] flex items-center justify-center">
                             <img
@@ -635,7 +634,9 @@ const MembershipPage = () => {
                         fontWeight: 400,
                       }}
                     >
-                      <p className="mb-1 text-sm">UPI ID: {qr?.name || "yourcompany@upi"}</p>
+                      <p className="mb-1 text-sm">
+                        UPI ID: {qr?.name || "yourcompany@upi"}
+                      </p>
                       <p className="text-sm">
                         After payment, please fill the form →
                       </p>

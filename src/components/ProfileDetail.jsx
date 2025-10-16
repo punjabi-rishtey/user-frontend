@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll } from "framer-motion";
 import Footer from "./Footer";
 import Header from "./Header";
 import ProfilePhotosLayout from "./ProfilePhotosLayout"; // Import the new component
+import AboutLookingSection from "./AboutLookingSection";
 import {
   FaHeart,
   FaUser,
   FaGraduationCap,
-  FaPhone,
   FaUsers,
-  FaTimes,
   FaArrowLeft,
 } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import profileIcon from "../assets/profile.png";
+import { apiUrl } from "../config/constants";
 
 // Define a vibrant color palette for different card types
 const cardColorSchemes = {
@@ -76,11 +75,10 @@ const ProfileDetail = () => {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { scrollYProgress } = useScroll();
+  useScroll();
 
   // Dynamic Scroll Effects for Boxes
-  const imageSize = useTransform(scrollYProgress, [0, 0.3], ["180px", "90px"]);
-  const imageOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0.85]);
+  // Scroll progress available for future subtle effects if needed
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -93,14 +91,11 @@ const ProfileDetail = () => {
           throw new Error("Authentication required");
         }
 
-        const response = await axios.get(
-          `https://backend-nm1z.onrender.com/api/users/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(apiUrl(`/api/users/${id}`), {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         setProfileData(response.data);
         setError(null);
@@ -200,8 +195,9 @@ const ProfileDetail = () => {
   }
 
   // Subscription status check
-  const isSubscriptionExpired = user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
-  
+  const isSubscriptionExpired =
+    user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+
   if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
     return (
       <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
@@ -215,7 +211,9 @@ const ProfileDetail = () => {
                 fontWeight: 400,
               }}
             >
-              {isSubscriptionExpired ? "Your subscription has expired" : "You don't have any active membership"}
+              {isSubscriptionExpired
+                ? "Your subscription has expired"
+                : "You don't have any active membership"}
             </h2>
             <div className="flex justify-center">
               <button
@@ -321,6 +319,18 @@ const ProfileDetail = () => {
     return formatValue(value);
   };
 
+  // Helper function to format abroad_ready
+  const formatAbroadReady = (value) => {
+    if (value === null || value === undefined || value === "")
+      return "Not specified";
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (typeof value === "string") {
+      if (value === "true" || value.toLowerCase() === "yes") return "Yes";
+      if (value === "false" || value.toLowerCase() === "no") return "No";
+    }
+    return formatValue(value);
+  };
+
   // Physical and lifestyle information
   const lifestyleDetails = {
     "Physical Disability": profileData.physical_attributes?.physical_disability
@@ -330,20 +340,24 @@ const ProfileDetail = () => {
     Drink: profileData.lifestyle?.drink ? profileData.lifestyle.drink : "No",
     "Diet Preference": formatDietPreference(profileData.lifestyle?.veg_nonveg),
     "NRI Status": formatNRIStatus(profileData.lifestyle?.nri_status),
+    "Ready to move Abroad": formatAbroadReady(
+      profileData.lifestyle?.abroad_ready
+    ),
   };
 
   // Hobbies details
   const hobbiesDetails = {
-    Hobbies: Array.isArray(profileData.hobbies) && profileData.hobbies.length > 0
-      ? profileData.hobbies.join(", ")
-      : "Not specified"
+    Hobbies:
+      Array.isArray(profileData.hobbies) && profileData.hobbies.length > 0
+        ? profileData.hobbies.join(", ")
+        : "Not specified",
   };
 
   // Astrology details
-  const astrologyDetails = {
-    Manglik: formatManglikStatus(profileData.mangalik), // Use correct field name
-    ...profileData.astrology_details,
-  };
+  // const astrologyDetails = {
+  //   Manglik: formatManglikStatus(profileData.mangalik),
+  //   ...profileData.astrology_details,
+  // };
 
   // Education and profession details
   const educationDetails = {};
@@ -417,7 +431,7 @@ const ProfileDetail = () => {
       ] = `${brothers} Brother(s), ${sisters} Sister(s)`;
     }
   }
-  
+
   // Add permanent address and city from user location
   if (profileData.location?.address) {
     familyDetails["Permanent Address"] = profileData.location.address;
@@ -427,7 +441,7 @@ const ProfileDetail = () => {
   }
 
   // Card variants for animation
-  const getCardVariants = (cardType) => {
+  const getCardVariants = () => {
     return {
       initial: { opacity: 0, y: 20 },
       animate: { opacity: 1, y: 0 },
@@ -464,6 +478,18 @@ const ProfileDetail = () => {
 
       {/* ProfilePhotosLayout Component - Replaces previous slideshow implementation */}
       <ProfilePhotosLayout photos={profileData.profile_pictures} />
+
+      {/* About & Looking For section: placed between gallery and details */}
+      {(() => {
+        const about = (profileData.about_myself ?? "").trim();
+        const looking = (profileData.looking_for ?? "").trim();
+        const showSection = about.length > 0 || looking.length > 0;
+        return (
+          showSection && (
+            <AboutLookingSection aboutMyself={about} lookingFor={looking} />
+          )
+        );
+      })()}
 
       {/* Profile Details Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">
@@ -572,58 +598,61 @@ const ProfileDetail = () => {
         </motion.div>
 
         {/* Hobbies Details */}
-        {Object.keys(hobbiesDetails).length > 0 && hobbiesDetails.Hobbies !== "Not specified" && (
-          <motion.div
-            variants={getCardVariants("basicDetails")}
-            initial="initial"
-            animate="animate"
-            whileHover="hover"
-            className="p-8 rounded-xl shadow-lg transition-all"
-            style={{
-              backgroundColor: cardColorSchemes.basicDetails.bg,
-              borderColor: cardColorSchemes.basicDetails.border,
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-          >
-            <h3
-              className="text-2xl mb-4 flex items-center"
+        {Object.keys(hobbiesDetails).length > 0 &&
+          hobbiesDetails.Hobbies !== "Not specified" && (
+            <motion.div
+              variants={getCardVariants("basicDetails")}
+              initial="initial"
+              animate="animate"
+              whileHover="hover"
+              className="p-8 rounded-xl shadow-lg transition-all"
               style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-                color: cardColorSchemes.basicDetails.title,
+                backgroundColor: cardColorSchemes.basicDetails.bg,
+                borderColor: cardColorSchemes.basicDetails.border,
+                borderWidth: "2px",
+                borderStyle: "solid",
               }}
             >
-              <FaUser
-                className="mr-3"
-                style={{ color: cardColorSchemes.basicDetails.icon }}
-              />
-              Hobbies & Interests
-            </h3>
-            <div className="space-y-2">
-              {Object.entries(hobbiesDetails).map(([key, value]) => (
-                <p
-                  key={key}
-                  className="text-lg"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  <strong style={{ color: cardColorSchemes.basicDetails.label }}>
-                    {key}:
-                  </strong>
-                  <span
-                    style={{ color: cardColorSchemes.basicDetails.value }}
-                    className="ml-2"
+              <h3
+                className="text-2xl mb-4 flex items-center"
+                style={{
+                  fontFamily: "'Tiempos Headline', serif",
+                  fontWeight: 400,
+                  color: cardColorSchemes.basicDetails.title,
+                }}
+              >
+                <FaUser
+                  className="mr-3"
+                  style={{ color: cardColorSchemes.basicDetails.icon }}
+                />
+                Hobbies & Interests
+              </h3>
+              <div className="space-y-2">
+                {Object.entries(hobbiesDetails).map(([key, value]) => (
+                  <p
+                    key={key}
+                    className="text-lg"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
                   >
-                    {value}
-                  </span>
-                </p>
-              ))}
-            </div>
-          </motion.div>
-        )}
+                    <strong
+                      style={{ color: cardColorSchemes.basicDetails.label }}
+                    >
+                      {key}:
+                    </strong>
+                    <span
+                      style={{ color: cardColorSchemes.basicDetails.value }}
+                      className="ml-2"
+                    >
+                      {value}
+                    </span>
+                  </p>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
         {/* Horoscope Details */}
         <motion.div

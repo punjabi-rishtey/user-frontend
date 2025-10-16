@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
+import { apiUrl } from "../../config/constants";
 
 const ProfessionSection = ({ user, logout }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -34,15 +35,12 @@ const ProfessionSection = ({ user, logout }) => {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/professions/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setProfessionData(response.data);
     } catch (error) {
@@ -84,16 +82,12 @@ const ProfessionSection = ({ user, logout }) => {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
-        professionData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/professions/${user._id}`), professionData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setIsEditing(false);
       alert("Profession details updated successfully!");

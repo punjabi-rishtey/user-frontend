@@ -180,10 +180,10 @@
 
 // export default ContactUs;
 
-
-import React, { useState } from "react";
+import { useState } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
+import { apiUrl } from "../config/constants";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -221,14 +221,11 @@ const ContactUs = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        "https://backend-nm1z.onrender.com/api/users/inquiries/submit",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await fetch(apiUrl("/api/users/inquiries/submit"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
       if (!response.ok) {
         throw new Error("Failed to submit inquiry");
       }
@@ -243,7 +240,9 @@ const ContactUs = () => {
       setErrors({});
     } catch (error) {
       console.error("Error submitting inquiry:", error);
-      alert("An error occurred while submitting the inquiry. Please try again.");
+      alert(
+        "An error occurred while submitting the inquiry. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -257,14 +256,16 @@ const ContactUs = () => {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row w-full">
               {/* LEFT PANEL (Contact Form) */}
-              <div className="
+              <div
+                className="
                 w-full md:w-1/2
                 bg-[#F5EDE7]
                 p-8
                 mb-6 md:mb-0
                 md:mr-6
                 rounded-lg
-              ">
+              "
+              >
                 <form onSubmit={handleSubmit}>
                   {["name", "email", "phone", "subject"].map((field) => (
                     <div key={field} className="mb-6">
@@ -315,7 +316,8 @@ const ContactUs = () => {
               </div>
 
               {/* RIGHT PANEL (Contact Info) - Fixed height with vertical centering */}
-              <div className="
+              <div
+                className="
                 w-full md:w-1/2
                 bg-[#F5EDE7]
                 p-8
@@ -324,21 +326,36 @@ const ContactUs = () => {
                 flex-col
                 justify-center
                 md:h-auto
-              ">
+              "
+              >
                 <div className="flex flex-col h-full justify-center">
                   <h2 className="text-2xl mb-6 text-[#4F2F1D]">Get in Touch</h2>
                   <p className="text-[#6B4132] mb-8">
-                    If you have any questions, feel free to reach out to us. We are here to help you.
+                    If you have any questions, feel free to reach out to us. We
+                    are here to help you.
                   </p>
 
                   <div className="space-y-6">
                     {[
                       { icon: "📞", label: "Phone", value: "+91-73546-19960" },
-                      { icon: "✉️", label: "Email", value: "support@punjabi-rishtey.com" },
-                      { icon: "📍", label: "Address", value: "Mahalaxmi Nagar, Indore, M.P. 452010" }
+                      {
+                        icon: "✉️",
+                        label: "Email",
+                        value: "support@punjabi-rishtey.com",
+                      },
+                      {
+                        icon: "📍",
+                        label: "Address",
+                        value: "Mahalaxmi Nagar, Indore, M.P. 452010",
+                      },
                     ].map((item) => (
-                      <div key={item.label} className="flex items-center space-x-4">
-                        <span className="bg-[#FCF9F2] p-3 rounded-full">{item.icon}</span>
+                      <div
+                        key={item.label}
+                        className="flex items-center space-x-4"
+                      >
+                        <span className="bg-[#FCF9F2] p-3 rounded-full">
+                          {item.icon}
+                        </span>
                         <div>
                           <p className="text-[#8B7355] text-sm">{item.label}</p>
                           <p className="text-[#4F2F1D]">{item.value}</p>

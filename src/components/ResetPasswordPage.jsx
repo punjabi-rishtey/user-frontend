@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
+import { apiUrl } from "../config/constants";
 
 const ResetPasswordPage = () => {
   const { token } = useParams(); // Extract token from URL
@@ -23,7 +24,7 @@ const ResetPasswordPage = () => {
 
     try {
       const response = await fetch(
-        `https://backend-nm1z.onrender.com/api/users/reset-password/${token}`,
+        apiUrl(`/api/users/reset-password/${token}`),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

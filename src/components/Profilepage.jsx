@@ -1,23 +1,16 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
-import {
-  FaCog,
-  FaSignOutAlt,
-  FaHeart,
-  FaUser,
-  FaComments,
-  FaMoneyBill,
-  FaUserTimes,
-} from "react-icons/fa";
+import { FaCog, FaSignOutAlt, FaUserTimes } from "react-icons/fa";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import Header from "./Header";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 import ProfileImageGallery from "./ProfileImageGallery";
-import { PiPassword, PiPasswordBold } from "react-icons/pi";
-import { TbPassword } from "react-icons/tb";
+// Removed unused password icons
 import { MdPrivacyTip } from "react-icons/md";
+import { apiUrl } from "../config/constants";
 
 // Helper functions moved outside the component for better performance
 const generateFeetOptions = () => {
@@ -94,6 +87,15 @@ function HeightDropdowns({ value, onChange, isEditing }) {
   }
 }
 
+HeightDropdowns.propTypes = {
+  value: PropTypes.shape({
+    feet: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    inches: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  }),
+  onChange: PropTypes.func,
+  isEditing: PropTypes.bool,
+};
+
 // InfoRow Component
 function InfoRow({
   label,
@@ -108,7 +110,11 @@ function InfoRow({
   const getDisplayValue = () => {
     if (type === "select" && options) {
       // Handle boolean values (but not for manglik and nri_status fields which have custom logic)
-      if (typeof value === "boolean" && name !== "manglik" && name !== "lifestyle.nri_status") {
+      if (
+        typeof value === "boolean" &&
+        name !== "manglik" &&
+        name !== "lifestyle.nri_status"
+      ) {
         return value ? "Yes" : "No";
       }
       // Handle manglik field with smart display logic
@@ -137,10 +143,25 @@ function InfoRow({
         }
         if (typeof value === "string") {
           if (value === "true" || value.toLowerCase() === "yes") return "NRI";
-          if (value === "false" || value.toLowerCase() === "no") return "Indian";
+          if (value === "false" || value.toLowerCase() === "no")
+            return "Indian";
         }
         if (!value && value !== false) return "Not specified";
         return value ? "NRI" : "Indian";
+      }
+      // Handle Ready to move Abroad field with smart display logic
+      if (name === "lifestyle.abroad_ready") {
+        if (value === null || value === undefined || value === "") {
+          return "Not specified";
+        }
+        if (typeof value === "boolean") {
+          return value ? "Yes" : "No";
+        }
+        if (typeof value === "string") {
+          if (value === "true" || value.toLowerCase() === "yes") return "Yes";
+          if (value === "false" || value.toLowerCase() === "no") return "No";
+        }
+        return value;
       }
       if (value === undefined || value === null || value === "") {
         return "";
@@ -200,6 +221,19 @@ function InfoRow({
   );
 }
 
+InfoRow.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.any,
+  isEditing: PropTypes.bool,
+  name: PropTypes.string,
+  onChange: PropTypes.func,
+  type: PropTypes.string,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({ value: PropTypes.any, label: PropTypes.string })
+  ),
+  isPassword: PropTypes.bool,
+};
+
 // Tab Button Component
 function TabButton({ active, onClick, children }) {
   return (
@@ -215,6 +249,12 @@ function TabButton({ active, onClick, children }) {
     </button>
   );
 }
+
+TabButton.propTypes = {
+  active: PropTypes.bool,
+  onClick: PropTypes.func,
+  children: PropTypes.node,
+};
 
 // Action Buttons Component
 function ActionButtons({ isEditing, onSave, onCancel, onEdit, loading }) {
@@ -248,12 +288,19 @@ function ActionButtons({ isEditing, onSave, onCancel, onEdit, loading }) {
   );
 }
 
+ActionButtons.propTypes = {
+  isEditing: PropTypes.bool,
+  onSave: PropTypes.func,
+  onCancel: PropTypes.func,
+  onEdit: PropTypes.func,
+  loading: PropTypes.bool,
+};
+
 // Main Component
 export default function ProfileSettings() {
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const [loadingPassword, setLoadingPassword] = useState(false); // Added loading state for password reset
 
@@ -270,7 +317,6 @@ export default function ProfileSettings() {
   const [isEditingEducation, setIsEditingEducation] = useState(false);
   const [loadingAstrology, setLoadingAstrology] = useState(false);
   const [isEditingAstrology, setIsEditingAstrology] = useState(false);
-  const [isEditingHobbies, setIsEditingHobbies] = useState(false);
 
   // Data states
   const [hobbiesData, setHobbiesData] = useState({
@@ -354,12 +400,19 @@ export default function ProfileSettings() {
       drink: false,
       veg_nonveg: "",
       nri_status: false,
+      abroad_ready: null,
     },
     home_address: {
       address: "",
       city: "",
     },
     hobbies: [],
+  });
+
+  // New optional About fields state
+  const [aboutFields, setAboutFields] = useState({
+    about_myself: "",
+    looking_for: "",
   });
 
   // Helper function to parse height
@@ -393,6 +446,7 @@ export default function ProfileSettings() {
   }, [user?.profilePicture]);
 
   // Fetch user details when user ID changes
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (user?._id) {
       fetchUserDetails();
@@ -402,6 +456,7 @@ export default function ProfileSettings() {
       fetchEducationDetails();
     }
   }, [user?._id]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   // Show loading state only if user is being fetched or if user doesn't have required data
   if (!user || !user._id) {
@@ -410,7 +465,9 @@ export default function ProfileSettings() {
         <Header />
         <div className="flex-grow flex justify-center items-center">
           <div className="text-center">
-            <div className="text-[#4F2F1D] text-xl mb-4">Loading your profile...</div>
+            <div className="text-[#4F2F1D] text-xl mb-4">
+              Loading your profile...
+            </div>
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4F2F1D] mx-auto"></div>
           </div>
         </div>
@@ -432,15 +489,12 @@ export default function ProfileSettings() {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/users/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       const userData = response.data;
 
       setBasicData({
@@ -476,6 +530,10 @@ export default function ProfileSettings() {
           drink: userData.lifestyle?.drink || false,
           veg_nonveg: userData.lifestyle?.veg_nonveg || "",
           nri_status: userData.lifestyle?.nri_status || false,
+          abroad_ready:
+            userData.lifestyle?.abroad_ready !== undefined
+              ? userData.lifestyle?.abroad_ready
+              : null,
         },
         home_address: {
           address: userData.location?.address || "",
@@ -491,9 +549,15 @@ export default function ProfileSettings() {
             : [],
         newHobby: "",
       });
+
+      // Set About fields from API (optional)
+      setAboutFields({
+        about_myself: userData.about_myself || "",
+        looking_for: userData.looking_for || "",
+      });
     } catch (error) {
       console.error("Error fetching user details:", error);
-      
+
       // Handle authentication errors
       if (error.response?.status === 401 || error.response?.status === 403) {
         alert("Session expired. Please log in again.");
@@ -502,7 +566,7 @@ export default function ProfileSettings() {
         navigate("/login");
         return;
       }
-      
+
       // For other errors, show a user-friendly message but don't block the UI
       console.warn("Failed to fetch complete user details, using cached data");
     } finally {
@@ -523,16 +587,13 @@ export default function ProfileSettings() {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/astrologies/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
 
       setAstrologyData(response.data);
     } catch (error) {
@@ -541,7 +602,7 @@ export default function ProfileSettings() {
         alert("Session expired. Please log in again.");
         logout();
       } else {
-        console.log("Failed to fetch astrology details.")
+        console.log("Failed to fetch astrology details.");
         // alert("Failed to fetch astrology details.");
       }
     }
@@ -561,15 +622,12 @@ export default function ProfileSettings() {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/professions/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setProfessionData(response.data);
     } catch (error) {
@@ -597,15 +655,12 @@ export default function ProfileSettings() {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/families/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setFamilyData(response.data);
     } catch (error) {
@@ -633,15 +688,12 @@ export default function ProfileSettings() {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/educations/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setEducationData(response.data);
     } catch (error) {
@@ -658,7 +710,6 @@ export default function ProfileSettings() {
 
   // Handle image operations
   const handleAddImage = async (file) => {
-    setIsUploading(true);
     try {
       const imageUrl = URL.createObjectURL(file);
 
@@ -686,7 +737,7 @@ export default function ProfileSettings() {
       console.error("Error adding image:", error);
       alert("Failed to upload image. Please try again.");
     } finally {
-      setIsUploading(false);
+      // no-op
     }
   };
 
@@ -723,7 +774,6 @@ export default function ProfileSettings() {
     input.accept = "image/*";
     input.onchange = async (e) => {
       if (e.target.files && e.target.files[0]) {
-        setIsUploading(true);
         try {
           const file = e.target.files[0];
           const imageUrl = URL.createObjectURL(file);
@@ -749,7 +799,7 @@ export default function ProfileSettings() {
           console.error("Error updating image:", error);
           alert("Failed to update image. Please try again.");
         } finally {
-          setIsUploading(false);
+          // no-op
         }
       }
     };
@@ -783,6 +833,12 @@ export default function ProfileSettings() {
         [name]: value,
       };
     });
+  };
+
+  // Handle About fields change (limit 300 chars each)
+  const handleAboutChange = (e) => {
+    const { name, value } = e.target;
+    setAboutFields((prev) => ({ ...prev, [name]: value.slice(0, 300) }));
   };
 
   const handleProfessionChange = (e) => {
@@ -859,6 +915,14 @@ export default function ProfileSettings() {
       // Since we no longer convert "yes"/"no"/"occasionally" to booleans,
       // we keep drink/smoke as strings in personalData.lifestyle
       const fixedLifestyle = { ...personalData.lifestyle };
+      // Normalize abroad_ready to boolean|null for backend schema
+      if (fixedLifestyle) {
+        const ar = fixedLifestyle.abroad_ready;
+        if (ar === "true" || ar === true) fixedLifestyle.abroad_ready = true;
+        else if (ar === "false" || ar === false)
+          fixedLifestyle.abroad_ready = false;
+        else fixedLifestyle.abroad_ready = null; // for "" or undefined
+      }
 
       // Convert "fullName" -> "name", and include "caste" in the request
       const requestBody = {
@@ -881,22 +945,20 @@ export default function ProfileSettings() {
           address: personalData.home_address.address,
         },
         hobbies: hobbiesData.hobbies,
+        about_myself: aboutFields.about_myself || "",
+        looking_for: aboutFields.looking_for || "",
       };
-      
+
       // Debug logging
       console.log("Saving manglik value:", personalData.manglik);
       console.log("Full request body:", requestBody);
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
-        requestBody,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/users/${user._id}`), requestBody, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       // Refetch user details so UI is in sync
       await fetchUserDetails();
@@ -923,16 +985,12 @@ export default function ProfileSettings() {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/professions/${user._id}`,
-        professionData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/professions/${user._id}`), professionData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setIsEditingProfession(false);
       alert("Profession details updated successfully!");
@@ -958,16 +1016,12 @@ export default function ProfileSettings() {
         return;
       }
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/families/${user._id}`,
-        familyData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/families/${user._id}`), familyData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setIsEditingFamily(false);
       alert("Family details updated successfully!");
@@ -988,16 +1042,12 @@ export default function ProfileSettings() {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
-        educationData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/educations/${user._id}`), educationData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setIsEditingEducation(false);
       alert("Education details updated successfully!");
@@ -1025,7 +1075,7 @@ export default function ProfileSettings() {
       }
 
       const response = await axios.put(
-        `https://backend-nm1z.onrender.com/api/astrologies/${user._id}`,
+        apiUrl(`/api/astrologies/${user._id}`),
         astrologyData,
         {
           headers: {
@@ -1060,38 +1110,16 @@ export default function ProfileSettings() {
     setIsEditingAstrology(false);
   };
 
-  const handleSaveHobbies = async () => {
-    const updatedUser = {
-      ...user,
-      hobbies: hobbiesData.hobbies,
-    };
-
-    try {
-      const success = await updateUser(updatedUser);
-      if (success) {
-        setIsEditingHobbies(false);
-      }
-    } catch (error) {
-      console.error("Error updating hobbies:", error);
-    }
-  };
-
-  const handleCancelHobbies = () => {
-    setHobbiesData({
-      hobbies: user?.hobbies || [],
-      newHobby: "",
-    });
-    setIsEditingHobbies(false);
-  };
+  // Removed unused hobbies save/cancel handlers; hobbies are saved with main Save
 
   const handleResetPassword = async () => {
     setLoadingPassword(true);
     try {
       const email = user?.email;
-      const response = await axios.post(
-        `https://backend-nm1z.onrender.com/api/users/forgot-password/`,
-        { email }
-      );
+      await axios.post(apiUrl(`/api/users/forgot-password/`), {
+        email,
+      });
+
       alert("Password reset link sent successfully");
     } catch (error) {
       console.error(
@@ -1116,22 +1144,19 @@ export default function ProfileSettings() {
       "Are you sure you want to permanently delete your account? This action cannot be undone."
     );
     if (!confirmed) return;
-    
+
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Session expired. Please log in again.");
       navigate("/login");
       return;
     }
-    
+
     try {
-      const response = await fetch(
-        "https://backend-nm1z.onrender.com/api/users/me",
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(apiUrl("/api/users/me"), {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!response.ok) {
         const msg = await response.text();
         throw new Error(msg || "Failed to delete account");
@@ -1166,6 +1191,7 @@ export default function ProfileSettings() {
     checkFields(basicData);
     checkFields(personalData);
     checkFields(hobbiesData);
+    checkFields(aboutFields);
     checkFields(professionData);
     checkFields(familyData);
     checkFields(educationData);
@@ -1453,6 +1479,24 @@ export default function ProfileSettings() {
                   { value: "true", label: "NRI" },
                 ]}
               />
+              <InfoRow
+                label="Ready to move Abroad"
+                value={
+                  personalData.lifestyle.abroad_ready === null ||
+                  personalData.lifestyle.abroad_ready === undefined
+                    ? ""
+                    : personalData.lifestyle.abroad_ready
+                }
+                isEditing={isEditing || isEditingPersonal}
+                name="lifestyle.abroad_ready"
+                onChange={handlePersonalChange}
+                type="select"
+                options={[
+                  { value: "", label: "Prefer not to say" },
+                  { value: "true", label: "Yes" },
+                  { value: "false", label: "No" },
+                ]}
+              />
             </div>
 
             {/* Home Address Section */}
@@ -1534,7 +1578,7 @@ export default function ProfileSettings() {
 
             {/* Action Buttons */}
             <ActionButtons
-              isEditing={isEditing || isEditingPersonal || isEditingHobbies}
+              isEditing={isEditing || isEditingPersonal}
               onSave={handleSave}
               onCancel={handleCancel}
               onEdit={() => setIsEditing(true)}
@@ -1752,7 +1796,6 @@ export default function ProfileSettings() {
                 onChange={handleProfessionChange}
                 type="text"
                 placeholder="Enter annual income (e.g., 5 Lakhs)"
-                
               />
 
               <div className="col-span-1 md:col-span-2">
@@ -1886,7 +1929,9 @@ export default function ProfileSettings() {
                 className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300 disabled:bg-gray-400 disabled:text-white"
               >
                 <MdPrivacyTip />
-                <span>{loadingPassword ? "Sending link..." : "Change Password"}</span>
+                <span>
+                  {loadingPassword ? "Sending link..." : "Change Password"}
+                </span>
               </button>
               <button
                 onClick={handleDeleteAccount}
@@ -1949,7 +1994,9 @@ export default function ProfileSettings() {
                     className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300 disabled:bg-gray-400 disabled:text-white"
                   >
                     <MdPrivacyTip />
-                    <span>{loadingPassword ? "Sending link..." : "Change Password"}</span>
+                    <span>
+                      {loadingPassword ? "Sending link..." : "Change Password"}
+                    </span>
                   </button>
                   <button
                     onClick={handleDeleteAccount}
@@ -1986,6 +2033,8 @@ export default function ProfileSettings() {
             </p>
           </div>
 
+          {/* About & Looking For are edited and viewed within the Profile Completion card below to follow current UX */}
+
           {/* Profile Completion Progress Card */}
           <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg mb-6">
             <h3 className="text-md md:text-lg text-[#111111] mb-2">
@@ -2004,6 +2053,61 @@ export default function ProfileSettings() {
                       : "#168821", // Green (High completion)
                 }}
               />
+            </div>
+
+            {/* About Myself & I am looking for */}
+            <h4 className="text-md font-semibold mb-4 border-t pt-6">
+              About Section
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="w-full">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  About Myself
+                </label>
+                {isEditing ? (
+                  <textarea
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline min-h-[120px]"
+                    name="about_myself"
+                    value={aboutFields.about_myself}
+                    onChange={handleAboutChange}
+                    maxLength={300}
+                    placeholder="Write a short introduction about yourself (max 300 characters)"
+                  />
+                ) : (
+                  <p className="text-gray-600 whitespace-pre-line">
+                    {aboutFields.about_myself || "Not specified"}
+                  </p>
+                )}
+                {isEditing && (
+                  <p className="text-xs text-gray-500 mt-1 text-right">
+                    {aboutFields.about_myself.length}/300
+                  </p>
+                )}
+              </div>
+              <div className="w-full">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  I am looking for
+                </label>
+                {isEditing ? (
+                  <textarea
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline min-h-[120px]"
+                    name="looking_for"
+                    value={aboutFields.looking_for}
+                    onChange={handleAboutChange}
+                    maxLength={300}
+                    placeholder="Describe what you are looking for in a partner (max 300 characters)"
+                  />
+                ) : (
+                  <p className="text-gray-600 whitespace-pre-line">
+                    {aboutFields.looking_for || "Not specified"}
+                  </p>
+                )}
+                {isEditing && (
+                  <p className="text-xs text-gray-500 mt-1 text-right">
+                    {aboutFields.looking_for.length}/300
+                  </p>
+                )}
+              </div>
             </div>
             <p className="text-sm text-gray-600 mt-2">
               {calculateProfileCompletion()}% completed

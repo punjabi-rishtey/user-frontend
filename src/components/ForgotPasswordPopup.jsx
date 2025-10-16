@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { apiUrl } from "../config/constants";
 
 const ForgotPasswordPopup = ({ onClose }) => {
   const [email, setEmail] = useState("");
@@ -10,14 +11,11 @@ const ForgotPasswordPopup = ({ onClose }) => {
     setMessage("");
 
     try {
-      const response = await fetch(
-        "https://backend-nm1z.onrender.com/api/users/forgot-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch(apiUrl("/api/users/forgot-password"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -26,7 +24,8 @@ const ForgotPasswordPopup = ({ onClose }) => {
         setMessage(data.message || "Failed to send reset link.");
       }
     } catch (error) {
-      setMessage("Error sending reset link. Try again.");
+      console.error("Forgot password error:", error);
+      setMessage("Something went wrong. Please try again.");
     }
 
     setLoading(false);

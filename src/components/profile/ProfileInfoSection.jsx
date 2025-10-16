@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
+import { apiUrl } from "../../config/constants";
 
 function ProfileInfoSection({
   user,
@@ -49,6 +50,7 @@ function ProfileInfoSection({
       drink: false,
       veg_nonveg: "",
       nri_status: false,
+      abroad_ready: null,
     },
     home_address: {
       address: "",
@@ -103,15 +105,12 @@ function ProfileInfoSection({
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/users/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       const userData = response.data;
 
       setBasicData({
@@ -146,6 +145,10 @@ function ProfileInfoSection({
           drink: userData.lifestyle?.drink || false,
           veg_nonveg: userData.lifestyle?.veg_nonveg || "",
           nri_status: userData.lifestyle?.nri_status || false,
+          abroad_ready:
+            userData.lifestyle?.abroad_ready !== undefined
+              ? userData.lifestyle?.abroad_ready
+              : null,
         },
         home_address: {
           address: userData.location?.address || "",
@@ -202,17 +205,26 @@ function ProfileInfoSection({
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      // Build payload and normalize lifestyle.abroad_ready to boolean|null
+      const payload = {
+        ...basicData,
+        ...personalData,
+        hobbies: hobbiesData.hobbies,
+      };
+      if (payload?.lifestyle) {
+        const ar = payload.lifestyle.abroad_ready;
+        if (ar === "true" || ar === true) payload.lifestyle.abroad_ready = true;
+        else if (ar === "false" || ar === false)
+          payload.lifestyle.abroad_ready = false;
+        else payload.lifestyle.abroad_ready = null; // for "" or undefined -> null
+      }
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
-        { ...basicData, ...personalData, hobbies: hobbiesData.hobbies },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/users/${user._id}`), payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
       fetchUserDetails();
       setIsEditing(false);
       alert("Profile updated successfully!");
@@ -465,6 +477,24 @@ function ProfileInfoSection({
           options={[
             { value: "false", label: "No" },
             { value: "true", label: "Yes" },
+          ]}
+        />
+        <InfoRow
+          label="Ready to move Abroad"
+          value={
+            personalData.lifestyle.abroad_ready === null ||
+            personalData.lifestyle.abroad_ready === undefined
+              ? ""
+              : personalData.lifestyle.abroad_ready
+          }
+          isEditing={isEditing}
+          name="lifestyle.abroad_ready"
+          onChange={handlePersonalChange}
+          type="select"
+          options={[
+            { value: "", label: "Prefer not to say" },
+            { value: "true", label: "Yes" },
+            { value: "false", label: "No" },
           ]}
         />
       </div>

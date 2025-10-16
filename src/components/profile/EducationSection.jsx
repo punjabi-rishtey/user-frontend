@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
+import { apiUrl } from "../../config/constants";
 
 const EducationSection = ({ user, logout }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -33,15 +34,12 @@ const EducationSection = ({ user, logout }) => {
         return;
       }
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await axios.get(apiUrl(`/api/educations/${user._id}`), {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setEducationData(response.data);
     } catch (error) {
@@ -78,16 +76,12 @@ const EducationSection = ({ user, logout }) => {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.put(
-        `https://backend-nm1z.onrender.com/api/educations/${user._id}`,
-        educationData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      await axios.put(apiUrl(`/api/educations/${user._id}`), educationData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       setIsEditing(false);
       alert("Education details updated successfully!");

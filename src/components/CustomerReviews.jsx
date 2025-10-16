@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
+import { apiUrl } from "../config/constants";
 
 const CustomerReviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -11,9 +12,7 @@ const CustomerReviews = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await axios.get(
-          "https://backend-nm1z.onrender.com/api/review/all"
-        );
+        const response = await axios.get(apiUrl("/api/review/all"));
         const mappedReviews = response.data.map((review) => ({
           rating: review.ratings,
           title: review.user_name,
@@ -208,7 +207,7 @@ const CustomerReviews = () => {
                     fontWeight: 400,
                   }}
                 >
-                  "{selectedReview.text}"
+                  &ldquo;{selectedReview.text}&rdquo;
                 </p>
                 {/* Author */}
                 <p className="text-sm text-gray-600 mt-4 font-semibold">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { apiUrl } from "./config/constants";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaBell } from "react-icons/fa";
@@ -131,9 +132,7 @@ const MessageAlert = () => {
     const fetchMessages = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          "https://backend-nm1z.onrender.com/api/messages"
-        );
+        const response = await fetch(apiUrl("/api/messages"));
         if (!response.ok) {
           throw new Error("Failed to fetch messages");
         }

@@ -3,6 +3,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { apiUrl, BACKEND_BASE_URL } from "../config/constants";
 
 const Testimonials = () => {
   const [selectedClient, setSelectedClient] = useState(0);
@@ -12,7 +13,7 @@ const Testimonials = () => {
 
   useEffect(() => {
     setLoading(true);
-    fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
+    fetch(apiUrl("/api/testimonials/all"))
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -22,9 +23,7 @@ const Testimonials = () => {
       .then((data) => {
         const formattedClients = data.map((client) => ({
           name: client.user_name,
-          photo:
-            client.image_url ||
-            `https://backend-nm1z.onrender.com${client.image}`,
+          photo: client.image_url || `${BACKEND_BASE_URL}${client.image}`,
           quote: client.message,
         }));
         setClients(formattedClients);
@@ -102,7 +101,7 @@ const Testimonials = () => {
                     {/* Image Container */}
                     <div className="w-full md:w-2/5 bg-[#F5EDE7]">
                       <div className="aspect-w-1 aspect-h-1 h-full w-full">
-                        <motion.div 
+                        <motion.div
                           className="h-full flex items-center justify-center p-4 sm:p-6"
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -126,7 +125,10 @@ const Testimonials = () => {
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.3, duration: 0.5 }}
                         className="text-lg sm:text-xl text-[#6B4132] mb-6 italic"
-                        style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                        style={{
+                          fontFamily: "'Modern Era', sans-serif",
+                          fontWeight: 400,
+                        }}
                       >
                         "{clients[selectedClient].quote}"
                       </motion.blockquote>
@@ -138,7 +140,10 @@ const Testimonials = () => {
                       >
                         <h3
                           className="text-xl sm:text-2xl text-[#4F2F1D]"
-                          style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                          style={{
+                            fontFamily: "'Tiempos Headline', serif",
+                            fontWeight: 400,
+                          }}
                         >
                           {clients[selectedClient].name}
                         </h3>
@@ -174,7 +179,10 @@ const Testimonials = () => {
               >
                 <h3
                   className="text-xl sm:text-2xl text-center mb-6 text-[#4F2F1D]"
-                  style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
+                  style={{
+                    fontFamily: "'Tiempos Headline', serif",
+                    fontWeight: 400,
+                  }}
                 >
                   Meet Our Happy Couples
                 </h3>
@@ -200,9 +208,12 @@ const Testimonials = () => {
                         />
                       </div>
                       <div className="p-2 text-center">
-                        <p 
+                        <p
                           className="text-xs sm:text-sm truncate text-[#4F2F1D]"
-                          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+                          style={{
+                            fontFamily: "'Modern Era', sans-serif",
+                            fontWeight: 400,
+                          }}
                         >
                           {client.name}
                         </p>

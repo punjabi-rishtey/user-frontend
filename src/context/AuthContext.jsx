@@ -1,5 +1,6 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
+import { apiUrl } from "../config/constants";
 
 const AuthContext = createContext();
 
@@ -40,10 +41,10 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        'https://backend-nm1z.onrender.com/api/users/login',
+        apiUrl("/api/users/login"),
         credentials,
         {
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" },
         }
       );
       console.log("Response data:", response.data);
@@ -58,7 +59,7 @@ export const AuthProvider = ({ children }) => {
         return false;
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       return false;
     } finally {
       setIsLoading(false);
@@ -82,7 +83,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       const response = await axios.put(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
+        apiUrl(`/api/users/${user._id}`),
         updatedUserData,
         {
           headers: {
@@ -113,10 +114,9 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       if (!token || !user) return;
 
-      const response = await axios.get(
-        `https://backend-nm1z.onrender.com/api/users/${user._id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await axios.get(apiUrl(`/api/users/${user._id}`), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.data) {
         localStorage.setItem("currentUser", JSON.stringify(response.data));

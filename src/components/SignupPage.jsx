@@ -6,6 +6,7 @@ import Header from "./Header";
 import PreferencesPopup from "./PreferencesPopup";
 import { Eye, EyeOff } from "lucide-react";
 import Modal from "./TermsConditionModal";
+import { apiUrl } from "../config/constants";
 
 const SignupPage = () => {
   const [showModal, setShowModal] = useState(false);
@@ -37,13 +38,23 @@ const SignupPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     // Password validation
     if (name === "password" || name === "confirmPassword") {
       setPasswordError("");
-      if (name === "confirmPassword" && formData.password && value && formData.password !== value) {
+      if (
+        name === "confirmPassword" &&
+        formData.password &&
+        value &&
+        formData.password !== value
+      ) {
         setPasswordError("Passwords do not match");
-      } else if (name === "password" && formData.confirmPassword && value && value !== formData.confirmPassword) {
+      } else if (
+        name === "password" &&
+        formData.confirmPassword &&
+        value &&
+        value !== formData.confirmPassword
+      ) {
         setPasswordError("Passwords do not match");
       }
     }
@@ -80,9 +91,12 @@ const SignupPage = () => {
   // Password strength indicator
   const getPasswordStrength = (password) => {
     if (!password) return { strength: "", color: "" };
-    if (password.length < 6) return { strength: "Too short", color: "text-red-500" };
-    if (password.length < 8) return { strength: "Weak", color: "text-orange-500" };
-    if (password.length < 12) return { strength: "Good", color: "text-blue-500" };
+    if (password.length < 6)
+      return { strength: "Too short", color: "text-red-500" };
+    if (password.length < 8)
+      return { strength: "Weak", color: "text-orange-500" };
+    if (password.length < 12)
+      return { strength: "Good", color: "text-blue-500" };
     return { strength: "Strong", color: "text-green-500" };
   };
 
@@ -93,25 +107,25 @@ const SignupPage = () => {
 
   const TermsCondition = (e) => {
     e.preventDefault();
-    
+
     // Check if passwords match
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
-    
+
     // Check password strength
     if (formData.password.length < 6) {
       setPasswordError("Password must be at least 6 characters long");
       return;
     }
-    
+
     // Check if at least one profile picture is selected
     if (profilePictures.length === 0) {
       alert("Please upload at least one profile picture to sign up.");
       return;
     }
-    
+
     setPasswordError("");
     setShowModal(true);
   };
@@ -136,13 +150,10 @@ const SignupPage = () => {
     });
 
     try {
-      const response = await fetch(
-        "https://backend-nm1z.onrender.com/api/users/register",
-        {
-          method: "POST",
-          body: formDataToSend,
-        }
-      );
+      const response = await fetch(apiUrl("/api/users/register"), {
+        method: "POST",
+        body: formDataToSend,
+      });
 
       const data = await response.json();
       setLoading(false);
@@ -222,7 +233,9 @@ const SignupPage = () => {
               type="button"
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#6B4132] hover:text-[#4F2F1D] focus:outline-none p-1"
               onClick={toggleConfirmPasswordVisibility}
-              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
             >
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -232,11 +245,14 @@ const SignupPage = () => {
               {passwordError}
             </p>
           )}
-          {!passwordError && formData.password && formData.confirmPassword && formData.password === formData.confirmPassword && (
-            <p className="text-green-500 text-xs sm:text-sm mt-1">
-              ✓ Passwords match
-            </p>
-          )}
+          {!passwordError &&
+            formData.password &&
+            formData.confirmPassword &&
+            formData.password === formData.confirmPassword && (
+              <p className="text-green-500 text-xs sm:text-sm mt-1">
+                ✓ Passwords match
+              </p>
+            )}
         </div>
       );
     } else {
@@ -269,8 +285,8 @@ const SignupPage = () => {
               error, I shall be responsible for the same.
             </li>
             <li>
-              Before fixing up my marriage, with my future partner, I shall
-              know satisfactory information about the family and the partner
+              Before fixing up my marriage, with my future partner, I shall know
+              satisfactory information about the family and the partner
               herself/himself. The Punjabi Marriage Forum (punjabi-rishtey.com)
               is not responsible for any mishap.
             </li>
@@ -349,7 +365,11 @@ const SignupPage = () => {
                 },
                 { label: "Email", name: "email", type: "email" },
                 { label: "Password", name: "password", type: "password" },
-                { label: "Confirm Password", name: "confirmPassword", type: "password" },
+                {
+                  label: "Confirm Password",
+                  name: "confirmPassword",
+                  type: "password",
+                },
               ].map((field) => (
                 <div key={field.name}>
                   <label className="block text-[#6B4132] mb-2 font-medium text-sm md:text-base">
@@ -444,7 +464,6 @@ const SignupPage = () => {
 };
 
 export default SignupPage;
-
 
 //
 
