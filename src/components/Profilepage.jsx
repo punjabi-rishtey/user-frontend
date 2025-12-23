@@ -369,6 +369,7 @@ export default function ProfileSettings() {
   const [basicData, setBasicData] = useState({
     fullName: "",
     mobile: "",
+    secondary_contact: "",
     email: "",
     gender: "",
     dob: "",
@@ -500,6 +501,7 @@ export default function ProfileSettings() {
       setBasicData({
         fullName: userData.name || "",
         mobile: userData.mobile || "",
+        secondary_contact: userData.secondary_contact || "",
         email: userData.email || "",
         gender: userData.gender || "",
         dob: userData.dob || "",
@@ -929,6 +931,7 @@ export default function ProfileSettings() {
         name: basicData.fullName,
         email: basicData.email,
         mobile: basicData.mobile,
+        secondary_contact: basicData.secondary_contact,
         dob: basicData.dob,
         gender: basicData.gender,
         religion: basicData.religion,
@@ -1242,6 +1245,13 @@ export default function ProfileSettings() {
                 onChange={handleBasicChange}
               />
               <InfoRow
+                label="Secondary Contact"
+                value={basicData.secondary_contact}
+                isEditing={isEditing}
+                name="secondary_contact"
+                onChange={handleBasicChange}
+              />
+              <InfoRow
                 label="Email"
                 value={basicData.email}
                 isEditing={isEditing}
@@ -1259,7 +1269,7 @@ export default function ProfileSettings() {
               <InfoRow
                 label="Gender"
                 value={basicData.gender}
-                isEditing={isEditing}
+                isEditing={false}
                 name="gender"
                 onChange={handleBasicChange}
                 type="select"

@@ -20,6 +20,7 @@ function ProfileInfoSection({
   const [basicData, setBasicData] = useState({
     fullName: "",
     mobile: "",
+    secondary_contact: "",
     email: "",
     gender: "",
     dob: "",
@@ -116,6 +117,7 @@ function ProfileInfoSection({
       setBasicData({
         fullName: userData.name || "",
         mobile: userData.mobile || "",
+        secondary_contact: userData.secondary_contact || "",
         email: userData.email || "",
         gender: userData.gender || "",
         dob: userData.dob || "",
@@ -258,6 +260,13 @@ function ProfileInfoSection({
           value={basicData.mobile}
           isEditing={isEditing}
           name="mobile"
+          onChange={handleBasicChange}
+        />
+        <InfoRow
+          label="Secondary Contact"
+          value={basicData.secondary_contact}
+          isEditing={isEditing}
+          name="secondary_contact"
           onChange={handleBasicChange}
         />
         <InfoRow

@@ -274,6 +274,7 @@ const ProfileDetail = () => {
     "Birth Place": formatValue(profileData.birth_details?.birth_place),
     Email: profileData.email || "Not specified",
     Mobile: profileData.mobile || "Not specified",
+    "Secondary Contact": profileData.secondary_contact || "Not specified",
   };
 
   // Helper function to format manglik status
