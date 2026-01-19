@@ -204,6 +204,15 @@ function InfoRow({
               </option>
             ))}
           </select>
+        ) : type === "textarea" ? (
+          <textarea
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline min-h-[120px] resize-y"
+            placeholder={label}
+            name={name}
+            value={value}
+            onChange={onChange}
+            rows={5}
+          />
         ) : (
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -215,7 +224,7 @@ function InfoRow({
           />
         )
       ) : (
-        <p className="text-gray-600">{getDisplayValue()}</p>
+        <p className="text-gray-600 whitespace-pre-wrap">{getDisplayValue()}</p>
       )}
     </div>
   );
@@ -333,6 +342,7 @@ export default function ProfileSettings() {
       address: "",
       city: "",
     },
+    additional_info: "",
   });
 
   const [familyData, setFamilyData] = useState({
@@ -359,6 +369,7 @@ export default function ProfileSettings() {
       name: "",
       city: "",
     },
+    additional_info: "",
   });
 
   const [astrologyData, setAstrologyData] = useState({
@@ -1756,6 +1767,18 @@ export default function ProfileSettings() {
                   name="college_details.city"
                   onChange={handleEducationChange}
                 />
+
+                <div className="col-span-1 md:col-span-2">
+                  <InfoRow
+                    label="Additional Information"
+                    value={educationData.additional_info || ""}
+                    isEditing={isEditingEducation}
+                    name="additional_info"
+                    onChange={handleEducationChange}
+                    type="textarea"
+                    placeholder="Any additional education details you'd like to share"
+                  />
+                </div>
               </div>
             )}
 
@@ -1827,6 +1850,18 @@ export default function ProfileSettings() {
                 name="work_address.city"
                 onChange={handleProfessionChange}
               />
+
+              <div className="col-span-1 md:col-span-2">
+                <InfoRow
+                  label="Additional Information"
+                  value={professionData.additional_info || ""}
+                  isEditing={isEditingProfession}
+                  name="additional_info"
+                  onChange={handleProfessionChange}
+                  type="textarea"
+                  placeholder="Any additional professional details you'd like to share"
+                />
+              </div>
             </div>
 
             <ActionButtons

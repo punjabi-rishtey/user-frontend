@@ -390,6 +390,10 @@ const ProfileDetail = () => {
       educationDetails["Passout Year"] =
         profileData.education_details.college_details.passout_year;
     }
+    if (profileData.education_details.additional_info) {
+      educationDetails["Additional Information"] =
+        profileData.education_details.additional_info;
+    }
   }
 
   // Profession details
@@ -418,6 +422,10 @@ const ProfileDetail = () => {
     if (profileData.profession_details.work_address?.address) {
       professionDetails["Work Address"] =
         profileData.profession_details.work_address.address;
+    }
+    if (profileData.profession_details.additional_info) {
+      professionDetails["Additional Information"] =
+        profileData.profession_details.additional_info;
     }
   }
 
@@ -755,24 +763,45 @@ const ProfileDetail = () => {
             </h3>
             <div className="space-y-2">
               {Object.entries(educationDetails).map(([key, value]) => (
-                <p
-                  key={key}
-                  className="text-lg"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  <strong style={{ color: cardColorSchemes.education.label }}>
-                    {key}:
-                  </strong>
-                  <span
-                    style={{ color: cardColorSchemes.education.value }}
-                    className="ml-2"
+                key === "Additional Information" ? (
+                  <div key={key} className="mt-4 pt-4 border-t" style={{ borderColor: cardColorSchemes.education.border }}>
+                    <strong
+                      className="block text-lg mb-2"
+                      style={{ color: cardColorSchemes.education.label }}
+                    >
+                      {key}:
+                    </strong>
+                    <p
+                      className="text-base whitespace-pre-wrap"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                        color: cardColorSchemes.education.value,
+                      }}
+                    >
+                      {value || "Not specified"}
+                    </p>
+                  </div>
+                ) : (
+                  <p
+                    key={key}
+                    className="text-lg"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
                   >
-                    {value || "Not specified"}
-                  </span>
-                </p>
+                    <strong style={{ color: cardColorSchemes.education.label }}>
+                      {key}:
+                    </strong>
+                    <span
+                      style={{ color: cardColorSchemes.education.value }}
+                      className="ml-2"
+                    >
+                      {value || "Not specified"}
+                    </span>
+                  </p>
+                )
               ))}
             </div>
           </motion.div>
@@ -809,24 +838,45 @@ const ProfileDetail = () => {
             </h3>
             <div className="space-y-2">
               {Object.entries(professionDetails).map(([key, value]) => (
-                <p
-                  key={key}
-                  className="text-lg"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  <strong style={{ color: cardColorSchemes.profession.label }}>
-                    {key}:
-                  </strong>
-                  <span
-                    style={{ color: cardColorSchemes.profession.value }}
-                    className="ml-2"
+                key === "Additional Information" ? (
+                  <div key={key} className="mt-4 pt-4 border-t" style={{ borderColor: cardColorSchemes.profession.border }}>
+                    <strong
+                      className="block text-lg mb-2"
+                      style={{ color: cardColorSchemes.profession.label }}
+                    >
+                      {key}:
+                    </strong>
+                    <p
+                      className="text-base whitespace-pre-wrap"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                        color: cardColorSchemes.profession.value,
+                      }}
+                    >
+                      {value || "Not specified"}
+                    </p>
+                  </div>
+                ) : (
+                  <p
+                    key={key}
+                    className="text-lg"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
                   >
-                    {value || "Not specified"}
-                  </span>
-                </p>
+                    <strong style={{ color: cardColorSchemes.profession.label }}>
+                      {key}:
+                    </strong>
+                    <span
+                      style={{ color: cardColorSchemes.profession.value }}
+                      className="ml-2"
+                    >
+                      {value || "Not specified"}
+                    </span>
+                  </p>
+                )
               ))}
             </div>
           </motion.div>
