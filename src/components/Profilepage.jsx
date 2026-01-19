@@ -107,6 +107,76 @@ function InfoRow({
   options,
   isPassword,
 }) {
+  const [timeError, setTimeError] = useState("");
+
+  // Function to convert 24-hour time to 12-hour format
+  const convertTo12Hour = (time24) => {
+    const timeRegex = /^(\d{1,2}):(\d{2})$/;
+    const match = time24.match(timeRegex);
+
+    if (!match) return null;
+
+    let hours = parseInt(match[1]);
+    const minutes = match[2];
+
+    if (hours < 0 || hours > 23) return null;
+
+    const period = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12 || 12;
+
+    return `${hours}:${minutes} ${period}`;
+  };
+
+  // Function to validate 12-hour time format
+  const validate12HourTime = (timeStr) => {
+    if (!timeStr || timeStr.trim() === "") {
+      setTimeError("");
+      return true;
+    }
+
+    // Check for 12-hour format: HH:MM AM/PM
+    const time12Regex = /^(0?[1-9]|1[0-2]):([0-5][0-9])\s?(AM|PM|am|pm)$/i;
+
+    if (time12Regex.test(timeStr.trim())) {
+      setTimeError("");
+      return true;
+    }
+
+    // Check if it's 24-hour format and try to convert
+    const time24Regex = /^(\d{1,2}):(\d{2})$/;
+    if (time24Regex.test(timeStr.trim())) {
+      const converted = convertTo12Hour(timeStr.trim());
+      if (converted) {
+        setTimeError("Converting 24-hour format to 12-hour...");
+        // Auto-convert after a short delay
+        setTimeout(() => {
+          const syntheticEvent = {
+            target: { name, value: converted }
+          };
+          onChange(syntheticEvent);
+          setTimeError("");
+        }, 500);
+        return false;
+      }
+    }
+
+    setTimeError("Please use format: HH:MM AM/PM (e.g., 09:30 AM)");
+    return false;
+  };
+
+  // Validate existing time value on mount/change
+  useEffect(() => {
+    if (type === "time12h" && value && isEditing) {
+      validate12HourTime(value);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, isEditing, type]);
+
+  const handleTime12hChange = (e) => {
+    onChange(e);
+    validate12HourTime(e.target.value);
+  };
+
   const getDisplayValue = () => {
     if (type === "select" && options) {
       // Handle boolean values (but not for manglik and nri_status fields which have custom logic)
@@ -213,6 +283,26 @@ function InfoRow({
             onChange={onChange}
             rows={5}
           />
+        ) : type === "time12h" ? (
+          <>
+            <input
+              className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                timeError && timeError !== "Converting 24-hour format to 12-hour..." ? "border-red-500" : ""
+              }`}
+              type="text"
+              placeholder="HH:MM AM/PM (e.g., 09:30 AM)"
+              name={name}
+              value={value}
+              onChange={handleTime12hChange}
+            />
+            {timeError && (
+              <p className={`text-xs mt-1 ${
+                timeError === "Converting 24-hour format to 12-hour..." ? "text-blue-500" : "text-red-500"
+              }`}>
+                {timeError}
+              </p>
+            )}
+          </>
         ) : (
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -1383,7 +1473,7 @@ export default function ProfileSettings() {
                 isEditing={isEditing || isEditingPersonal}
                 name="birth_details.birth_time"
                 onChange={handlePersonalChange}
-                type="time"
+                type="time12h"
               />
               <InfoRow
                 label="Birth Place"
