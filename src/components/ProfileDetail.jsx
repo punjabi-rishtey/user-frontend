@@ -97,6 +97,10 @@ const ProfileDetail = () => {
           },
         });
 
+        console.log("=== PROFILE DATA FROM BACKEND ===");
+        console.log("Full response:", response.data);
+        console.log("================================");
+
         setProfileData(response.data);
         setError(null);
       } catch (err) {
@@ -269,6 +273,7 @@ const ProfileDetail = () => {
     Height: formatValue(profileData.height),
     Religion: formatValue(profileData.religion),
     Caste: formatValue(profileData.caste),
+    Language: formatValue(profileData.language),
     "Marital Status": formatValue(profileData.marital_status),
     "Birth Time": formatValue(profileData.birth_details?.birth_time),
     "Birth Place": formatValue(profileData.birth_details?.birth_place),
@@ -334,6 +339,8 @@ const ProfileDetail = () => {
 
   // Physical and lifestyle information
   const lifestyleDetails = {
+    "Skin Tone": formatValue(profileData.physical_attributes?.skin_tone),
+    "Body Type": formatValue(profileData.physical_attributes?.body_type),
     "Physical Disability": profileData.physical_attributes?.physical_disability
       ? "Yes"
       : "No",
@@ -379,6 +386,10 @@ const ProfileDetail = () => {
       educationDetails["College City"] =
         profileData.education_details.college_details.city;
     }
+    if (profileData.education_details.college_details?.passout_year) {
+      educationDetails["Passout Year"] =
+        profileData.education_details.college_details.passout_year;
+    }
   }
 
   // Profession details
@@ -388,16 +399,25 @@ const ProfileDetail = () => {
       professionDetails["Occupation"] =
         profileData.profession_details.occupation;
     }
-    if (profileData.profession_details.annual_income) {
-      professionDetails["Annual Income"] =
-        profileData.profession_details.annual_income;
+    if (profileData.profession_details.designation) {
+      professionDetails["Designation"] =
+        profileData.profession_details.designation;
     }
-    if (profileData.profession_details.company) {
-      professionDetails["Company"] = profileData.profession_details.company;
+    if (profileData.profession_details.working_with) {
+      professionDetails["Working With"] =
+        profileData.profession_details.working_with;
+    }
+    if (profileData.profession_details.income) {
+      professionDetails["Annual Income"] =
+        profileData.profession_details.income;
     }
     if (profileData.profession_details.work_address?.city) {
       professionDetails["Work City"] =
         profileData.profession_details.work_address.city;
+    }
+    if (profileData.profession_details.work_address?.address) {
+      professionDetails["Work Address"] =
+        profileData.profession_details.work_address.address;
     }
   }
 
@@ -492,15 +512,15 @@ const ProfileDetail = () => {
         );
       })()}
 
-      {/* Profile Details Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">
+      {/* Profile Details Sections - Masonry Layout */}
+      <div className="columns-1 md:columns-2 lg:columns-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">
         {/* Basic Details */}
         <motion.div
           variants={getCardVariants("basicDetails")}
           initial="initial"
           animate="animate"
           whileHover="hover"
-          className="p-8 rounded-xl shadow-lg transition-all"
+          className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
           style={{
             backgroundColor: cardColorSchemes.basicDetails.bg,
             borderColor: cardColorSchemes.basicDetails.border,
@@ -552,7 +572,7 @@ const ProfileDetail = () => {
           initial="initial"
           animate="animate"
           whileHover="hover"
-          className="p-8 rounded-xl shadow-lg transition-all"
+          className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
           style={{
             backgroundColor: cardColorSchemes.lifestyle.bg,
             borderColor: cardColorSchemes.lifestyle.border,
@@ -606,7 +626,7 @@ const ProfileDetail = () => {
               initial="initial"
               animate="animate"
               whileHover="hover"
-              className="p-8 rounded-xl shadow-lg transition-all"
+              className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
               style={{
                 backgroundColor: cardColorSchemes.basicDetails.bg,
                 borderColor: cardColorSchemes.basicDetails.border,
@@ -661,7 +681,7 @@ const ProfileDetail = () => {
           initial="initial"
           animate="animate"
           whileHover="hover"
-          className="p-8 rounded-xl shadow-lg transition-all"
+          className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
           style={{
             backgroundColor: cardColorSchemes.horoscope.bg,
             borderColor: cardColorSchemes.horoscope.border,
@@ -711,7 +731,7 @@ const ProfileDetail = () => {
             initial="initial"
             animate="animate"
             whileHover="hover"
-            className="p-8 rounded-xl shadow-lg transition-all"
+            className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
             style={{
               backgroundColor: cardColorSchemes.education.bg,
               borderColor: cardColorSchemes.education.border,
@@ -765,7 +785,7 @@ const ProfileDetail = () => {
             initial="initial"
             animate="animate"
             whileHover="hover"
-            className="p-8 rounded-xl shadow-lg transition-all"
+            className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
             style={{
               backgroundColor: cardColorSchemes.profession.bg,
               borderColor: cardColorSchemes.profession.border,
@@ -819,7 +839,7 @@ const ProfileDetail = () => {
             initial="initial"
             animate="animate"
             whileHover="hover"
-            className="p-8 rounded-xl shadow-lg transition-all"
+            className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
             style={{
               backgroundColor: cardColorSchemes.family.bg,
               borderColor: cardColorSchemes.family.border,
