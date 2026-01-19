@@ -205,6 +205,28 @@ const HeroWithHeader = () => {
                   {item.label}
                 </button>
               ))}
+              {!isAuthenticated && (
+                <>
+                  <button
+                    className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300 mt-4"
+                    onClick={() => {
+                      navigate("/login");
+                      setIsSidebarOpen(false);
+                    }}
+                  >
+                    Login
+                  </button>
+                  <button
+                    className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
+                    onClick={() => {
+                      navigate("/signup");
+                      setIsSidebarOpen(false);
+                    }}
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </>

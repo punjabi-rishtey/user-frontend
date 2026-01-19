@@ -549,7 +549,7 @@ const MembershipPage = () => {
         {showModal && selectedPlan && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center"
+              className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4 overflow-y-auto"
               variants={backgroundVariants}
               initial="hidden"
               animate="visible"
@@ -557,7 +557,7 @@ const MembershipPage = () => {
               onClick={closeModal}
             >
               <motion.div
-                className="bg-white rounded-lg p-6 w-full max-w-3xl mx-4 z-50"
+                className="bg-white rounded-lg p-6 w-full max-w-3xl my-8 z-50"
                 variants={modalVariants}
                 initial="hidden"
                 animate="visible"
