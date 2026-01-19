@@ -16,6 +16,7 @@ const SignupPage = () => {
     password: "",
     confirmPassword: "",
     mobile: "",
+    secondary_contact: "",
     gender: "",
     dob: "",
     religion: "",
@@ -317,6 +318,7 @@ const SignupPage = () => {
               {[
                 { label: "Name", name: "name", type: "text" },
                 { label: "Mobile", name: "mobile", type: "text" },
+                { label: "Secondary Contact", name: "secondary_contact", type: "text" },
                 {
                   label: "Gender",
                   name: "gender",

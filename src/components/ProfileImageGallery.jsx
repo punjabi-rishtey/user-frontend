@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { FaPlus, FaTrash, FaCheck, FaTimes } from "react-icons/fa";
+import { FaPlus, FaTrash, FaCheck, FaTimes, FaCamera } from "react-icons/fa";
 import { apiUrl } from "../config/constants";
 const API_URL = apiUrl("/api/users");
 
@@ -11,7 +10,7 @@ const ProfileImageGallery = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
   const [operation, setOperation] = useState(null);
   const [images, setImages] = useState([]);
-  const sliderRef = useRef(null);
+  const [profilePicture, setProfilePicture] = useState("");
 
   // Image refs
   const fileInputRef = useRef(null);
@@ -128,6 +127,10 @@ const ProfileImageGallery = () => {
       if (data.profile_pictures) {
         setImages(data.profile_pictures);
       }
+      // Set profile picture (or fallback to first image)
+      setProfilePicture(
+        data.profile_picture || data.profile_pictures?.[0] || ""
+      );
     } catch (error) {
       console.error("Error fetching profile images:", error);
     }
@@ -322,7 +325,7 @@ const ProfileImageGallery = () => {
     }
   };
 
-  const handleRemoveImage = async (index) => {
+  const handleRemoveImage = async (imageUrl) => {
     if (
       !window.confirm("Are you sure you want to delete this image?") ||
       !user?._id
@@ -330,7 +333,6 @@ const ProfileImageGallery = () => {
       return;
 
     setOperation("deleting");
-    const imageToDelete = images[index];
 
     try {
       const response = await fetch(`${API_URL}/${user._id}/delete-picture`, {
@@ -339,11 +341,16 @@ const ProfileImageGallery = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ imagePath: imageToDelete }),
+        body: JSON.stringify({ imagePath: imageUrl }),
       });
 
       if (response.ok) {
-        setImages((prev) => prev.filter((_, i) => i !== index));
+        setImages((prev) => prev.filter((img) => img !== imageUrl));
+        // If deleted image was profile picture, reset to first remaining image
+        if (imageUrl === profilePicture) {
+          const remaining = images.filter((img) => img !== imageUrl);
+          setProfilePicture(remaining[0] || "");
+        }
         await refreshUser();
       }
     } catch (error) {
@@ -353,31 +360,221 @@ const ProfileImageGallery = () => {
     }
   };
 
-  let addPhotoText = "Add Photo";
-  if (operation === "uploading") addPhotoText = "Uploading...";
-  else if (operation === "deleting") addPhotoText = "Deleting...";
+  // Handle setting a picture as profile picture
+  const handleSetProfilePicture = async (imageUrl) => {
+    if (!user?._id) return;
+
+    // If already the profile picture, do nothing
+    if (isProfilePicture(imageUrl)) return;
+
+    setOperation("setting-profile");
+    try {
+      const response = await fetch(
+        `${API_URL}/${user._id}/set-profile-picture`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ imageUrl }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        setProfilePicture(data.profile_picture || imageUrl);
+        await refreshUser();
+      } else {
+        alert(data.message || "Failed to set profile picture");
+      }
+    } catch (error) {
+      console.error("Error setting profile picture:", error);
+      alert("Failed to set profile picture");
+    } finally {
+      setOperation(null);
+    }
+  };
+
+  // Check if an image is the current profile picture
+  const isProfilePicture = (imageUrl) => {
+    // If profilePicture is set, compare directly
+    if (profilePicture) {
+      return imageUrl === profilePicture;
+    }
+    // Fallback: first image is profile picture
+    return images.length > 0 && imageUrl === images[0];
+  };
+
+  // Get the current profile picture URL
+  const getCurrentProfilePicture = () => {
+    if (profilePicture) return profilePicture;
+    if (images.length > 0) return images[0];
+    return null;
+  };
+
+  const currentProfilePic = getCurrentProfilePicture();
+  const otherPhotos = images.filter((img) => img !== currentProfilePic);
 
   return (
-    <div className="container mx-auto px-2 py-6 bg-white rounded-lg shadow-lg mb-6">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold">My Photos</h2>
+    <div className="bg-white rounded-lg shadow-lg mb-6 overflow-hidden">
+      {/* Header */}
+      <div className="px-4 py-3 bg-gray-50 border-b flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-800">My Photos</h2>
+        <span className="text-sm text-gray-500">{images.length} photo{images.length !== 1 ? 's' : ''}</span>
+      </div>
 
-        <label className="cursor-pointer px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg flex items-center">
-          <FaPlus className="mr-2" />
-          {addPhotoText}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileInputChange}
-            disabled={
-              operation === "uploading" ||
-              operation === "deleting" ||
-              showCropper
-            }
-          />
-        </label>
+      <div className="p-4">
+        {/* Main Layout: Profile Picture + Other Photos */}
+        {images.length > 0 ? (
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Profile Picture - Left/Top */}
+            <div className="flex-shrink-0">
+              <p className="text-sm font-medium text-gray-600 mb-2">Profile Picture</p>
+              <div className="relative w-[200px] h-[260px] mx-auto md:mx-0">
+                <img
+                  src={currentProfilePic}
+                  alt="Profile"
+                  className="w-full h-full object-cover rounded-lg border-3 border-[#B31312] shadow-md"
+                />
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#B31312] text-white text-xs px-3 py-1 rounded-full flex items-center shadow">
+                  <FaCheck className="mr-1" size={10} />
+                  Profile Photo
+                </div>
+              </div>
+            </div>
+
+            {/* Other Photos Grid - Right/Bottom */}
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-600 mb-2">
+                All Photos
+                {otherPhotos.length > 0 && (
+                  <span className="text-gray-400 font-normal ml-1">
+                    (tap to set as profile)
+                  </span>
+                )}
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {images.map((image) => {
+                  const isProfile = isProfilePicture(image);
+                  return (
+                    <div
+                      key={image}
+                      className={`relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer group ${
+                        isProfile
+                          ? "ring-2 ring-[#B31312] ring-offset-1"
+                          : "ring-1 ring-gray-200 hover:ring-2 hover:ring-blue-400"
+                      }`}
+                      onClick={() => !isProfile && handleSetProfilePicture(image)}
+                    >
+                      <img
+                        src={image}
+                        alt="Photo"
+                        className="w-full h-full object-cover"
+                      />
+
+                      {/* Overlay for non-profile photos */}
+                      {!isProfile && (
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <FaCamera className="text-white text-xl drop-shadow-lg" />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Profile indicator */}
+                      {isProfile && (
+                        <div className="absolute top-1 left-1 bg-[#B31312] text-white p-1 rounded-full">
+                          <FaCheck size={10} />
+                        </div>
+                      )}
+
+                      {/* Delete button */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveImage(image);
+                        }}
+                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors opacity-70 hover:opacity-100"
+                        disabled={operation !== null}
+                        title="Delete photo"
+                      >
+                        <FaTimes size={10} />
+                      </button>
+                    </div>
+                  );
+                })}
+
+                {/* Add Photo Button */}
+                <label
+                  className={`relative aspect-[3/4] rounded-lg border-2 border-dashed border-gray-300 hover:border-[#B31312] cursor-pointer flex flex-col items-center justify-center transition-colors ${
+                    operation ? "opacity-50 pointer-events-none" : ""
+                  }`}
+                >
+                  <FaPlus className="text-gray-400 text-xl mb-1" />
+                  <span className="text-xs text-gray-500">Add</span>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileInputChange}
+                    disabled={operation !== null || showCropper}
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <FaCamera className="text-gray-400 text-2xl" />
+            </div>
+            <p className="text-gray-600 mb-4">No photos uploaded yet</p>
+            <label className="cursor-pointer px-4 py-2 bg-[#B31312] hover:bg-[#931110] text-white rounded-lg flex items-center transition-colors">
+              <FaPlus className="mr-2" />
+              Upload Your First Photo
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileInputChange}
+                disabled={operation !== null || showCropper}
+              />
+            </label>
+          </div>
+        )}
+
+        {/* Status indicator */}
+        {operation && (
+          <div className="mt-4 flex items-center justify-center text-sm text-gray-600">
+            <svg
+              className="animate-spin mr-2 h-4 w-4 text-[#B31312]"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            {operation === "uploading" && "Uploading..."}
+            {operation === "deleting" && "Deleting..."}
+            {operation === "setting-profile" && "Setting profile picture..."}
+          </div>
+        )}
       </div>
 
       {/* Image Cropping Modal */}
@@ -543,98 +740,6 @@ const ProfileImageGallery = () => {
               </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Image Gallery */}
-      {images.length > 0 ? (
-        <div className="max-w-4xl mx-auto">
-          <Slider
-            ref={sliderRef}
-            dots={true}
-            infinite={images.length > 1}
-            speed={500}
-            slidesToShow={Math.min(3, Math.max(1, images.length))}
-            slidesToScroll={1}
-            autoplay={true}
-            autoplaySpeed={3000}
-            pauseOnHover={true}
-            responsive={[
-              {
-                breakpoint: 1024,
-                settings: {
-                  slidesToShow: Math.min(2, Math.max(1, images.length)),
-                  centerMode: images.length > 1,
-                  centerPadding: "0px",
-                },
-              },
-              {
-                breakpoint: 640,
-                settings: {
-                  slidesToShow: 1,
-                  centerMode: false,
-                  centerPadding: "0px",
-                },
-              },
-            ]}
-          >
-            {images.map((image, index) => (
-              <div key={index} className="px-2">
-                <div className="relative group h-[280px] mx-auto w-[220px] overflow-hidden rounded-md border border-gray-200">
-                  <img
-                    src={image}
-                    alt={`Profile image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => handleRemoveImage(index)}
-                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
-                        disabled={
-                          operation === "uploading" || operation === "deleting"
-                        }
-                      >
-                        <FaTrash />
-                      </button>
-                    </div>
-                  </div>
-                  {index === 0 && (
-                    <div className="absolute bottom-2 left-2 bg-[#B31312] text-white text-xs px-2 py-1 rounded-full">
-                      Profile Photo
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </Slider>
-
-          {images.length > 1 && (
-            <div className="flex justify-center mt-8 space-x-4">
-              <button
-                onClick={() => sliderRef.current?.slickPrev()}
-                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md text-sm"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => sliderRef.current?.slickNext()}
-                className="px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded-md text-sm"
-              >
-                Next
-              </button>
-            </div>
-          )}
-
-          {images.length > 0 && (
-            <div className="text-center mt-4 text-gray-500 text-sm">
-              {images.length} photos
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8">
-          <p className="text-gray-600 mb-4">No photos uploaded yet</p>
         </div>
       )}
     </div>
