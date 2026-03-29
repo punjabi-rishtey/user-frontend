@@ -26,7 +26,7 @@ const FindPartner = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, user, refreshUser } = useAuth();
+  const { isAuthenticated, user, refreshUser, logout } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
   const [currentUserGender, setCurrentUserGender] = useState(null);
   const [profileComplete, setProfileComplete] = useState(true);
@@ -162,10 +162,18 @@ const FindPartner = () => {
         fetchUsers();
       } catch (err) {
         console.error("Error checking profile completeness:", err);
-        if (err.response && err.response.status === 403) {
+        if (err.response?.status === 401) {
+          alert("Session expired. Please log in again.");
+          logout();
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        if (err.response?.status === 403) {
           setProfileComplete(false);
           setError(
-            "Your profile must be at least 70% complete to access this feature."
+            err.response?.data?.error ||
+              "Your profile must be at least 70% complete to access this feature."
           );
         } else {
           setError(
@@ -179,7 +187,7 @@ const FindPartner = () => {
     if (isAuthenticated && authChecked) {
       checkProfileCompleteness();
     }
-  }, [isAuthenticated, authChecked]);
+  }, [isAuthenticated, authChecked, logout, navigate]);
 
   // Fetch users from API
   const fetchUsers = async () => {
