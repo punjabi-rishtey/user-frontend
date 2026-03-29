@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
 import { apiUrl } from "../../config/constants";
+import { authApi, isSessionExpiryError } from "../../config/authClient";
 
-const EducationSection = ({ user, logout }) => {
+const EducationSection = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [educationData, setEducationData] = useState({
@@ -27,26 +27,19 @@ const EducationSection = ({ user, logout }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/educations/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/educations/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
       setEducationData(response.data);
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status !== 401) {
         console.error("Error fetching education details:", error);
         // alert("Failed to fetch education details.");
       }
@@ -74,11 +67,8 @@ const EducationSection = ({ user, logout }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.put(apiUrl(`/api/educations/${user._id}`), educationData, {
+      await authApi.put(apiUrl(`/api/educations/${user._id}`), educationData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -86,6 +76,10 @@ const EducationSection = ({ user, logout }) => {
       setIsEditing(false);
       alert("Education details updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving education details:", error);
       alert("Failed to update education details. Please try again.");
     }

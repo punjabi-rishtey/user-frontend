@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
 import { apiUrl } from "../../config/constants";
+import { authApi, isSessionExpiryError } from "../../config/authClient";
 
-const FamilyDetailsSection = ({ user, logout }) => {
+const FamilyDetailsSection = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [familyData, setFamilyData] = useState({
@@ -34,26 +34,19 @@ const FamilyDetailsSection = ({ user, logout }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/families/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/families/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
       setFamilyData(response.data);
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status !== 401) {
         console.error("Error fetching family details:", error);
         // alert("Failed to fetch family details.");
       }
@@ -84,16 +77,8 @@ const FamilyDetailsSection = ({ user, logout }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      await axios.put(apiUrl(`/api/families/${user._id}`), familyData, {
+      await authApi.put(apiUrl(`/api/families/${user._id}`), familyData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -101,6 +86,10 @@ const FamilyDetailsSection = ({ user, logout }) => {
       setIsEditing(false);
       alert("Family details updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving family details:", error);
       alert("Failed to update family details. Please try again.");
     }

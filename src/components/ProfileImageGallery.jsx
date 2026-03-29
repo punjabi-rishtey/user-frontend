@@ -4,6 +4,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { FaPlus, FaTrash, FaCheck, FaTimes, FaCamera } from "react-icons/fa";
 import { apiUrl } from "../config/constants";
+import { authFetch, isSessionExpiryError } from "../config/authClient";
 const API_URL = apiUrl("/api/users");
 
 const ProfileImageGallery = () => {
@@ -118,11 +119,11 @@ const ProfileImageGallery = () => {
   const fetchImages = async () => {
     if (!user?._id) return;
     try {
-      const response = await fetch(`${API_URL}/${user._id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await authFetch(`${API_URL}/${user._id}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch profile images");
+      }
+
       const data = await response.json();
       if (data.profile_pictures) {
         setImages(data.profile_pictures);
@@ -132,6 +133,10 @@ const ProfileImageGallery = () => {
         data.profile_picture || data.profile_pictures?.[0] || ""
       );
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error fetching profile images:", error);
     }
   };
@@ -289,13 +294,13 @@ const ProfileImageGallery = () => {
       const formData = new FormData();
       formData.append("profile_pictures", croppedFile);
 
-      const response = await fetch(`${API_URL}/${user._id}/upload`, {
+      const response = await authFetch(`${API_URL}/${user._id}/upload`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
         body: formData,
       });
+      if (!response.ok) {
+        throw new Error("Failed to upload profile image");
+      }
 
       const data = await response.json();
       if (data.profile_pictures) {
@@ -308,6 +313,10 @@ const ProfileImageGallery = () => {
         await refreshUser();
       }
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error uploading cropped image:", error);
     } finally {
       // Clean up
@@ -335,11 +344,10 @@ const ProfileImageGallery = () => {
     setOperation("deleting");
 
     try {
-      const response = await fetch(`${API_URL}/${user._id}/delete-picture`, {
+      const response = await authFetch(`${API_URL}/${user._id}/delete-picture`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({ imagePath: imageUrl }),
       });
@@ -354,6 +362,10 @@ const ProfileImageGallery = () => {
         await refreshUser();
       }
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error deleting image:", error);
     } finally {
       setOperation(null);
@@ -369,13 +381,12 @@ const ProfileImageGallery = () => {
 
     setOperation("setting-profile");
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `${API_URL}/${user._id}/set-profile-picture`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ imageUrl }),
         }
@@ -389,6 +400,10 @@ const ProfileImageGallery = () => {
         alert(data.message || "Failed to set profile picture");
       }
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error setting profile picture:", error);
       alert("Failed to set profile picture");
     } finally {

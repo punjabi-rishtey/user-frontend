@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
 import { apiUrl } from "../../config/constants";
+import { authApi, isSessionExpiryError } from "../../config/authClient";
 
 function ProfileInfoSection({
   user,
-  updateUser,
   setBasicData: setParentBasicData,
   setPersonalData: setParentPersonalData,
   setHobbiesData: setParentHobbiesData,
@@ -100,15 +99,8 @@ function ProfileInfoSection({
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/users/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/users/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -167,6 +159,10 @@ function ProfileInfoSection({
         newHobby: "",
       });
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error fetching user details:", error);
       // alert("Failed to fetch user details.");
     }
@@ -206,7 +202,6 @@ function ProfileInfoSection({
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
       // Build payload and normalize lifestyle.abroad_ready to boolean|null
       const payload = {
         ...basicData,
@@ -221,9 +216,8 @@ function ProfileInfoSection({
         else payload.lifestyle.abroad_ready = null; // for "" or undefined -> null
       }
 
-      await axios.put(apiUrl(`/api/users/${user._id}`), payload, {
+      await authApi.put(apiUrl(`/api/users/${user._id}`), payload, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -231,6 +225,10 @@ function ProfileInfoSection({
       setIsEditing(false);
       alert("Profile updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving profile:", error);
       alert("Failed to update profile.");
     }
