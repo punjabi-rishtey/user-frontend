@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom"; // Added for navigation
-import axios from "axios";
 import { apiUrl } from "../config/constants";
+import { authApi, isSessionExpiryError } from "../config/authClient";
 
 const CurrentMembershipPage = () => {
   const { user } = useAuth();
@@ -11,22 +11,11 @@ const CurrentMembershipPage = () => {
   const navigate = useNavigate(); // Hook for navigation
 
   useEffect(() => {
-    const userId = user.id;
+    const userId = user?.id || user?._id;
     const fetchUserSubscriptionDetails = async (userId) => {
       try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("Authentication token not found");
-        }
-
-        const response = await axios.get(
-          apiUrl(`/api/users/subscription/${userId}`),
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
+        const response = await authApi.get(
+          apiUrl(`/api/users/subscription/${userId}`)
         );
 
         console.log(">fetching user subscription details: ", response.data);
@@ -36,6 +25,10 @@ const CurrentMembershipPage = () => {
           setUserStatusDetails(expiry);
         }
       } catch (err) {
+        if (isSessionExpiryError(err)) {
+          return;
+        }
+
         console.log(err);
       }
     };

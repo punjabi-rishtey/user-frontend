@@ -1,6 +1,12 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { apiUrl } from "../config/constants";
+import {
+  SESSION_EXPIRED_EVENT,
+  authApi,
+  clearStoredSession,
+  isSessionExpiryError,
+} from "../config/authClient";
 
 const AuthContext = createContext();
 
@@ -12,7 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const syncAuthStateFromStorage = () => {
     const token = localStorage.getItem("token");
     if (token) {
       const storedUser = localStorage.getItem("currentUser");
@@ -34,7 +40,22 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setIsAuthenticated(false);
       }
+    } else {
+      setUser(null);
+      setIsAuthenticated(false);
     }
+  };
+
+  useEffect(() => {
+    syncAuthStateFromStorage();
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, syncAuthStateFromStorage);
+    return () => {
+      window.removeEventListener(
+        SESSION_EXPIRED_EVENT,
+        syncAuthStateFromStorage
+      );
+    };
   }, []);
 
   const login = async (credentials) => {
@@ -67,27 +88,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("token");
+    clearStoredSession();
     setUser(null);
     setIsAuthenticated(false);
   };
 
   const updateUser = async (updatedUserData) => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return false;
-      }
-
-      const response = await axios.put(
+      const response = await authApi.put(
         apiUrl(`/api/users/${user._id}`),
         updatedUserData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -102,6 +114,10 @@ export const AuthProvider = ({ children }) => {
         return false;
       }
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return false;
+      }
+
       console.error("Error updating user:", error);
       alert("An error occurred while updating the profile.");
       return false;
@@ -111,18 +127,20 @@ export const AuthProvider = ({ children }) => {
   // We'll rely on refreshUser() after uploading/deleting pictures:
   const refreshUser = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token || !user) return;
+      const userId = user?._id || user?.id;
+      if (!userId) return;
 
-      const response = await axios.get(apiUrl(`/api/users/${user._id}`), {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await authApi.get(apiUrl(`/api/users/${userId}`));
 
       if (response.data) {
         localStorage.setItem("currentUser", JSON.stringify(response.data));
         setUser(response.data);
       }
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error refreshing user data:", error);
     }
   };

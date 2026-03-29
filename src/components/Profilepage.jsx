@@ -11,6 +11,7 @@ import ProfileImageGallery from "./ProfileImageGallery";
 // Removed unused password icons
 import { MdPrivacyTip } from "react-icons/md";
 import { apiUrl } from "../config/constants";
+import { authApi, authFetch, isSessionExpiryError } from "../config/authClient";
 
 // Helper functions moved outside the component for better performance
 const generateFeetOptions = () => {
@@ -584,16 +585,8 @@ export default function ProfileSettings() {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        navigate("/login");
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/users/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/users/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -659,13 +652,14 @@ export default function ProfileSettings() {
         looking_for: userData.looking_for || "",
       });
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error fetching user details:", error);
 
       // Handle authentication errors
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        alert("Session expired. Please log in again.");
-        localStorage.removeItem("token");
-        localStorage.removeItem("currentUser");
+      if (error.response?.status === 403) {
         navigate("/login");
         return;
       }
@@ -683,16 +677,8 @@ export default function ProfileSettings() {
 
     setLoadingAstrology(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/astrologies/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/astrologies/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -700,11 +686,12 @@ export default function ProfileSettings() {
 
       setAstrologyData(response.data);
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error fetching astrology details:", error);
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (error.response?.status !== 401) {
         console.log("Failed to fetch astrology details.");
         // alert("Failed to fetch astrology details.");
       }
@@ -718,26 +705,19 @@ export default function ProfileSettings() {
 
     setLoadingProfession(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/professions/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/professions/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
       setProfessionData(response.data);
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status !== 401) {
         console.error("Error fetching profession details:", error);
         // alert("Failed to fetch profession details.");
       }
@@ -751,26 +731,19 @@ export default function ProfileSettings() {
 
     setLoadingFamily(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/families/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/families/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
       setFamilyData(response.data);
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status !== 401) {
         console.error("Error fetching family details:", error);
         // alert("Failed to fetch family details.");
       }
@@ -784,26 +757,19 @@ export default function ProfileSettings() {
 
     setLoadingEducation(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/educations/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/educations/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
       setEducationData(response.data);
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status !== 401) {
         console.error("Error fetching education details:", error);
         // alert("Failed to fetch education details.");
       }
@@ -1013,8 +979,6 @@ export default function ProfileSettings() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
       // Since we no longer convert "yes"/"no"/"occasionally" to booleans,
       // we keep drink/smoke as strings in personalData.lifestyle
       const fixedLifestyle = { ...personalData.lifestyle };
@@ -1057,9 +1021,8 @@ export default function ProfileSettings() {
       console.log("Saving manglik value:", personalData.manglik);
       console.log("Full request body:", requestBody);
 
-      await axios.put(apiUrl(`/api/users/${user._id}`), requestBody, {
+      await authApi.put(apiUrl(`/api/users/${user._id}`), requestBody, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -1072,6 +1035,10 @@ export default function ProfileSettings() {
 
       alert("Profile updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving profile:", error);
       alert("Failed to update profile.");
     } finally {
@@ -1087,11 +1054,8 @@ export default function ProfileSettings() {
   const handleSaveProfession = async () => {
     setLoadingProfession(true);
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.put(apiUrl(`/api/professions/${user._id}`), professionData, {
+      await authApi.put(apiUrl(`/api/professions/${user._id}`), professionData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -1099,6 +1063,10 @@ export default function ProfileSettings() {
       setIsEditingProfession(false);
       alert("Profession details updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving profession details:", error);
       alert("Failed to update profession details. Please try again.");
     }
@@ -1113,16 +1081,8 @@ export default function ProfileSettings() {
   const handleSaveFamily = async () => {
     setLoadingFamily(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      await axios.put(apiUrl(`/api/families/${user._id}`), familyData, {
+      await authApi.put(apiUrl(`/api/families/${user._id}`), familyData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -1130,6 +1090,10 @@ export default function ProfileSettings() {
       setIsEditingFamily(false);
       alert("Family details updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving family details:", error);
       alert("Failed to update family details. Please try again.");
     }
@@ -1144,11 +1108,8 @@ export default function ProfileSettings() {
   const handleSaveEducation = async () => {
     setLoadingEducation(true);
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.put(apiUrl(`/api/educations/${user._id}`), educationData, {
+      await authApi.put(apiUrl(`/api/educations/${user._id}`), educationData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -1156,6 +1117,10 @@ export default function ProfileSettings() {
       setIsEditingEducation(false);
       alert("Education details updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving education details:", error);
       alert("Failed to update education details. Please try again.");
     }
@@ -1170,20 +1135,11 @@ export default function ProfileSettings() {
   const handleSaveAstrology = async () => {
     setLoadingAstrology(true);
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.put(
+      const response = await authApi.put(
         apiUrl(`/api/astrologies/${user._id}`),
         astrologyData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -1196,10 +1152,11 @@ export default function ProfileSettings() {
         alert("Unexpected response from server. Please try again.");
       }
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else if (error.response?.status === 500) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status === 500) {
         alert("Server error! Please try again later.");
       } else {
         console.error("Error saving astrology details:", error);
@@ -1249,17 +1206,9 @@ export default function ProfileSettings() {
     );
     if (!confirmed) return;
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Session expired. Please log in again.");
-      navigate("/login");
-      return;
-    }
-
     try {
-      const response = await fetch(apiUrl("/api/users/me"), {
+      const response = await authFetch(apiUrl("/api/users/me"), {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) {
         const msg = await response.text();
@@ -1269,6 +1218,10 @@ export default function ProfileSettings() {
       logout();
       navigate("/");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Delete account error:", error);
       alert("Could not delete the account. Please try again.");
     }

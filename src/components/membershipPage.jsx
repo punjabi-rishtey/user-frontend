@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
 import Header from "./Header";
 import Footer from "./Footer";
 import { apiUrl } from "../config/constants";
+import { authApi, isSessionExpiryError } from "../config/authClient";
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
@@ -179,19 +179,12 @@ const MembershipPage = () => {
     }
 
     try {
-      // Verify token presence
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-
       // Call API to validate coupon
-      const response = await axios.post(
+      const response = await authApi.post(
         apiUrl("/api/coupons/validate"),
         { code: formData.couponCode },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -224,6 +217,10 @@ const MembershipPage = () => {
         throw new Error(response.data?.message || "Failed to apply coupon");
       }
     } catch (err) {
+      if (isSessionExpiryError(err)) {
+        return;
+      }
+
       console.error("Coupon application error:", err);
       setError(
         err.response?.data?.message ||
@@ -253,12 +250,6 @@ const MembershipPage = () => {
     }
 
     try {
-      // Verify token presence
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-
       // Create form data for submission with only the required fields
       const formDataToSubmit = new FormData();
       formDataToSubmit.append("fullName", formData.name);
@@ -273,12 +264,11 @@ const MembershipPage = () => {
         // formDataToSubmit.append('finalPrice', finalPrice);
       }
 
-      const response = await axios.post(
+      const response = await authApi.post(
         apiUrl("/api/users/subscribe"),
         formDataToSubmit,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
@@ -296,6 +286,10 @@ const MembershipPage = () => {
         throw new Error(response.data?.message || "Payment submission failed");
       }
     } catch (err) {
+      if (isSessionExpiryError(err)) {
+        return;
+      }
+
       console.error("Payment submission error:", err);
       setError(err.message || "Failed to process payment. Please try again.");
     } finally {

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
 import { apiUrl } from "../../config/constants";
+import { authApi, isSessionExpiryError } from "../../config/authClient";
 
-const AstrologySection = ({ user, logout }) => {
+const AstrologySection = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [astrologyData, setAstrologyData] = useState({
@@ -22,16 +22,8 @@ const AstrologySection = ({ user, logout }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/astrologies/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/astrologies/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
         },
@@ -39,11 +31,12 @@ const AstrologySection = ({ user, logout }) => {
 
       setAstrologyData(response.data);
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error fetching astrology details:", error);
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (error.response?.status !== 401) {
         // alert("Failed to fetch astrology details.");
         console.log("Failed to fetch astrology details.", error);
       }
@@ -62,20 +55,11 @@ const AstrologySection = ({ user, logout }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.put(
+      const response = await authApi.put(
         apiUrl(`/api/astrologies/${user._id}`),
         astrologyData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }
@@ -88,10 +72,11 @@ const AstrologySection = ({ user, logout }) => {
         alert("Unexpected response from server. Please try again.");
       }
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else if (error.response?.status === 500) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status === 500) {
         alert("Server error! Please try again later.");
       } else {
         console.error("Error saving astrology details:", error);

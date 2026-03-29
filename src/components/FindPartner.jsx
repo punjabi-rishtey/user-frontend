@@ -10,6 +10,7 @@ import Header from "./Header";
 import { motion } from "framer-motion";
 import axios from "axios";
 import PropTypes from "prop-types";
+import { authApi, isSessionExpiryError } from "../config/authClient";
 
 const FindPartner = () => {
   const [filters, setFilters] = useState({
@@ -26,7 +27,7 @@ const FindPartner = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, user, refreshUser, logout } = useAuth();
+  const { isAuthenticated, user, refreshUser } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
   const [currentUserGender, setCurrentUserGender] = useState(null);
   const [profileComplete, setProfileComplete] = useState(true);
@@ -153,19 +154,12 @@ const FindPartner = () => {
       if (!isAuthenticated) return;
 
       try {
-        await axios.get(apiUrl("/api/users/find-my-partner"), {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        await authApi.get(apiUrl("/api/users/find-my-partner"));
         setProfileComplete(true);
         fetchUsers();
       } catch (err) {
         console.error("Error checking profile completeness:", err);
-        if (err.response?.status === 401) {
-          alert("Session expired. Please log in again.");
-          logout();
-          navigate("/login", { replace: true });
+        if (isSessionExpiryError(err)) {
           return;
         }
 
@@ -187,7 +181,7 @@ const FindPartner = () => {
     if (isAuthenticated && authChecked) {
       checkProfileCompleteness();
     }
-  }, [isAuthenticated, authChecked, logout, navigate]);
+  }, [isAuthenticated, authChecked]);
 
   // Fetch users from API
   const fetchUsers = async () => {

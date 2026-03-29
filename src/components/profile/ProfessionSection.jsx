@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { InfoRow, SectionContainer, EditButtons } from "./ProfileUtils";
 import { apiUrl } from "../../config/constants";
+import { authApi, isSessionExpiryError } from "../../config/authClient";
 
-const ProfessionSection = ({ user, logout }) => {
+const ProfessionSection = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [professionData, setProfessionData] = useState({
@@ -28,26 +28,19 @@ const ProfessionSection = ({ user, logout }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("Session expired. Please log in again.");
-        logout();
-        return;
-      }
-
-      const response = await axios.get(apiUrl(`/api/professions/${user._id}`), {
+      const response = await authApi.get(apiUrl(`/api/professions/${user._id}`), {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
 
       setProfessionData(response.data);
     } catch (error) {
-      if (error.response?.status === 401) {
-        alert("Session expired. Please log in again.");
-        logout();
-      } else {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
+      if (error.response?.status !== 401) {
         console.error("Error fetching profession details:", error);
         // alert("Failed to fetch profession details.");
       }
@@ -80,11 +73,8 @@ const ProfessionSection = ({ user, logout }) => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-
-      await axios.put(apiUrl(`/api/professions/${user._id}`), professionData, {
+      await authApi.put(apiUrl(`/api/professions/${user._id}`), professionData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
@@ -92,6 +82,10 @@ const ProfessionSection = ({ user, logout }) => {
       setIsEditing(false);
       alert("Profession details updated successfully!");
     } catch (error) {
+      if (isSessionExpiryError(error)) {
+        return;
+      }
+
       console.error("Error saving profession details:", error);
       alert("Failed to update profession details. Please try again.");
     }
