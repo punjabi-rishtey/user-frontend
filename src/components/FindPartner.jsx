@@ -395,7 +395,7 @@ const FindPartner = () => {
   const predefinedOptions = {
     manglik: ["true", "false"],
     nriStatus: ["true", "false"],
-    maritalStatus: ["Never Married", "Divowed", "Widowed", "Separated"],
+    maritalStatus: ["Never Married", "Divorced", "Widowed", "Separated"],
   };
 
   const filterOptions = [
@@ -1017,11 +1017,7 @@ const FindPartner = () => {
                         }}
                       >
                         <strong>Location:</strong>{" "}
-                        {item.nri_status === true ||
-                        item.nri_status === "true" ||
-                        item.nri_status === "yes"
-                          ? "NRI"
-                          : "Indian"}
+                        {item.city?.trim() || "Not Specified"}
                       </p>
                       <p
                         className="text-sm sm:text-base text-[#6B4132] mb-1"

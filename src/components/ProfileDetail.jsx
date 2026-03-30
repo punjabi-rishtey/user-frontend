@@ -142,6 +142,28 @@ const ProfileDetail = () => {
     return value;
   };
 
+  const formatSelectionValue = (value) => {
+    if (value === undefined || value === null || value === "") {
+      return "Not specified";
+    }
+
+    if (typeof value !== "string") {
+      return formatValue(value);
+    }
+
+    const normalizedValue = value.replace(/_/g, " ").trim();
+
+    if (!normalizedValue) {
+      return "Not specified";
+    }
+
+    if (normalizedValue === normalizedValue.toLowerCase()) {
+      return normalizedValue.replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    return normalizedValue;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
@@ -269,10 +291,10 @@ const ProfileDetail = () => {
   const basicDetails = {
     Age: calculateAge(profileData.dob),
     "Date of Birth": formatDate(profileData.dob),
-    Gender: formatValue(profileData.gender),
+    Gender: formatSelectionValue(profileData.gender),
     Height: formatValue(profileData.height),
-    Religion: formatValue(profileData.religion),
-    Caste: formatValue(profileData.caste),
+    Religion: formatSelectionValue(profileData.religion),
+    Caste: formatSelectionValue(profileData.caste),
     Language: formatValue(profileData.language),
     "Marital Status": formatValue(profileData.marital_status),
     "Birth Time": formatValue(profileData.birth_details?.birth_time),
@@ -372,11 +394,11 @@ const ProfileDetail = () => {
   if (profileData.education_details) {
     if (profileData.education_details.education_level) {
       educationDetails["Education Level"] =
-        profileData.education_details.education_level;
+        formatValue(profileData.education_details.education_level);
     }
     if (profileData.education_details.education_field) {
       educationDetails["Field of Study"] =
-        profileData.education_details.education_field;
+        formatValue(profileData.education_details.education_field);
     }
     if (profileData.education_details.college_details?.name) {
       educationDetails["College"] =
