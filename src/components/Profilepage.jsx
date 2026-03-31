@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import axios from "axios";
 import { FaCog, FaSignOutAlt, FaUserTimes } from "react-icons/fa";
 import { Menu, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -402,7 +401,14 @@ export default function ProfileSettings() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
-  const [loadingPassword, setLoadingPassword] = useState(false); // Added loading state for password reset
+  const [loadingPassword, setLoadingPassword] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   // States for different sections
   const [userImages, setUserImages] = useState([]);
@@ -1173,21 +1179,80 @@ export default function ProfileSettings() {
 
   // Removed unused hobbies save/cancel handlers; hobbies are saved with main Save
 
+  const openPasswordModal = () => {
+    setPasswordError("");
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setShowPasswordModal(true);
+  };
+
+  const closePasswordModal = () => {
+    if (loadingPassword) return;
+    setShowPasswordModal(false);
+    setPasswordError("");
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
+
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
   const handleResetPassword = async () => {
+    const { currentPassword, newPassword, confirmPassword } = passwordForm;
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setPasswordError("Please fill in all password fields.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("New password must be at least 6 characters long.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New password and confirm password must match.");
+      return;
+    }
+
     setLoadingPassword(true);
+    setPasswordError("");
     try {
-      const email = user?.email;
-      await axios.post(apiUrl(`/api/users/forgot-password/`), {
-        email,
+      const response = await authApi.put(apiUrl("/api/users/change-password"), {
+        currentPassword,
+        newPassword,
       });
 
-      alert("Password reset link sent successfully");
+      setShowPasswordModal(false);
+      setPasswordError("");
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      alert(response.data?.message || "Password changed successfully.");
+      logout();
+      navigate("/login", { replace: true });
     } catch (error) {
       console.error(
-        "Error resetting password:",
+        "Error changing password:",
         error.response?.data || error.message
       );
-      alert("Failed to send password reset link. Please try again.");
+      setPasswordError(
+        error.response?.data?.message ||
+          "Failed to change password. Please try again."
+      );
     } finally {
       setLoadingPassword(false);
     }
@@ -2012,14 +2077,11 @@ export default function ProfileSettings() {
                 </button>
               ))}
               <button
-                onClick={handleResetPassword}
-                disabled={loadingPassword}
+                onClick={openPasswordModal}
                 className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300 disabled:bg-gray-400 disabled:text-white"
               >
                 <MdPrivacyTip />
-                <span>
-                  {loadingPassword ? "Sending link..." : "Change Password"}
-                </span>
+                <span>Change Password</span>
               </button>
               <button
                 onClick={handleDeleteAccount}
@@ -2077,14 +2139,11 @@ export default function ProfileSettings() {
                     </button>
                   ))}
                   <button
-                    onClick={handleResetPassword}
-                    disabled={loadingPassword}
+                    onClick={openPasswordModal}
                     className="w-full flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-gray-100 text-[#B31312] transition duration-300 disabled:bg-gray-400 disabled:text-white"
                   >
                     <MdPrivacyTip />
-                    <span>
-                      {loadingPassword ? "Sending link..." : "Change Password"}
-                    </span>
+                    <span>Change Password</span>
                   </button>
                   <button
                     onClick={handleDeleteAccount}
@@ -2244,6 +2303,115 @@ export default function ProfileSettings() {
           {renderTabContent()}
         </main>
       </div>
+
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-semibold text-[#4F2F1D]">
+                  Change Password
+                </h3>
+                <p className="mt-1 text-sm text-[#6B4132]">
+                  Update your password here. If you do not remember your
+                  current password, please contact support for help.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closePasswordModal}
+                disabled={loadingPassword}
+                className="rounded-full p-2 text-[#6B4132] hover:bg-[#F5EDE7] disabled:cursor-not-allowed"
+                aria-label="Close password dialog"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-6 space-y-4">
+              <div>
+                <label
+                  htmlFor="currentPassword"
+                  className="mb-2 block text-sm font-medium text-[#4F2F1D]"
+                >
+                  Current Password
+                </label>
+                <input
+                  id="currentPassword"
+                  name="currentPassword"
+                  type="password"
+                  value={passwordForm.currentPassword}
+                  onChange={handlePasswordInputChange}
+                  className="w-full rounded-lg border border-[#D8C7BC] px-4 py-3 text-[#4F2F1D] focus:border-[#B31312] focus:outline-none"
+                  placeholder="Enter current password"
+                  autoComplete="current-password"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="newPassword"
+                  className="mb-2 block text-sm font-medium text-[#4F2F1D]"
+                >
+                  New Password
+                </label>
+                <input
+                  id="newPassword"
+                  name="newPassword"
+                  type="password"
+                  value={passwordForm.newPassword}
+                  onChange={handlePasswordInputChange}
+                  className="w-full rounded-lg border border-[#D8C7BC] px-4 py-3 text-[#4F2F1D] focus:border-[#B31312] focus:outline-none"
+                  placeholder="Enter new password"
+                  autoComplete="new-password"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="mb-2 block text-sm font-medium text-[#4F2F1D]"
+                >
+                  Confirm New Password
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={passwordForm.confirmPassword}
+                  onChange={handlePasswordInputChange}
+                  className="w-full rounded-lg border border-[#D8C7BC] px-4 py-3 text-[#4F2F1D] focus:border-[#B31312] focus:outline-none"
+                  placeholder="Re-enter new password"
+                  autoComplete="new-password"
+                />
+              </div>
+
+              {passwordError && (
+                <p className="text-sm text-[#B31312]">{passwordError}</p>
+              )}
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={closePasswordModal}
+                disabled={loadingPassword}
+                className="rounded-lg border border-[#D8C7BC] px-4 py-3 text-[#6B4132] transition hover:bg-[#F9F3EE] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleResetPassword}
+                disabled={loadingPassword}
+                className="rounded-lg bg-[#B31312] px-4 py-3 font-medium text-white transition hover:bg-[#931110] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {loadingPassword ? "Updating..." : "Save Password"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
