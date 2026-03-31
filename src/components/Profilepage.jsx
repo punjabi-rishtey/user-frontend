@@ -9,7 +9,12 @@ import { useNavigate } from "react-router-dom";
 import ProfileImageGallery from "./ProfileImageGallery";
 // Removed unused password icons
 import { MdPrivacyTip } from "react-icons/md";
-import { apiUrl } from "../config/constants";
+import {
+  apiUrl,
+  SUPPORT_PHONE_LINK,
+  SUPPORT_PHONE_NUMBER,
+  SUPPORT_WHATSAPP_LINK,
+} from "../config/constants";
 import { authApi, authFetch, isSessionExpiryError } from "../config/authClient";
 
 // Helper functions moved outside the component for better performance
@@ -2315,6 +2320,25 @@ export default function ProfileSettings() {
                 <p className="mt-1 text-sm text-[#6B4132]">
                   Update your password here. If you do not remember your
                   current password, please contact support for help.
+                </p>
+                <p className="mt-2 text-sm text-[#6B4132]">
+                  Call{" "}
+                  <a
+                    href={SUPPORT_PHONE_LINK}
+                    className="font-medium text-[#B31312] underline"
+                  >
+                    {SUPPORT_PHONE_NUMBER}
+                  </a>{" "}
+                  or{" "}
+                  <a
+                    href={SUPPORT_WHATSAPP_LINK}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-medium text-[#B31312] underline"
+                  >
+                    contact us on WhatsApp
+                  </a>
+                  .
                 </p>
               </div>
               <button

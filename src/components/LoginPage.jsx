@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import logoSrc from "../assets/logo.png";
 import Footer from "./Footer";
 import Header from "./Header";
 import ForgotPasswordPopup from "./ForgotPasswordPopup";
+import {
+  SUPPORT_PHONE_LINK,
+  SUPPORT_PHONE_NUMBER,
+  SUPPORT_WHATSAPP_LINK,
+} from "../config/constants";
 // Import eye icons for password visibility toggle
 import { Eye, EyeOff } from "lucide-react";
 
@@ -140,7 +144,7 @@ const LoginPage = () => {
                 fontWeight: 400,
               }}
             >
-              Don't have an account? Sign Up
+              Don&apos;t have an account? Sign Up
             </button>
             <br />
             <button
@@ -153,6 +157,31 @@ const LoginPage = () => {
             >
               Forgot Password?
             </button>
+            <p
+              className="mx-auto max-w-sm text-sm text-[#6B4132]"
+              style={{
+                fontFamily: "'Modern Era', sans-serif",
+                fontWeight: 400,
+              }}
+            >
+              Need help signing in? Call{" "}
+              <a
+                href={SUPPORT_PHONE_LINK}
+                className="font-medium text-[#990000] underline"
+              >
+                {SUPPORT_PHONE_NUMBER}
+              </a>{" "}
+              or{" "}
+              <a
+                href={SUPPORT_WHATSAPP_LINK}
+                target="_blank"
+                rel="noreferrer"
+                className="font-medium text-[#990000] underline"
+              >
+                message us on WhatsApp
+              </a>
+              .
+            </p>
           </div>
         </div>
       </div>

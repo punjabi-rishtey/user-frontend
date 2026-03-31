@@ -1,5 +1,11 @@
+import PropTypes from "prop-types";
 import { useState } from "react";
-import { apiUrl } from "../config/constants";
+import {
+  apiUrl,
+  SUPPORT_PHONE_LINK,
+  SUPPORT_PHONE_NUMBER,
+  SUPPORT_WHATSAPP_LINK,
+} from "../config/constants";
 
 const ForgotPasswordPopup = ({ onClose }) => {
   const [email, setEmail] = useState("");
@@ -67,6 +73,23 @@ const ForgotPasswordPopup = ({ onClose }) => {
           {loading ? "Sending..." : "Send Reset Link"}
         </button>
 
+        <p className="mt-4 text-sm text-[#6B4132]">
+          If you do not have access to this email, call{" "}
+          <a href={SUPPORT_PHONE_LINK} className="font-medium text-[#990000] underline">
+            {SUPPORT_PHONE_NUMBER}
+          </a>{" "}
+          or{" "}
+          <a
+            href={SUPPORT_WHATSAPP_LINK}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-[#990000] underline"
+          >
+            message us on WhatsApp
+          </a>
+          .
+        </p>
+
         <button
           onClick={onClose}
           className="mt-4 text-[#4A4A4A] hover:text-[#2D2D2D] hover:underline"
@@ -76,6 +99,10 @@ const ForgotPasswordPopup = ({ onClose }) => {
       </div>
     </>
   );
+};
+
+ForgotPasswordPopup.propTypes = {
+  onClose: PropTypes.func.isRequired,
 };
 
 export default ForgotPasswordPopup;
