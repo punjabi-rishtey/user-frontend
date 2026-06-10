@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -19,9 +19,11 @@ const MembershipPage = () => {
     screenshot: null,
     couponCode: "",
     membershipId: "",
+    transactionId: "",
   });
   const [couponApplied, setCouponApplied] = useState(false);
-  const [discountPercentage, setDiscountPercentage] = useState(0);
+  const [couponSavings, setCouponSavings] = useState(0);
+  const [couponMessage, setCouponMessage] = useState("");
   const [finalPrice, setFinalPrice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -29,7 +31,10 @@ const MembershipPage = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  const { isAuthenticated, user, refreshUser } = useAuth();
+  const { isAuthenticated, refreshUser } = useAuth();
+
+  const formatDuration = (duration) =>
+    `${duration} month${Number(duration) === 1 ? "" : "s"}`;
 
   // Refresh user data when component mounts
   useEffect(() => {
@@ -126,11 +131,14 @@ const MembershipPage = () => {
       screenshot: null,
       couponCode: "",
       membershipId: plan._id,
+      transactionId: "",
     });
     setPreviewUrl(null);
     setCouponApplied(false);
-    setDiscountPercentage(0);
+    setCouponSavings(0);
+    setCouponMessage("");
     setFinalPrice(plan.price);
+    setError(null);
   };
 
   const handleInputChange = (e) => {
@@ -160,25 +168,40 @@ const MembershipPage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (!file.type.startsWith("image/")) {
+        setError("Please upload an image of your payment screenshot.");
+        return;
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        setError("Payment screenshot must be smaller than 5MB.");
+        return;
+      }
+
       setFormData((prev) => ({
         ...prev,
         screenshot: file,
       }));
 
       // Create preview URL for the image
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
+      setError(null);
     }
   };
 
   // Handle coupon code application
   const handleApplyCoupon = async () => {
     if (!formData.couponCode.trim()) {
-      setError("Please enter a coupon code");
+      setCouponMessage("");
+      setError("Please enter a coupon code.");
       return;
     }
 
     try {
+      setError(null);
+      setCouponMessage("");
       // Call API to validate coupon
       const response = await authApi.post(
         apiUrl("/api/coupons/validate"),
@@ -198,23 +221,27 @@ const MembershipPage = () => {
 
         // Calculate new price based on discount type
         let newPrice = selectedPlan.price;
+        let savings = 0;
         if (discountType === "percentage") {
-          const discountAmount = (selectedPlan.price * discount) / 100;
-          newPrice = selectedPlan.price - discountAmount;
-        } else if (discountType === "fixed") {
-          newPrice = selectedPlan.price - discount;
+          savings = (selectedPlan.price * discount) / 100;
+          newPrice = selectedPlan.price - savings;
+        } else if (discountType === "flat") {
+          savings = discount;
+          newPrice = selectedPlan.price - savings;
         }
 
         // Make sure price doesn't go below zero
         newPrice = Math.max(0, newPrice);
+        savings = Math.min(selectedPlan.price, Math.max(0, savings));
 
         // Update state
         setCouponApplied(true);
-        setDiscountPercentage(discount);
-        setFinalPrice(newPrice);
+        setCouponSavings(savings);
+        setFinalPrice(Math.round(newPrice));
+        setCouponMessage("Coupon applied.");
         setError(null);
       } else {
-        throw new Error(response.data?.message || "Failed to apply coupon");
+        throw new Error(response.data?.message || "Coupon not valid.");
       }
     } catch (err) {
       if (isSessionExpiryError(err)) {
@@ -222,46 +249,63 @@ const MembershipPage = () => {
       }
 
       console.error("Coupon application error:", err);
+      setCouponMessage("");
       setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to apply coupon code"
+        err.response?.data?.message || err.message || "Coupon not valid."
       );
       setCouponApplied(false);
-      setDiscountPercentage(0);
+      setCouponSavings(0);
       setFinalPrice(selectedPlan.price);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setError(null);
-
-    // Debug authentication state
-    console.log("Submit auth state:", { isAuthenticated, user });
-    console.log("Token exists:", !!localStorage.getItem("token"));
 
     // First check if user is authenticated
     if (!isAuthenticated) {
       setError("You must be logged in to subscribe to a plan");
-      setIsSubmitting(false);
       return;
     }
+
+    if (!formData.membershipId || !selectedPlan) {
+      setError("Please select a membership plan.");
+      return;
+    }
+
+    if (!formData.name.trim()) {
+      setError("Please enter your full name.");
+      return;
+    }
+
+    const phone = formData.phone.trim();
+    if (!/^\d{10}$/.test(phone)) {
+      setError("Please enter a valid 10-digit phone number.");
+      return;
+    }
+
+    if (!formData.screenshot) {
+      setError("Please upload your payment screenshot.");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       // Create form data for submission with only the required fields
       const formDataToSubmit = new FormData();
-      formDataToSubmit.append("fullName", formData.name);
-      formDataToSubmit.append("phoneNumber", formData.phone);
+      formDataToSubmit.append("fullName", formData.name.trim());
+      formDataToSubmit.append("phoneNumber", phone);
       formDataToSubmit.append("image", formData.screenshot);
       formDataToSubmit.append("membershipId", formData.membershipId);
 
       // Include coupon code and discount information if applied
       if (couponApplied && formData.couponCode) {
-        formDataToSubmit.append("couponCode", formData.couponCode);
-        // formDataToSubmit.append('discountPercentage', discountPercentage);
-        // formDataToSubmit.append('finalPrice', finalPrice);
+        formDataToSubmit.append(
+          "couponCode",
+          formData.couponCode.trim().toUpperCase()
+        );
       }
 
       const response = await authApi.post(
@@ -291,7 +335,12 @@ const MembershipPage = () => {
       }
 
       console.error("Payment submission error:", err);
-      setError(err.message || "Failed to process payment. Please try again.");
+      setError(
+        err.response?.data?.error ||
+          err.response?.data?.message ||
+          err.message ||
+          "Failed to submit payment request. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -394,7 +443,7 @@ const MembershipPage = () => {
                 fontWeight: 400,
               }}
             >
-              Payment Successful!
+              Payment Request Submitted
             </h2>
             <p
               className="text-[#6B4132] mb-6 text-center"
@@ -403,8 +452,8 @@ const MembershipPage = () => {
                 fontWeight: 400,
               }}
             >
-              Thank you for your subscription. Our team will verify your payment
-              and upgrade your account shortly.
+              Your payment request has been submitted. Our team will verify the
+              screenshot and activate your membership shortly.
             </p>
             <div className="flex justify-center">
               <button
@@ -499,7 +548,7 @@ const MembershipPage = () => {
                       fontWeight: 400,
                     }}
                   >
-                    for {plan.duration} month
+                    for {formatDuration(plan.duration)}
                   </span>
                 </p>
 
@@ -596,7 +645,7 @@ const MembershipPage = () => {
                       {couponApplied ? finalPrice : selectedPlan.price}
                       {couponApplied && (
                         <span className="block mt-1 text-sm text-green-600">
-                          {discountPercentage}% discount applied
+                          Coupon applied. You save ₹{couponSavings.toFixed(2)}
                         </span>
                       )}
                     </h4>
@@ -632,7 +681,8 @@ const MembershipPage = () => {
                         UPI ID: {qr?.name || "yourcompany@upi"}
                       </p>
                       <p className="text-sm">
-                        After payment, please fill the form →
+                        Pay the exact amount shown above, then upload the
+                        payment screenshot.
                       </p>
                     </div>
                   </div>
@@ -685,6 +735,7 @@ const MembershipPage = () => {
                           className="w-full p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D]"
                           style={{ fontFamily: "'Modern Era', sans-serif" }}
                           placeholder="Enter your phone number"
+                          maxLength={10}
                         />
                       </div>
 
@@ -716,11 +767,12 @@ const MembershipPage = () => {
                           <button
                             type="button"
                             onClick={
-                              couponApplied
+                                  couponApplied
                                 ? () => {
                                     setCouponApplied(false);
-                                    setDiscountPercentage(0);
+                                    setCouponSavings(0);
                                     setFinalPrice(selectedPlan.price);
+                                    setCouponMessage("");
                                     setFormData((prev) => ({
                                       ...prev,
                                       couponCode: "",
@@ -743,11 +795,8 @@ const MembershipPage = () => {
                         </div>
                         {couponApplied && (
                           <p className="mt-2 text-sm text-green-600">
-                            Coupon applied! You save ₹
-                            {(
-                              (selectedPlan.price * discountPercentage) /
-                              100
-                            ).toFixed(2)}
+                            {couponMessage} You save ₹
+                            {couponSavings.toFixed(2)}.
                           </p>
                         )}
                       </div>
@@ -763,6 +812,10 @@ const MembershipPage = () => {
                         >
                           Payment Screenshot *
                         </label>
+                        <p className="mb-2 text-sm text-[#6B4132]">
+                          Upload a clear screenshot that shows the paid amount,
+                          date, and UPI transaction details.
+                        </p>
 
                         <div
                           onClick={() => fileInputRef.current.click()}
@@ -823,14 +876,14 @@ const MembershipPage = () => {
                           UPI Transaction ID
                         </label>
                         <input
-                          type="tel"
+                          type="text"
                           id="transactionId"
-                          name="transaction ID"
+                          name="transactionId"
                           value={formData.transactionId}
                           onChange={handleInputChange}
                           className="w-full p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D]"
                           style={{ fontFamily: "'Modern Era', sans-serif" }}
-                          placeholder="Enter your phone number"
+                          placeholder="Optional"
                         />
                       </div>
 

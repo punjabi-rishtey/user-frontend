@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
@@ -24,14 +24,20 @@ const Header = () => {
   };
 
   const handleMembershipPlanClick = () => {
+    const expiryDate = user?.metadata?.exp_date
+      ? new Date(user.metadata.exp_date)
+      : null;
+    const hasActiveMembership =
+      user?.status === "Approved" &&
+      (!expiryDate || expiryDate >= new Date());
+
     if (!isAuthenticated) {
       navigate("/membership");
       return;
     }
 
-    if (user.status == "Approved") {
+    if (hasActiveMembership) {
       navigate("/current-plan");
-      console.log("> isAuthenticated && getMembershipStatus(): ", user.status);
     } else {
       navigate("/membership");
     }

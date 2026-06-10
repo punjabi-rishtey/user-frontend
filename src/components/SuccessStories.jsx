@@ -1,43 +1,14 @@
-import React, { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useTransform, useScroll } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { apiUrl, BACKEND_BASE_URL } from "../config/constants";
+import { mapTestimonialsFromApi } from "../utils/testimonials";
 
 const SuccessStories = () => {
   const navigate = useNavigate();
-  const stories = [
-    {
-      name: "Sakshi and Vivek",
-      quote:
-        "The perfect match! This platform made it so easy to find someone who truly understands me.",
-      image:
-        // "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600876/1_aqbrsk.jpg",
-        "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600875/3_q3fi9z.jpg",
-
-    },
-    {
-      name: "Shalini and Vicky",
-      quote:
-        "We found love and companionship on this amazing platform. It was everything we dreamed of and more!",
-      image:
-        // "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600875/2_mo4kor.jpg",
-        "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600876/1_aqbrsk.jpg",
-    },
-    {
-      name: "Simran and Taranjeet",
-      quote:
-        "Thank you for helping us find each other! We are now happily married and couldn't be more grateful.",
-      image:
-        // "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600875/3_q3fi9z.jpg",
-        "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600875/2_mo4kor.jpg",
-    },
-    {
-      name: "Lakshita and Rachit",
-      quote:
-        "We never imagined finding someone so perfect for us. Thank you for bringing us together!",
-      image:
-        "https://res.cloudinary.com/dkbzoosmm/image/upload/v1743600876/4_u04hde.jpg",
-    },
-  ];
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -47,6 +18,33 @@ const SuccessStories = () => {
 
   // Animate the red line from 0% to 90% height as you scroll
   const lineHeight = useTransform(scrollYProgress, [0, 0.9], ["5%", "90%"]);
+
+  useEffect(() => {
+    setLoading(true);
+    fetch(apiUrl("/api/testimonials/all"))
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load testimonials");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const latestStories = mapTestimonialsFromApi(data, BACKEND_BASE_URL).slice(
+          0,
+          4
+        );
+        setStories(latestStories);
+        setError(null);
+      })
+      .catch((fetchError) => {
+        console.error("Failed to fetch success stories:", fetchError);
+        setStories([]);
+        setError("Failed to load success stories right now.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <div className="bg-[#FCF9F2] py-8 sm:py-16 md:py-24 relative overflow-hidden">
@@ -93,20 +91,32 @@ const SuccessStories = () => {
           className="hidden sm:block absolute w-1 md:w-[3px] bg-gradient-to-b from-[#FF3D57] via-[#FF5A71] to-[#FF8A9A] left-1/2 -translate-x-1/2 top-32 md:top-40 rounded-full"
         />
 
-        {/* Stories display */}
-        <div className="relative space-y-16 sm:space-y-24 md:space-y-32 mt-12 sm:mt-16 md:mt-24">
-          {stories.map((story, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              viewport={{ once: true, amount: 0.3 }}
-              className="relative flex flex-col sm:flex-row items-center justify-center sm:gap-8 md:gap-16"
-            >
-              {/* Horizontal connector line (hidden on small screens) */}
-              <div
-                className={`
+        {loading ? (
+          <div className="mt-12 sm:mt-16 md:mt-24 flex justify-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-[#FF3D57]" />
+          </div>
+        ) : error ? (
+          <div className="mt-12 sm:mt-16 md:mt-24 mx-auto max-w-xl rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </div>
+        ) : stories.length === 0 ? (
+          <div className="mt-12 sm:mt-16 md:mt-24 mx-auto max-w-xl rounded-lg bg-white px-4 py-6 text-center text-[#555555] shadow-sm">
+            No success stories are available right now.
+          </div>
+        ) : (
+          <div className="relative space-y-16 sm:space-y-24 md:space-y-32 mt-12 sm:mt-16 md:mt-24">
+            {stories.map((story, index) => (
+              <motion.div
+                key={story.id}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
+                viewport={{ once: true, amount: 0.3 }}
+                className="relative flex flex-col sm:flex-row items-center justify-center sm:gap-8 md:gap-16"
+              >
+                {/* Horizontal connector line (hidden on small screens) */}
+                <div
+                  className={`
                   hidden sm:block absolute h-[2px] top-1/2
                   ${
                     index % 2 === 0
@@ -114,109 +124,115 @@ const SuccessStories = () => {
                       : "left-1/2 bg-gradient-to-l"
                   }
                   from-transparent to-[#FF3D57] w-8 sm:w-12 md:w-16
-                `}
-              />
+                  `}
+                />
 
-              {/* Diamond marker (hidden on small screens) */}
-              <motion.div
-                whileInView={{
-                  boxShadow: [
-                    "0 0 0 0 rgba(255, 61, 87, 0.8)",
-                    "0 0 0 8px rgba(255, 61, 87, 0)",
-                  ],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  repeatType: "loop",
-                }}
-                viewport={{ once: false }}
-                className="hidden sm:block absolute w-5 h-5 bg-[#FF3D57] rotate-45 z-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
-              />
+                {/* Diamond marker (hidden on small screens) */}
+                <motion.div
+                  whileInView={{
+                    boxShadow: [
+                      "0 0 0 0 rgba(255, 61, 87, 0.8)",
+                      "0 0 0 8px rgba(255, 61, 87, 0)",
+                    ],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                  }}
+                  viewport={{ once: false }}
+                  className="hidden sm:block absolute w-5 h-5 bg-[#FF3D57] rotate-45 z-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
+                />
 
-              {/* Image with polaroid frame effect */}
-              <motion.div
-                whileHover={{ scale: 1.05, rotate: index % 2 === 0 ? -2 : 2 }}
-                transition={{ duration: 0.3 }}
-                className="w-full sm:w-1/2 max-w-xs sm:max-w-sm flex justify-center sm:justify-end sm:pr-4 md:pr-8"
-              >
-                <div className="relative w-48 sm:w-56 md:w-64">
-                  {/* Polaroid frame */}
-                  <div className="bg-white p-2 sm:p-3 pt-3 pb-6 sm:pb-8 rounded-md shadow-[0_8px_16px_rgba(0,0,0,0.08)] transform transition-all duration-300">
-                    {/* Image */}
-                    <div className="overflow-hidden rounded-sm">
-                      <img
-                        src={story.image}
-                        alt={story.name}
-                        className="w-full h-40 sm:h-48 md:h-56 object-cover transition-transform duration-500 hover:scale-110"
-                        onError={(e) => {
-                          e.target.src = "https://via.placeholder.com/150";
-                        }}
-                      />
+                {/* Image with polaroid frame effect */}
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: index % 2 === 0 ? -2 : 2 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full sm:w-1/2 max-w-xs sm:max-w-sm flex justify-center sm:justify-end sm:pr-4 md:pr-8"
+                >
+                  <div className="relative w-48 sm:w-56 md:w-64">
+                    {/* Polaroid frame */}
+                    <div className="bg-white p-2 sm:p-3 pt-3 pb-6 sm:pb-8 rounded-md shadow-[0_8px_16px_rgba(0,0,0,0.08)] transform transition-all duration-300">
+                      {/* Image */}
+                      <div className="overflow-hidden rounded-sm">
+                        <img
+                          src={story.photo}
+                          alt={story.name}
+                          className="w-full h-40 sm:h-48 md:h-56 object-cover transition-transform duration-500 hover:scale-110"
+                          onError={(e) => {
+                            e.target.src = "https://via.placeholder.com/150";
+                          }}
+                        />
+                      </div>
+                      {/* Name on the polaroid */}
+                      <div className="mt-2 text-center py-1 font-medium text-[#333333] text-sm sm:text-base">
+                        {story.name}
+                      </div>
+                      {/* Heart icon */}
+                      <div className="absolute -bottom-2 sm:-bottom-3 -right-2 sm:-right-3 bg-white rounded-full p-1 shadow-md">
+                        <svg
+                          className="w-4 sm:w-5 h-4 sm:h-5 text-[#FF3D57]"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                        >
+                          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                        </svg>
+                      </div>
                     </div>
-                    {/* Name on the polaroid */}
-                    <div className="mt-2 text-center py-1 font-medium text-[#333333] text-sm sm:text-base">
+                    {/* Subtle polaroid tilt */}
+                    <div
+                      className={`absolute inset-0 border-2 border-white bg-transparent rounded-md -z-10 ${
+                        index % 2 === 0 ? "-rotate-2" : "rotate-2"
+                      }`}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* Content Card */}
+                <motion.div
+                  whileHover={{ y: -5, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
+                  className="w-full sm:w-1/2 max-w-xs sm:max-w-sm mt-6 sm:mt-0 flex justify-center sm:justify-start sm:pl-4 md:pl-8"
+                >
+                  <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg max-w-full text-left border-t-4 border-[#FF3D57] relative">
+                    {/* Large quote mark */}
+                    <div className="absolute -top-4 sm:-top-5 -left-2 text-6xl sm:text-7xl text-[#FF3D57] opacity-10 leading-none font-serif">
+                      &ldquo;
+                    </div>
+                    <h3
+                      className="text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-[#111111]"
+                      style={{
+                        fontFamily: "'Tiempos Headline', serif",
+                        fontWeight: 400,
+                      }}
+                    >
                       {story.name}
+                    </h3>
+                    {story.metaValue && (
+                      <p className="mb-3 text-xs font-medium uppercase tracking-wide text-[#B85A69] sm:text-sm">
+                        {story.metaLabel}: {story.metaValue}
+                      </p>
+                    )}
+                    <p
+                      className="text-[#555555] text-sm sm:text-base md:text-lg relative"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      &ldquo;{story.quote}&rdquo;
+                    </p>
+                    {/* End quote mark */}
+                    <div className="absolute bottom-1 sm:bottom-2 right-2 sm:right-3 text-4xl sm:text-5xl text-[#FF3D57] opacity-10 leading-none font-serif">
+                      &rdquo;
                     </div>
-                    {/* Heart icon */}
-                    <div className="absolute -bottom-2 sm:-bottom-3 -right-2 sm:-right-3 bg-white rounded-full p-1 shadow-md">
-                      <svg
-                        className="w-4 sm:w-5 h-4 sm:h-5 text-[#FF3D57]"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                      >
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                      </svg>
-                    </div>
+                    {/* Decorative accent */}
+                    <div className="absolute -bottom-2 -right-2 w-12 sm:w-16 h-12 sm:h-16 bg-[#FFE8EB] rounded-full -z-10" />
                   </div>
-                  {/* Subtle polaroid tilt */}
-                  <div
-                    className={`absolute inset-0 border-2 border-white bg-transparent rounded-md -z-10 ${
-                      index % 2 === 0 ? "-rotate-2" : "rotate-2"
-                    }`}
-                  />
-                </div>
+                </motion.div>
               </motion.div>
-
-              {/* Content Card */}
-              <motion.div
-                whileHover={{ y: -5, boxShadow: "0 10px 20px rgba(0,0,0,0.1)" }}
-                className="w-full sm:w-1/2 max-w-xs sm:max-w-sm mt-6 sm:mt-0 flex justify-center sm:justify-start sm:pl-4 md:pl-8"
-              >
-                <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-lg max-w-full text-left border-t-4 border-[#FF3D57] relative">
-                  {/* Large quote mark */}
-                  <div className="absolute -top-4 sm:-top-5 -left-2 text-6xl sm:text-7xl text-[#FF3D57] opacity-10 leading-none font-serif">
-                    "
-                  </div>
-                  <h3
-                    className="text-xl sm:text-2xl md:text-3xl mb-3 sm:mb-4 text-[#111111]"
-                    style={{
-                      fontFamily: "'Tiempos Headline', serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    {story.name}
-                  </h3>
-                  <p
-                    className="text-[#555555] text-sm sm:text-base md:text-lg relative"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      lineHeight: 1.6,
-                    }}
-                  >
-                    "{story.quote}"
-                  </p>
-                  {/* End quote mark */}
-                  <div className="absolute bottom-1 sm:bottom-2 right-2 sm:right-3 text-4xl sm:text-5xl text-[#FF3D57] opacity-10 leading-none font-serif">
-                    "
-                  </div>
-                  {/* Decorative accent */}
-                  <div className="absolute -bottom-2 -right-2 w-12 sm:w-16 h-12 sm:h-16 bg-[#FFE8EB] rounded-full -z-10" />
-                </div>
-              </motion.div>
-            </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* CTA button */}
         <motion.div
@@ -227,7 +243,7 @@ const SuccessStories = () => {
           className="mt-12 sm:mt-16 md:mt-24"
         >
           <button
-            onClick={() => navigate("/login")}
+            onClick={() => navigate("/testimonials")}
             className="
               bg-[#FF3D57] hover:bg-[#FF5A71]
               text-white text-base sm:text-lg font-medium
@@ -239,7 +255,7 @@ const SuccessStories = () => {
               duration-300
             "
           >
-            Start Your Success Story
+            View All Success Stories
           </button>
         </motion.div>
       </div>
