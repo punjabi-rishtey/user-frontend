@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { apiUrl, BACKEND_BASE_URL } from "../config/constants";
+import { mapTestimonialsFromApi } from "../utils/testimonials";
 
 const Testimonials = () => {
   const [selectedClient, setSelectedClient] = useState(0);
@@ -21,11 +22,10 @@ const Testimonials = () => {
         return response.json();
       })
       .then((data) => {
-        const formattedClients = data.map((client) => ({
-          name: client.user_name,
-          photo: client.image_url || `${BACKEND_BASE_URL}${client.image}`,
-          quote: client.message,
-        }));
+        const formattedClients = mapTestimonialsFromApi(
+          data,
+          BACKEND_BASE_URL
+        );
         setClients(formattedClients);
         if (formattedClients.length > 0) {
           setSelectedClient(0);
@@ -130,7 +130,7 @@ const Testimonials = () => {
                           fontWeight: 400,
                         }}
                       >
-                        "{clients[selectedClient].quote}"
+                        &ldquo;{clients[selectedClient].quote}&rdquo;
                       </motion.blockquote>
 
                       <motion.div
@@ -190,7 +190,7 @@ const Testimonials = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                   {clients.map((client, index) => (
                     <motion.div
-                      key={index}
+                      key={client.id}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className={`cursor-pointer overflow-hidden rounded-lg shadow-md ${

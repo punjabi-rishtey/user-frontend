@@ -9,6 +9,18 @@ const CurrentMembershipPage = () => {
   const [userStatusDetails, setUserStatusDetails] = useState();
   const [daysRemaining, setDaysRemaining] = useState();
   const navigate = useNavigate(); // Hook for navigation
+  const expiryDate = user?.metadata?.exp_date
+    ? new Date(user.metadata.exp_date)
+    : null;
+  const hasActiveMembership =
+    user?.status === "Approved" &&
+    (!expiryDate || expiryDate >= new Date());
+
+  useEffect(() => {
+    if (user && !hasActiveMembership) {
+      navigate("/membership", { replace: true });
+    }
+  }, [hasActiveMembership, navigate, user]);
 
   useEffect(() => {
     const userId = user?.id || user?._id;

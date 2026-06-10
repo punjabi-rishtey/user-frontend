@@ -8,7 +8,6 @@ import Footer from "./Footer";
 import Header from "./Header";
 // import ProfileSlider from "./ProfileSlider";
 import { motion } from "framer-motion";
-import axios from "axios";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
 
@@ -187,7 +186,7 @@ const FindPartner = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(apiUrl("/api/users/all-basic"));
+      const response = await authApi.get(apiUrl("/api/users/all-basic"));
       if (Array.isArray(response.data)) {
         console.log(response.data);
         setUsers(response.data);
@@ -202,8 +201,15 @@ const FindPartner = () => {
       }
       setError(null);
     } catch (err) {
+      if (isSessionExpiryError(err)) {
+        return;
+      }
+
       console.error("Error fetching users:", err);
-      setError("Failed to load users. Please try again later.");
+      setError(
+        err.response?.data?.error ||
+          "Failed to load users. Please try again later."
+      );
     } finally {
       setLoading(false);
     }
@@ -293,8 +299,8 @@ const FindPartner = () => {
     ? users.filter((item) => {
         if (!item) return false;
 
-        // Exclude users who have status 'Unapproved' or 'Pending'
-        if (item.status === "Unapproved" || item.status === "Pending")
+        // Only show member-visible active profiles.
+        if (item.status !== "Approved")
           return false;
 
         const normalizedMaritalStatus = normalizeMaritalStatus(

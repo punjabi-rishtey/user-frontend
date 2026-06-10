@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import videoSrc from "../assets/WeddingVideo.mp4";
 import logoSrc from "../assets/logo.png";
@@ -8,7 +8,6 @@ import { useAuth } from "../context/AuthContext";
 const HeroWithHeader = () => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
@@ -27,14 +26,20 @@ const HeroWithHeader = () => {
   };
 
   const handleMembershipPlanClick = () => {
+    const expiryDate = user?.metadata?.exp_date
+      ? new Date(user.metadata.exp_date)
+      : null;
+    const hasActiveMembership =
+      user?.status === "Approved" &&
+      (!expiryDate || expiryDate >= new Date());
+
     if (!isAuthenticated) {
       navigate("/membership");
       return;
     }
 
-    if (user.status == "Approved") {
+    if (hasActiveMembership) {
       navigate("/current-plan");
-      console.log("> isAuthenticated && getMembershipStatus(): ", user.status);
     } else {
       navigate("/membership");
     }
