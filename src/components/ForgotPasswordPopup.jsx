@@ -15,12 +15,15 @@ const ForgotPasswordPopup = ({ onClose }) => {
   const handleSendResetLink = async () => {
     setLoading(true);
     setMessage("");
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 20000);
 
     try {
       const response = await fetch(apiUrl("/api/users/forgot-password"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
+        signal: controller.signal,
       });
       const data = await response.json();
 
@@ -31,10 +34,15 @@ const ForgotPasswordPopup = ({ onClose }) => {
       }
     } catch (error) {
       console.error("Forgot password error:", error);
-      setMessage("Something went wrong. Please try again.");
+      if (error.name === "AbortError") {
+        setMessage("This is taking too long. Please try again in a moment.");
+      } else {
+        setMessage("Something went wrong. Please try again.");
+      }
+    } finally {
+      window.clearTimeout(timeoutId);
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
