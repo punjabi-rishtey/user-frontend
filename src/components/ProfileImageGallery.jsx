@@ -7,6 +7,12 @@ import { apiUrl } from "../config/constants";
 import { authFetch, isSessionExpiryError } from "../config/authClient";
 const API_URL = apiUrl("/api/users");
 
+const normalizeProfilePhotoUrl = (url) => {
+  if (!url || typeof url !== "string") return "";
+  if (url.startsWith("//")) return `https:${url}`;
+  return url;
+};
+
 const ProfileImageGallery = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
   const [operation, setOperation] = useState(null);
@@ -298,17 +304,14 @@ const ProfileImageGallery = () => {
         method: "POST",
         body: formData,
       });
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to upload profile image");
+        throw new Error(data.message || "Failed to upload profile image");
       }
 
-      const data = await response.json();
       if (data.profile_pictures) {
-        setImages(
-          data.profile_pictures.map((img) =>
-            img.startsWith("http") ? img : `https://${img}`
-          )
-        );
+        setImages(data.profile_pictures.map(normalizeProfilePhotoUrl));
         // Refresh user data
         await refreshUser();
       }
@@ -352,14 +355,21 @@ const ProfileImageGallery = () => {
         body: JSON.stringify({ imagePath: imageUrl }),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        setImages((prev) => prev.filter((img) => img !== imageUrl));
-        // If deleted image was profile picture, reset to first remaining image
-        if (imageUrl === profilePicture) {
-          const remaining = images.filter((img) => img !== imageUrl);
-          setProfilePicture(remaining[0] || "");
-        }
+        const updatedImages = Array.isArray(data.profile_pictures)
+          ? data.profile_pictures.map(normalizeProfilePhotoUrl)
+          : images.filter((img) => img !== imageUrl);
+        setImages(updatedImages);
+        setProfilePicture(
+          normalizeProfilePhotoUrl(data.profile_picture) || updatedImages[0] || ""
+        );
         await refreshUser();
+      } else {
+        const message = data.message || "Failed to delete image";
+        if (message) {
+          alert(message);
+        }
       }
     } catch (error) {
       if (isSessionExpiryError(error)) {
@@ -367,6 +377,7 @@ const ProfileImageGallery = () => {
       }
 
       console.error("Error deleting image:", error);
+      alert(error.message || "Failed to delete image");
     } finally {
       setOperation(null);
     }
