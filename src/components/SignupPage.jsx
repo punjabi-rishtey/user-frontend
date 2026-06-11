@@ -414,7 +414,7 @@ const SignupPage = () => {
                           <img
                             src={URL.createObjectURL(file)}
                             alt={`Preview ${index}`}
-                            className="w-full h-20 sm:h-24 object-cover rounded-lg shadow-md"
+                            className="w-full h-20 sm:h-24 object-cover object-top rounded-lg shadow-md"
                           />
                           <button
                             type="button"

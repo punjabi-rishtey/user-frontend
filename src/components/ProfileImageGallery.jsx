@@ -132,11 +132,11 @@ const ProfileImageGallery = () => {
 
       const data = await response.json();
       if (data.profile_pictures) {
-        setImages(data.profile_pictures);
+        setImages(data.profile_pictures.map(normalizeProfilePhotoUrl));
       }
       // Set profile picture (or fallback to first image)
       setProfilePicture(
-        data.profile_picture || data.profile_pictures?.[0] || ""
+        normalizeProfilePhotoUrl(data.profile_picture || data.profile_pictures?.[0] || "")
       );
     } catch (error) {
       if (isSessionExpiryError(error)) {
@@ -405,7 +405,7 @@ const ProfileImageGallery = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setProfilePicture(data.profile_picture || imageUrl);
+        setProfilePicture(normalizeProfilePhotoUrl(data.profile_picture || imageUrl));
         await refreshUser();
       } else {
         alert(data.message || "Failed to set profile picture");
@@ -461,7 +461,7 @@ const ProfileImageGallery = () => {
                 <img
                   src={currentProfilePic}
                   alt="Profile"
-                  className="w-full h-full object-cover rounded-lg border-3 border-[#B31312] shadow-md"
+                  className="w-full h-full object-cover object-top rounded-lg border-3 border-[#B31312] shadow-md"
                 />
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#B31312] text-white text-xs px-3 py-1 rounded-full flex items-center shadow">
                   <FaCheck className="mr-1" size={10} />
@@ -496,7 +496,7 @@ const ProfileImageGallery = () => {
                       <img
                         src={image}
                         alt="Photo"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-top"
                       />
 
                       {/* Overlay for non-profile photos */}

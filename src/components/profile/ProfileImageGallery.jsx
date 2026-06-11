@@ -60,7 +60,7 @@ const ProfileImageGallery = ({
                 <img
                   src={image}
                   alt={`Profile ${index + 1}`}
-                  className="w-full h-40 object-cover"
+                  className="w-full h-40 object-cover object-top"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center items-center space-x-2">
                   <button
