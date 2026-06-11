@@ -125,7 +125,7 @@ const ProfileSlider = () => {
               <img
                 src={profile.image}
                 alt={profile.name}
-                className="w-full h-full object-cover object-center" // Ensures all images fit portrait frame
+                className="w-full h-full object-cover object-top"
               />
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-center text-white opacity-0 hover:opacity-100 transition-opacity duration-300">

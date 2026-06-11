@@ -7,6 +7,12 @@ import { apiUrl } from "../config/constants";
 import { authFetch, isSessionExpiryError } from "../config/authClient";
 const API_URL = apiUrl("/api/users");
 
+const normalizeProfilePhotoUrl = (url) => {
+  if (!url || typeof url !== "string") return "";
+  if (url.startsWith("//")) return `https:${url}`;
+  return url;
+};
+
 const ProfileImageGallery = () => {
   const { user, isAuthenticated, refreshUser } = useAuth();
   const [operation, setOperation] = useState(null);
@@ -126,11 +132,11 @@ const ProfileImageGallery = () => {
 
       const data = await response.json();
       if (data.profile_pictures) {
-        setImages(data.profile_pictures);
+        setImages(data.profile_pictures.map(normalizeProfilePhotoUrl));
       }
       // Set profile picture (or fallback to first image)
       setProfilePicture(
-        data.profile_picture || data.profile_pictures?.[0] || ""
+        normalizeProfilePhotoUrl(data.profile_picture || data.profile_pictures?.[0] || "")
       );
     } catch (error) {
       if (isSessionExpiryError(error)) {
@@ -298,17 +304,14 @@ const ProfileImageGallery = () => {
         method: "POST",
         body: formData,
       });
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to upload profile image");
+        throw new Error(data.message || "Failed to upload profile image");
       }
 
-      const data = await response.json();
       if (data.profile_pictures) {
-        setImages(
-          data.profile_pictures.map((img) =>
-            img.startsWith("http") ? img : `https://${img}`
-          )
-        );
+        setImages(data.profile_pictures.map(normalizeProfilePhotoUrl));
         // Refresh user data
         await refreshUser();
       }
@@ -352,14 +355,21 @@ const ProfileImageGallery = () => {
         body: JSON.stringify({ imagePath: imageUrl }),
       });
 
+      const data = await response.json();
       if (response.ok) {
-        setImages((prev) => prev.filter((img) => img !== imageUrl));
-        // If deleted image was profile picture, reset to first remaining image
-        if (imageUrl === profilePicture) {
-          const remaining = images.filter((img) => img !== imageUrl);
-          setProfilePicture(remaining[0] || "");
-        }
+        const updatedImages = Array.isArray(data.profile_pictures)
+          ? data.profile_pictures.map(normalizeProfilePhotoUrl)
+          : images.filter((img) => img !== imageUrl);
+        setImages(updatedImages);
+        setProfilePicture(
+          normalizeProfilePhotoUrl(data.profile_picture) || updatedImages[0] || ""
+        );
         await refreshUser();
+      } else {
+        const message = data.message || "Failed to delete image";
+        if (message) {
+          alert(message);
+        }
       }
     } catch (error) {
       if (isSessionExpiryError(error)) {
@@ -367,6 +377,7 @@ const ProfileImageGallery = () => {
       }
 
       console.error("Error deleting image:", error);
+      alert(error.message || "Failed to delete image");
     } finally {
       setOperation(null);
     }
@@ -394,7 +405,7 @@ const ProfileImageGallery = () => {
 
       const data = await response.json();
       if (response.ok) {
-        setProfilePicture(data.profile_picture || imageUrl);
+        setProfilePicture(normalizeProfilePhotoUrl(data.profile_picture || imageUrl));
         await refreshUser();
       } else {
         alert(data.message || "Failed to set profile picture");
@@ -450,7 +461,7 @@ const ProfileImageGallery = () => {
                 <img
                   src={currentProfilePic}
                   alt="Profile"
-                  className="w-full h-full object-cover rounded-lg border-3 border-[#B31312] shadow-md"
+                  className="w-full h-full object-cover object-top rounded-lg border-3 border-[#B31312] shadow-md"
                 />
                 <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#B31312] text-white text-xs px-3 py-1 rounded-full flex items-center shadow">
                   <FaCheck className="mr-1" size={10} />
@@ -485,7 +496,7 @@ const ProfileImageGallery = () => {
                       <img
                         src={image}
                         alt="Photo"
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-top"
                       />
 
                       {/* Overlay for non-profile photos */}
