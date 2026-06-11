@@ -432,16 +432,6 @@ const ProfileImageGallery = () => {
     return images.length > 0 && imageUrl === images[0];
   };
 
-  // Get the current profile picture URL
-  const getCurrentProfilePicture = () => {
-    if (profilePicture) return profilePicture;
-    if (images.length > 0) return images[0];
-    return null;
-  };
-
-  const currentProfilePic = getCurrentProfilePicture();
-  const otherPhotos = images.filter((img) => img !== currentProfilePic);
-
   return (
     <div className="bg-white rounded-lg shadow-lg mb-6 overflow-hidden">
       {/* Header */}
@@ -451,104 +441,79 @@ const ProfileImageGallery = () => {
       </div>
 
       <div className="p-4">
-        {/* Main Layout: Profile Picture + Other Photos */}
         {images.length > 0 ? (
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Profile Picture - Left/Top */}
-            <div className="flex-shrink-0">
-              <p className="text-sm font-medium text-gray-600 mb-2">Profile Picture</p>
-              <div className="relative w-[200px] h-[260px] mx-auto md:mx-0">
-                <img
-                  src={currentProfilePic}
-                  alt="Profile"
-                  className="w-full h-full object-cover object-top rounded-lg border-3 border-[#B31312] shadow-md"
-                />
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-[#B31312] text-white text-xs px-3 py-1 rounded-full flex items-center shadow">
-                  <FaCheck className="mr-1" size={10} />
-                  Profile Photo
-                </div>
-              </div>
-            </div>
+          <div>
+            <p className="text-sm font-medium text-gray-600 mb-2">
+              All Photos
+              <span className="text-gray-400 font-normal ml-1">
+                (tap a photo to make it active)
+              </span>
+            </p>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2">
+              {images.map((image) => {
+                const isProfile = isProfilePicture(image);
+                return (
+                  <div
+                    key={image}
+                    className={`relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer group ${
+                      isProfile
+                        ? "ring-2 ring-[#B31312] ring-offset-1"
+                        : "ring-1 ring-gray-200 hover:ring-2 hover:ring-blue-400"
+                    }`}
+                    onClick={() => !isProfile && handleSetProfilePicture(image)}
+                  >
+                    <img
+                      src={image}
+                      alt="Photo"
+                      className="w-full h-full object-cover object-top"
+                    />
 
-            {/* Other Photos Grid - Right/Bottom */}
-            <div className="flex-1">
-              <p className="text-sm font-medium text-gray-600 mb-2">
-                All Photos
-                {otherPhotos.length > 0 && (
-                  <span className="text-gray-400 font-normal ml-1">
-                    (tap to set as profile)
-                  </span>
-                )}
-              </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                {images.map((image) => {
-                  const isProfile = isProfilePicture(image);
-                  return (
-                    <div
-                      key={image}
-                      className={`relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer group ${
-                        isProfile
-                          ? "ring-2 ring-[#B31312] ring-offset-1"
-                          : "ring-1 ring-gray-200 hover:ring-2 hover:ring-blue-400"
-                      }`}
-                      onClick={() => !isProfile && handleSetProfilePicture(image)}
+                    {!isProfile && (
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                          <FaCamera className="text-white text-xl drop-shadow-lg" />
+                        </div>
+                      </div>
+                    )}
+
+                    {isProfile && (
+                      <div className="absolute left-2 bottom-2 bg-[#B31312] text-white text-xs px-2.5 py-1 rounded-full flex items-center shadow">
+                        <FaCheck className="mr-1" size={10} />
+                        Profile Photo
+                      </div>
+                    )}
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveImage(image);
+                      }}
+                      className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors opacity-70 hover:opacity-100"
+                      disabled={operation !== null}
+                      title="Delete photo"
                     >
-                      <img
-                        src={image}
-                        alt="Photo"
-                        className="w-full h-full object-cover object-top"
-                      />
+                      <FaTimes size={10} />
+                    </button>
+                  </div>
+                );
+              })}
 
-                      {/* Overlay for non-profile photos */}
-                      {!isProfile && (
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <FaCamera className="text-white text-xl drop-shadow-lg" />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Profile indicator */}
-                      {isProfile && (
-                        <div className="absolute top-1 left-1 bg-[#B31312] text-white p-1 rounded-full">
-                          <FaCheck size={10} />
-                        </div>
-                      )}
-
-                      {/* Delete button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveImage(image);
-                        }}
-                        className="absolute top-1 right-1 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors opacity-70 hover:opacity-100"
-                        disabled={operation !== null}
-                        title="Delete photo"
-                      >
-                        <FaTimes size={10} />
-                      </button>
-                    </div>
-                  );
-                })}
-
-                {/* Add Photo Button */}
-                <label
-                  className={`relative aspect-[3/4] rounded-lg border-2 border-dashed border-gray-300 hover:border-[#B31312] cursor-pointer flex flex-col items-center justify-center transition-colors ${
-                    operation ? "opacity-50 pointer-events-none" : ""
-                  }`}
-                >
-                  <FaPlus className="text-gray-400 text-xl mb-1" />
-                  <span className="text-xs text-gray-500">Add</span>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleFileInputChange}
-                    disabled={operation !== null || showCropper}
-                  />
-                </label>
-              </div>
+              <label
+                className={`relative aspect-[3/4] rounded-lg border-2 border-dashed border-gray-300 hover:border-[#B31312] cursor-pointer flex flex-col items-center justify-center transition-colors ${
+                  operation ? "opacity-50 pointer-events-none" : ""
+                }`}
+              >
+                <FaPlus className="text-gray-400 text-xl mb-1" />
+                <span className="text-xs text-gray-500">Add</span>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileInputChange}
+                  disabled={operation !== null || showCropper}
+                />
+              </label>
             </div>
           </div>
         ) : (
