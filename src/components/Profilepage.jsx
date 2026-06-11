@@ -404,6 +404,8 @@ ActionButtons.propTypes = {
 export default function ProfileSettings() {
   const { user, updateUser, logout } = useAuth();
   const navigate = useNavigate();
+  const profileImageSrc =
+    user?.profile_picture || user?.profile_pictures?.[0] || "/profile.jpg";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("basic");
   const [loadingPassword, setLoadingPassword] = useState(false);
@@ -2055,11 +2057,7 @@ export default function ProfileSettings() {
           <div className="p-5">
             <div className="text-center">
               <img
-                src={
-                  user?.profile_pictures?.length > 0
-                    ? user.profile_pictures[0]
-                    : "/profile.jpg"
-                }
+                src={profileImageSrc}
                 alt="Profile"
                 className="w-32 h-32 rounded-full mx-auto border-2 border-[#B31312] object-cover object-top sidebar-profile-image"
               />
@@ -2178,12 +2176,6 @@ export default function ProfileSettings() {
             onRemoveImage={handleRemoveImage}
             onEditImage={handleEditImage}
           />
-
-          <div className="bg-[#FEF3F3] border border-[#B31312] rounded-md p-3 mb-6 text-center">
-            <p className="text-[#B31312] font-medium">
-              First photo you upload will be the profile photo
-            </p>
-          </div>
 
           {/* About & Looking For are edited and viewed within the Profile Completion card below to follow current UX */}
 

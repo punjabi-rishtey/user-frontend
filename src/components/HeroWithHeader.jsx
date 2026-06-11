@@ -63,6 +63,9 @@ const HeroWithHeader = () => {
     setIsSidebarOpen(false);
   };
 
+  const profileImageSrc =
+    user?.profile_picture || user?.profile_pictures?.[0] || profileIcon;
+
   return (
     <div className="relative h-screen overflow-hidden bg-[#800000] w-full">
       {/* Loading spinner for video only - positioned on top of video */}
@@ -117,7 +120,7 @@ const HeroWithHeader = () => {
               <div>
                 <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white cursor-pointer">
                   <img
-                    src={user?.profile_pictures?.[0] || profileIcon}
+                    src={profileImageSrc}
                     alt="Profile"
                     className="w-full h-full object-cover object-top"
                     onClick={handleProfileClick}

@@ -61,6 +61,9 @@ const Header = () => {
     setIsSidebarOpen(false);
   };
 
+  const profileImageSrc =
+    user?.profile_picture || user?.profile_pictures?.[0] || profileIcon;
+
   return (
     <div className="w-full p-4 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] shadow-md">
       <div className="container mx-auto flex justify-between items-center px-6">
@@ -91,10 +94,8 @@ const Header = () => {
           {isAuthenticated && (
             <div>
               <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E5D3C8] cursor-pointer m-auto">
-                {/* user.profile_pictures[0] is updated automatically if
-                  ProfileImageGallery calls refreshUser() after uploading */}
                 <img
-                  src={user?.profile_pictures?.[0] || profileIcon}
+                  src={profileImageSrc}
                   alt="Profile"
                   className="w-full h-full object-cover object-top"
                   onClick={handleProfileClick}
