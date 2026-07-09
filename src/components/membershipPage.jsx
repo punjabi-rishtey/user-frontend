@@ -17,14 +17,9 @@ const MembershipPage = () => {
     name: "",
     phone: "",
     screenshot: null,
-    couponCode: "",
     membershipId: "",
     transactionId: "",
   });
-  const [couponApplied, setCouponApplied] = useState(false);
-  const [couponSavings, setCouponSavings] = useState(0);
-  const [couponMessage, setCouponMessage] = useState("");
-  const [finalPrice, setFinalPrice] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -33,8 +28,18 @@ const MembershipPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, refreshUser } = useAuth();
 
-  const formatDuration = (duration) =>
-    `${duration} month${Number(duration) === 1 ? "" : "s"}`;
+  const formatPlanPrice = (price) =>
+    `₹${Number(price || 0).toLocaleString("en-IN")}`;
+
+  const formatDuration = (duration) => {
+    const numericDuration = Number(duration);
+
+    if (numericDuration === 12) {
+      return "1 year";
+    }
+
+    return `${numericDuration} month${numericDuration === 1 ? "" : "s"}`;
+  };
 
   // Refresh user data when component mounts
   useEffect(() => {
@@ -91,7 +96,12 @@ const MembershipPage = () => {
   useEffect(() => {
     const fetchMemberships = async () => {
       try {
-        const response = await fetch(apiUrl("/api/memberships/all"));
+        const response = await fetch(apiUrl("/api/memberships/all"), {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        });
         if (!response.ok) throw new Error("Failed to fetch membership plans");
 
         const data = await response.json();
@@ -124,20 +134,15 @@ const MembershipPage = () => {
     setSelectedPlan(plan);
     setShowModal(true);
     // console.log(">>>> plan selected: (membershipId): ", plan._id)
-    // Reset form and coupon state when opening modal
+    // Reset form state when opening modal
     setFormData({
       name: "",
       phone: "",
       screenshot: null,
-      couponCode: "",
       membershipId: plan._id,
       transactionId: "",
     });
     setPreviewUrl(null);
-    setCouponApplied(false);
-    setCouponSavings(0);
-    setCouponMessage("");
-    setFinalPrice(plan.price);
     setError(null);
   };
 
@@ -191,74 +196,6 @@ const MembershipPage = () => {
     }
   };
 
-  // Handle coupon code application
-  const handleApplyCoupon = async () => {
-    if (!formData.couponCode.trim()) {
-      setCouponMessage("");
-      setError("Please enter a coupon code.");
-      return;
-    }
-
-    try {
-      setError(null);
-      setCouponMessage("");
-      // Call API to validate coupon
-      const response = await authApi.post(
-        apiUrl("/api/coupons/validate"),
-        { code: formData.couponCode },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      // Process response
-      if (response.data && response.data.discountValue) {
-        // Get discount information from response
-        const discount = response.data.discountValue;
-        const discountType = response.data.discountType;
-
-        // Calculate new price based on discount type
-        let newPrice = selectedPlan.price;
-        let savings = 0;
-        if (discountType === "percentage") {
-          savings = (selectedPlan.price * discount) / 100;
-          newPrice = selectedPlan.price - savings;
-        } else if (discountType === "flat") {
-          savings = discount;
-          newPrice = selectedPlan.price - savings;
-        }
-
-        // Make sure price doesn't go below zero
-        newPrice = Math.max(0, newPrice);
-        savings = Math.min(selectedPlan.price, Math.max(0, savings));
-
-        // Update state
-        setCouponApplied(true);
-        setCouponSavings(savings);
-        setFinalPrice(Math.round(newPrice));
-        setCouponMessage("Coupon applied.");
-        setError(null);
-      } else {
-        throw new Error(response.data?.message || "Coupon not valid.");
-      }
-    } catch (err) {
-      if (isSessionExpiryError(err)) {
-        return;
-      }
-
-      console.error("Coupon application error:", err);
-      setCouponMessage("");
-      setError(
-        err.response?.data?.message || err.message || "Coupon not valid."
-      );
-      setCouponApplied(false);
-      setCouponSavings(0);
-      setFinalPrice(selectedPlan.price);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -299,14 +236,6 @@ const MembershipPage = () => {
       formDataToSubmit.append("phoneNumber", phone);
       formDataToSubmit.append("image", formData.screenshot);
       formDataToSubmit.append("membershipId", formData.membershipId);
-
-      // Include coupon code and discount information if applied
-      if (couponApplied && formData.couponCode) {
-        formDataToSubmit.append(
-          "couponCode",
-          formData.couponCode.trim().toUpperCase()
-        );
-      }
 
       const response = await authApi.post(
         apiUrl("/api/users/subscribe"),
@@ -540,7 +469,7 @@ const MembershipPage = () => {
                     fontWeight: 400,
                   }}
                 >
-                  ₹{plan.price}
+                  {formatPlanPrice(plan.price)}
                   <span
                     className="text-[#6B4132] text-lg ml-1"
                     style={{
@@ -548,7 +477,7 @@ const MembershipPage = () => {
                       fontWeight: 400,
                     }}
                   >
-                    for {formatDuration(plan.duration)}
+                    / {formatDuration(plan.duration)}
                   </span>
                 </p>
 
@@ -641,13 +570,10 @@ const MembershipPage = () => {
                         fontWeight: 400,
                       }}
                     >
-                      Scan to Pay ₹
-                      {couponApplied ? finalPrice : selectedPlan.price}
-                      {couponApplied && (
-                        <span className="block mt-1 text-sm text-green-600">
-                          Coupon applied. You save ₹{couponSavings.toFixed(2)}
-                        </span>
-                      )}
+                      Pay exactly {formatPlanPrice(selectedPlan.price)}
+                      <span className="block mt-1 text-sm text-[#6B4132]">
+                        Annual membership for one user
+                      </span>
                     </h4>
 
                     <div className="flex justify-center mb-4">
@@ -681,7 +607,7 @@ const MembershipPage = () => {
                         UPI ID: {qr?.name || "yourcompany@upi"}
                       </p>
                       <p className="text-sm">
-                        Pay the exact amount shown above, then upload the
+                        Pay exactly {formatPlanPrice(selectedPlan.price)}, then upload the
                         payment screenshot.
                       </p>
                     </div>
@@ -737,68 +663,6 @@ const MembershipPage = () => {
                           placeholder="Enter your phone number"
                           maxLength={10}
                         />
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="couponCode"
-                          className="block mb-2 text-[#4F2F1D]"
-                          style={{
-                            fontFamily: "'Modern Era', sans-serif",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Coupon Code
-                        </label>
-                        <div className="flex space-x-2">
-                          <input
-                            type="text"
-                            id="couponCode"
-                            name="couponCode"
-                            value={formData.couponCode}
-                            onChange={handleInputChange}
-                            disabled={couponApplied}
-                            className={`flex-1 p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D] ${
-                              couponApplied ? "bg-gray-100" : ""
-                            }`}
-                            style={{ fontFamily: "'Modern Era', sans-serif" }}
-                            placeholder="Enter coupon code (if available)"
-                          />
-                          <button
-                            type="button"
-                            onClick={
-                                  couponApplied
-                                ? () => {
-                                    setCouponApplied(false);
-                                    setCouponSavings(0);
-                                    setFinalPrice(selectedPlan.price);
-                                    setCouponMessage("");
-                                    setFormData((prev) => ({
-                                      ...prev,
-                                      couponCode: "",
-                                    }));
-                                  }
-                                : handleApplyCoupon
-                            }
-                            className={`px-4 py-2 rounded-md transition-colors ${
-                              couponApplied
-                                ? "bg-gray-200 hover:bg-gray-300 text-gray-700"
-                                : "bg-[#4F2F1D] hover:bg-[#6B4132] text-white"
-                            }`}
-                            style={{
-                              fontFamily: "'Modern Era', sans-serif",
-                              fontWeight: 500,
-                            }}
-                          >
-                            {couponApplied ? "Remove" : "Apply"}
-                          </button>
-                        </div>
-                        {couponApplied && (
-                          <p className="mt-2 text-sm text-green-600">
-                            {couponMessage} You save ₹
-                            {couponSavings.toFixed(2)}.
-                          </p>
-                        )}
                       </div>
 
                       <div>
