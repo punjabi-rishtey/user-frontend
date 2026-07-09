@@ -1,26 +1,47 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { AlertCircle, CheckCircle } from "lucide-react";
 import Header from "./Header";
 import Footer from "./Footer";
 import { apiUrl } from "../config/constants";
+import {
+  authCardClassName,
+  authInputClassName,
+  authLabelClassName,
+  authNoticeIconClassName,
+  authPrimaryButtonClassName,
+  getAuthNoticeClassName,
+  getAuthNoticeRole,
+} from "./ui/formStyles";
 
 const ResetPasswordPage = () => {
-  const { token } = useParams(); // Extract token from URL
+  const { token } = useParams();
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const canSubmit = Boolean(newPassword && confirmPassword) && !loading;
+
+  const updatePassword = (setter) => (event) => {
+    setter(event.target.value);
+    if (status) {
+      setStatus(null);
+    }
+  };
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setMessage("Passwords do not match.");
+      setStatus({
+        type: "error",
+        message: "Passwords do not match.",
+      });
       return;
     }
 
     setLoading(true);
-    setMessage("");
+    setStatus(null);
 
     try {
       const response = await fetch(
@@ -31,20 +52,28 @@ const ResetPasswordPage = () => {
           body: JSON.stringify({ newPassword }),
         }
       );
-      const data = await response.json();
-      console.log("Extracted token from URL:", token);
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        setMessage("Password reset successfully! Redirecting...");
-        setTimeout(() => navigate("/login"), 2000); // Redirect to login
+        setStatus({
+          type: "success",
+          message: "Password reset successfully. Taking you to login…",
+        });
+        window.setTimeout(() => navigate("/login"), 2000);
       } else {
-        setMessage(data.message || "Failed to reset password.");
+        setStatus({
+          type: "error",
+          message: data.message || "Failed to reset password.",
+        });
       }
-    } catch (error) {
-      setMessage("Error resetting password. Try again.");
+    } catch {
+      setStatus({
+        type: "error",
+        message: "Could not reach the server. Please try again.",
+      });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -52,33 +81,79 @@ const ResetPasswordPage = () => {
       <Header />
 
       {/* Reset Password Form */}
-      <div className="flex-grow flex items-center justify-center my-16">
-        <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg w-full max-w-md">
-          <h2 className="text-3xl mb-6 text-[#4F2F1D]">Reset Password</h2>
+      <main className="flex-grow px-4 py-12 sm:py-16">
+        <div className={`mx-auto max-w-md ${authCardClassName}`}>
+          <div className="mb-7">
+            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#8A6A58]">
+              Account Help
+            </p>
+            <h1
+              className="text-3xl text-[#4F2F1D]"
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
+            >
+              Reset Password
+            </h1>
+            <p className="mt-2 text-sm leading-relaxed text-[#6B4132]">
+              Choose a new password for your Punjabi Rishtey account.
+            </p>
+          </div>
 
-          {message && <p className="text-red-500">{message}</p>}
+          {status && (
+            <div
+              className={getAuthNoticeClassName(status.type)}
+              role={getAuthNoticeRole(status.type)}
+              aria-live="polite"
+            >
+              {status.type === "success" ? (
+                <CheckCircle
+                  className={authNoticeIconClassName}
+                  aria-hidden="true"
+                />
+              ) : (
+                <AlertCircle
+                  className={authNoticeIconClassName}
+                  aria-hidden="true"
+                />
+              )}
+              <p>{status.message}</p>
+            </div>
+          )}
 
-          <form onSubmit={handleResetPassword}>
-            <div className="mb-4">
-              <label className="block text-[#6B4132] mb-2">New Password</label>
+          <form onSubmit={handleResetPassword} className="space-y-5">
+            <div>
+              <label htmlFor="reset-password-new" className={authLabelClassName}>
+                New Password
+              </label>
               <input
+                id="reset-password-new"
+                name="newPassword"
                 type="password"
+                autoComplete="new-password"
                 value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#4F2F1D] bg-white"
+                onChange={updatePassword(setNewPassword)}
+                className={authInputClassName}
                 required
               />
             </div>
 
-            <div className="mb-6">
-              <label className="block text-[#6B4132] mb-2">
+            <div>
+              <label
+                htmlFor="reset-password-confirm"
+                className={authLabelClassName}
+              >
                 Confirm Password
               </label>
               <input
+                id="reset-password-confirm"
+                name="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full p-3 border border-[#6B4132] rounded-lg focus:ring-2 focus:ring-[#4F2F1D] bg-white"
+                onChange={updatePassword(setConfirmPassword)}
+                className={authInputClassName}
                 required
               />
             </div>
@@ -86,17 +161,15 @@ const ResetPasswordPage = () => {
             <div className="flex justify-end">
               <button
                 type="submit"
-                disabled={loading}
-                className={`bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300 ${
-                  loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                disabled={!canSubmit}
+                className={`w-full sm:w-auto ${authPrimaryButtonClassName}`}
               >
-                {loading ? "Resetting..." : "Reset Password"}
+                {loading ? "Resetting…" : "Reset Password"}
               </button>
             </div>
           </form>
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>
