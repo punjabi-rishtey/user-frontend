@@ -11,10 +11,21 @@ import {
   FaGraduationCap,
   FaUsers,
   FaArrowLeft,
+  FaLock,
+  FaPhoneAlt,
+  FaWhatsapp,
+  FaEnvelope,
 } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
-import { apiUrl } from "../config/constants";
+import {
+  apiUrl,
+  SUPPORT_EMAIL,
+  SUPPORT_EMAIL_LINK,
+  SUPPORT_PHONE_LINK,
+  SUPPORT_PHONE_NUMBER,
+  SUPPORT_WHATSAPP_LINK,
+} from "../config/constants";
 
 // Define a vibrant color palette for different card types
 const cardColorSchemes = {
@@ -105,7 +116,17 @@ const ProfileDetail = () => {
         setError(null);
       } catch (err) {
         console.error("Error fetching profile data:", err);
-        setError("Failed to load profile data. Please try again later.");
+        if (
+          err.response?.status === 403 &&
+          err.response?.data?.code === "PROFILE_PRIVATE"
+        ) {
+          setError(
+            err.response?.data?.message ||
+              "This profile is private. For an introduction, please contact Punjabi Rishtey support."
+          );
+        } else {
+          setError("Failed to load profile data. Please try again later.");
+        }
         if (err.message === "Authentication required") {
           navigate("/login", { replace: true });
         }
@@ -164,6 +185,37 @@ const ProfileDetail = () => {
     return normalizedValue;
   };
 
+  const supportLinkBaseClass =
+    "inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full border border-[#D8C5B8] bg-white px-4 py-2 text-sm font-semibold text-[#4F2F1D] shadow-[0_1px_0_rgba(79,47,29,0.06)] transition-[transform,background-color,border-color,color,box-shadow] duration-150 ease-out hover:border-[#B99682] hover:bg-[#FCF9F2] active:scale-[0.98]";
+
+  const renderSupportLinks = ({ className = "" } = {}) => (
+    <div className={`flex flex-col gap-2 sm:flex-row sm:flex-wrap ${className}`}>
+      <a
+        href={SUPPORT_PHONE_LINK}
+        className={supportLinkBaseClass}
+      >
+        <FaPhoneAlt className="text-xs text-[#990000]" aria-hidden="true" />
+        <span>Call {SUPPORT_PHONE_NUMBER}</span>
+      </a>
+      <a
+        href={SUPPORT_WHATSAPP_LINK}
+        target="_blank"
+        rel="noreferrer"
+        className={supportLinkBaseClass}
+      >
+        <FaWhatsapp className="text-base text-[#128C7E]" aria-hidden="true" />
+        <span>WhatsApp</span>
+      </a>
+      <a
+        href={SUPPORT_EMAIL_LINK}
+        className={supportLinkBaseClass}
+      >
+        <FaEnvelope className="text-sm text-[#990000]" aria-hidden="true" />
+        <span>{SUPPORT_EMAIL}</span>
+      </a>
+    </div>
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
@@ -177,29 +229,54 @@ const ProfileDetail = () => {
   }
 
   if (error) {
+    const isPrivateProfileError = error.toLowerCase().includes("private");
+
     return (
       <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
         <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4 text-[#990000]">Error</h2>
-            <p className="mb-6">{error}</p>
-            <div className="flex gap-4">
+        <div className="flex-grow flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-xl rounded-2xl border border-[#E8DED7] bg-white p-6 shadow-[0_18px_45px_rgba(79,47,29,0.10)] sm:p-8">
+            <div className="mb-5 flex items-start gap-3">
+              <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5EDE7] text-[#990000]">
+                {isPrivateProfileError ? (
+                  <FaLock aria-hidden="true" />
+                ) : (
+                  <FaUser aria-hidden="true" />
+                )}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-[#990000]">
+                  {isPrivateProfileError ? "Profile Unavailable" : "Error"}
+                </h2>
+                <p className="mt-2 leading-relaxed text-[#4F2F1D]">{error}</p>
+              </div>
+            </div>
+            {isPrivateProfileError && (
+              <div className="mb-6 border-t border-[#E8DED7] pt-5">
+                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#8A6A58]">
+                  Request an introduction
+                </p>
+                {renderSupportLinks()}
+              </div>
+            )}
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button
-                className="bg-[#4F2F1D] hover:bg-[#6B4132] text-white font-bold py-2 px-4 rounded-md transition duration-300"
+                className="inline-flex min-h-[42px] items-center justify-center rounded-full bg-[#4F2F1D] px-5 py-2 text-sm font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-[#6B4132] active:scale-[0.98]"
                 onClick={handleGoBack}
               >
                 Go Back
               </button>
-              <button
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-md transition duration-300"
-                onClick={() => {
-                  logout();
-                  navigate("/");
-                }}
-              >
-                Logout
-              </button>
+              {!isPrivateProfileError && (
+                <button
+                  className="inline-flex min-h-[42px] items-center justify-center rounded-full bg-[#990000] px-5 py-2 text-sm font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-[#800000] active:scale-[0.98]"
+                  onClick={() => {
+                    logout();
+                    navigate("/");
+                  }}
+                >
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -287,6 +364,10 @@ const ProfileDetail = () => {
     });
   };
 
+  const contactIntroRequired =
+    profileData.contact_access === "admin_intro_required";
+  const hiddenContactText = "Hidden in Private Mode";
+
   // Organize profile data into sections for display
   const basicDetails = {
     Age: calculateAge(profileData.dob),
@@ -299,9 +380,15 @@ const ProfileDetail = () => {
     "Marital Status": formatValue(profileData.marital_status),
     "Birth Time": formatValue(profileData.birth_details?.birth_time),
     "Birth Place": formatValue(profileData.birth_details?.birth_place),
-    Email: profileData.email || "Not specified",
-    Mobile: profileData.mobile || "Not specified",
-    "Secondary Contact": profileData.secondary_contact || "Not specified",
+    Email: contactIntroRequired
+      ? hiddenContactText
+      : profileData.email || "Not specified",
+    Mobile: contactIntroRequired
+      ? hiddenContactText
+      : profileData.mobile || "Not specified",
+    "Secondary Contact": contactIntroRequired
+      ? hiddenContactText
+      : profileData.secondary_contact || "Not specified",
   };
 
   // Helper function to format manglik status
@@ -544,6 +631,48 @@ const ProfileDetail = () => {
 
       {/* Profile Details Sections - Masonry Layout */}
       <div className="columns-1 md:columns-2 lg:columns-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">
+        {contactIntroRequired && (
+          <motion.div
+            variants={getCardVariants("basicDetails")}
+            initial="initial"
+            animate="animate"
+            className="mb-8 inline-block w-full break-inside-avoid rounded-2xl border p-6 shadow-[0_12px_30px_rgba(79,47,29,0.08)]"
+            style={{
+              backgroundColor: "#FFFDF8",
+              borderColor: "#D8C5B8",
+            }}
+          >
+            <div className="mb-4 flex items-start gap-3">
+              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F5EDE7] text-[#990000]">
+                <FaLock aria-hidden="true" />
+              </div>
+              <div>
+                <h3
+                  className="text-xl"
+                  style={{
+                    fontFamily: "'Tiempos Headline', serif",
+                    fontWeight: 400,
+                    color: "#4F2F1D",
+                  }}
+                >
+                  Introductions are handled by support
+                </h3>
+                <p
+                  className="mt-1 text-base leading-relaxed text-[#6B4132]"
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
+                >
+                  {profileData.contact_message ||
+                    "For an introduction, please contact Punjabi Rishtey support."}
+                </p>
+              </div>
+            </div>
+            {renderSupportLinks()}
+          </motion.div>
+        )}
+
         {/* Basic Details */}
         <motion.div
           variants={getCardVariants("basicDetails")}
