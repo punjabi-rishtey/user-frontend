@@ -98,9 +98,6 @@ const MembershipPage = () => {
       try {
         const response = await fetch(apiUrl("/api/memberships/all"), {
           cache: "no-store",
-          headers: {
-            "Cache-Control": "no-cache",
-          },
         });
         if (!response.ok) throw new Error("Failed to fetch membership plans");
 
