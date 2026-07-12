@@ -299,8 +299,8 @@ const FindPartner = () => {
     ? users.filter((item) => {
         if (!item) return false;
 
-        // Only show member-visible active profiles.
-        if (item.status !== "Approved")
+        // Active members can discover approved and expired opposite-gender profiles.
+        if (!["Approved", "Expired"].includes(item.status))
           return false;
 
         const normalizedMaritalStatus = normalizeMaritalStatus(

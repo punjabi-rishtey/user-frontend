@@ -116,10 +116,7 @@ const ProfileDetail = () => {
         setError(null);
       } catch (err) {
         console.error("Error fetching profile data:", err);
-        if (
-          err.response?.status === 403 &&
-          err.response?.data?.code === "PROFILE_PRIVATE"
-        ) {
+        if (err.response?.status === 403) {
           setError(
             err.response?.data?.message ||
               "This profile is private. For an introduction, please contact Punjabi Rishtey support."
@@ -230,6 +227,10 @@ const ProfileDetail = () => {
 
   if (error) {
     const isPrivateProfileError = error.toLowerCase().includes("private");
+    const isMembershipError =
+      error.toLowerCase().includes("membership") ||
+      error.toLowerCase().includes("renew") ||
+      error.toLowerCase().includes("subscription");
 
     return (
       <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
@@ -246,7 +247,11 @@ const ProfileDetail = () => {
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-[#990000]">
-                  {isPrivateProfileError ? "Profile Unavailable" : "Error"}
+                  {isPrivateProfileError
+                    ? "Profile Unavailable"
+                    : isMembershipError
+                      ? "Membership Required"
+                      : "Error"}
                 </h2>
                 <p className="mt-2 leading-relaxed text-[#4F2F1D]">{error}</p>
               </div>
@@ -266,7 +271,14 @@ const ProfileDetail = () => {
               >
                 Go Back
               </button>
-              {!isPrivateProfileError && (
+              {isMembershipError ? (
+                <button
+                  className="inline-flex min-h-[42px] items-center justify-center rounded-full bg-[#990000] px-5 py-2 text-sm font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-[#800000] active:scale-[0.98]"
+                  onClick={() => navigate("/membership")}
+                >
+                  Renew Membership
+                </button>
+              ) : !isPrivateProfileError && (
                 <button
                   className="inline-flex min-h-[42px] items-center justify-center rounded-full bg-[#990000] px-5 py-2 text-sm font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-[#800000] active:scale-[0.98]"
                   onClick={() => {
