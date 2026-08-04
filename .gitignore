@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .env.qa
 
+# Generated marketing exports
+output
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

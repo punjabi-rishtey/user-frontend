@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Footer from "./Footer";
-import Header from "./Header";
+import PageShell from "./PageShell";
 import { AlertCircle, CheckCircle, Eye, EyeOff } from "lucide-react";
 import Modal from "./TermsConditionModal";
 import { apiUrl } from "../config/constants";
@@ -362,8 +361,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#FCF9F2] overflow-x-hidden">
-      <Header />
+    <PageShell className="overflow-x-hidden">
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -379,8 +377,8 @@ const SignupPage = () => {
             <li>
               Before fixing up my marriage, with my future partner, I shall know
               satisfactory information about the family and the partner
-              herself/himself. The Punjabi Marriage Forum (punjabi-rishtey.com)
-              is not responsible for any mishap.
+              herself/himself. Punjabi Rishtey (punjabi-rishtey.com) is not
+              responsible for any mishap.
             </li>
             <li>
               After getting married, I shall inform the website incharge about
@@ -388,7 +386,7 @@ const SignupPage = () => {
             </li>
             <li>
               I will respectfully follow all the terms and conditions provided
-              by PUNJABI MARRIAGE FORUM.
+              by Punjabi Rishtey.
             </li>
           </ol>
         </div>
@@ -396,13 +394,10 @@ const SignupPage = () => {
       <div className="flex-grow flex items-center justify-center px-4 py-8 md:py-16">
         <div className="w-full max-w-lg mx-auto">
           <div className={authCardClassName}>
-            <h2
-              className="text-2xl md:text-3xl mb-2 text-[#4F2F1D] text-center text-balance"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
+            <p className="mb-2 text-center text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+              Punjabi Rishtey
+            </p>
+            <h2 className="mb-2 text-center font-display text-3xl font-semibold text-balance text-brown md:text-4xl">
               Sign Up
             </h2>
             {formNotice && (
@@ -594,8 +589,7 @@ const SignupPage = () => {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
+    </PageShell>
   );
 };
 

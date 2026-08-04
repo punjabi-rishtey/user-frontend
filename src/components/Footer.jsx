@@ -1,134 +1,140 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import logoSrc from "../assets/logo.png";
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  Twitter,
+} from "lucide-react";
+import logoSrc from "@/assets/logo.png";
+import { useAppNav } from "@/hooks/useAppNav";
 
-const Footer = () => {
-  const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+/** Swap `href` values when real profile URLs are ready. */
+const socialLinks = [
+  { label: "Facebook", href: "#", Icon: Facebook },
+  { label: "Instagram", href: "#", Icon: Instagram },
+  { label: "Twitter", href: "#", Icon: Twitter },
+  { label: "LinkedIn", href: "#", Icon: Linkedin },
+];
 
-  const handleNavigation = (path) => {
-    if (path === "/findpartner" && !isAuthenticated) {
-      navigate("/login");
+const exploreLinks = [
+  { label: "Home", path: "/" },
+  { label: "About Us", path: "/about" },
+  { label: "Find Partner", path: "/findpartner", action: "findPartner" },
+  { label: "Testimonials", path: "/testimonials" },
+  { label: "Contact", path: "/contact" },
+];
+
+const trustLinks = [
+  { label: "Privacy Policy", path: "/privacy-policy" },
+  { label: "Safety Standards", path: "/safety-standards" },
+  { label: "Membership", action: "membership" },
+  { label: "Contact", path: "/contact" },
+];
+
+const linkClass =
+  "block w-full text-left text-sm leading-6 text-ivory/75 transition-colors hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon focus-visible:ring-offset-2 focus-visible:ring-offset-brown-deep";
+
+const columnLabelClass =
+  "mb-3 pt-1.5 text-xs font-medium tracking-[0.16em] text-ivory/50 uppercase";
+
+export default function Footer() {
+  const { navigate, goFindPartner, goMembership } = useAppNav();
+
+  const go = (link) => {
+    if (link.action === "findPartner") {
+      goFindPartner();
+    } else if (link.action === "membership") {
+      goMembership();
     } else {
-      navigate(path);
+      navigate(link.path);
     }
     window.scrollTo(0, 0);
   };
 
   return (
-    <footer className="bg-gradient-to-t from-[#2B1810] to-[#4F2F1D] text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Top Section */}
-        <div className="flex flex-col space-y-8">
-          {/* Logo and Description */}
-          <div className="text-center">
-            <img
-              src={logoSrc}
-              alt="Punjabi Matrimony Logo"
-              className="h-16 sm:h-20 mb-4 mx-auto"
-            />
-            <p className="text-sm text-[#E5D3C8] max-w-md mx-auto">
-              Find your perfect life partner on our trusted platform. We bring
-              love and connection closer for the Punjabi community.
+    <footer className="relative overflow-hidden border-t border-ivory/10 bg-gradient-to-b from-brown to-brown-deep text-ivory">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 70% 55% at 8% 100%, color-mix(in oklab, var(--maroon) 18%, transparent), transparent 65%), radial-gradient(ellipse 50% 40% at 92% 0%, color-mix(in oklab, var(--maroon) 10%, transparent), transparent 60%)",
+        }}
+        aria-hidden
+      />
+
+      <div className="relative mx-auto max-w-5xl px-6 py-12 sm:px-10 sm:py-16">
+        <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-3 md:gap-x-10 lg:gap-x-14">
+          {/* Brand - logo only, no tall spacer band */}
+          <div className="flex flex-col">
+            <button
+              type="button"
+              onClick={() => go({ path: "/" })}
+              className="w-fit outline-none focus-visible:ring-2 focus-visible:ring-maroon focus-visible:ring-offset-2 focus-visible:ring-offset-brown-deep"
+              aria-label="Punjabi Rishtey home"
+            >
+              <img
+                src={logoSrc}
+                alt=""
+                className="h-12 w-auto brightness-0 invert sm:h-14"
+              />
+            </button>
+            <p className="mt-4 max-w-[16rem] text-sm leading-6 text-ivory/65">
+              Find your perfect life partner within the Punjabi community.
             </p>
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              {socialLinks.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="flex size-9 items-center justify-center rounded-full border border-ivory/20 text-ivory/70 transition-colors hover:border-ivory/40 hover:text-ivory focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon focus-visible:ring-offset-2 focus-visible:ring-offset-brown-deep"
+                >
+                  <Icon className="size-4" strokeWidth={1.5} aria-hidden />
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* Navigation Links */}
-          <div className="grid grid-cols-2 gap-4 text-center sm:flex sm:flex-row sm:justify-center sm:space-x-6">
-            <button
-              onClick={() => handleNavigation("/")}
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
-            >
-              Home
-            </button>
-            <button
-              onClick={() => handleNavigation("/about")}
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
-            >
-              About Us
-            </button>
-            <button
-              onClick={() => handleNavigation("/findpartner")}
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
-            >
-              Find Partner
-            </button>
-            <button
-              onClick={() => navigate("/testimonials")}
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
-            >
-              Testimonials
-            </button>
-            <button
-              onClick={() => handleNavigation("/contact")}
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm"
-            >
-              Contact
-            </button>
-            {/* <button
-              onClick={() => handleNavigation("/")}
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline text-sm font-medium"
-            >
-              Punjabi Marriage Forum
-            </button> */}
-          </div>
+          <nav aria-label="Explore" className="flex flex-col">
+            <p className={columnLabelClass}>Explore</p>
+            <ul className="flex flex-col gap-2.5">
+              {exploreLinks.map((link) => (
+                <li key={link.label}>
+                  <button
+                    type="button"
+                    onClick={() => go(link)}
+                    className={linkClass}
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-          {/* Social Media Links */}
-          <div className="flex justify-center space-x-6">
-            <a
-              href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
-              aria-label="Facebook"
-            >
-              <i className="fab fa-facebook-f"></i>
-            </a>
-            <a
-              href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
-              aria-label="Instagram"
-            >
-              <i className="fab fa-instagram"></i>
-            </a>
-            <a
-              href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
-              aria-label="Twitter"
-            >
-              <i className="fab fa-twitter"></i>
-            </a>
-            <a
-              href="#"
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
-              aria-label="LinkedIn"
-            >
-              <i className="fab fa-linkedin-in"></i>
-            </a>
-          </div>
+          <nav aria-label="Trust" className="flex flex-col">
+            <p className={columnLabelClass}>Trust</p>
+            <ul className="flex flex-col gap-2.5">
+              {trustLinks.map((link) => (
+                <li key={`trust-${link.label}`}>
+                  <button
+                    type="button"
+                    onClick={() => go(link)}
+                    className={linkClass}
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
-        {/* Divider */}
-        <div className="my-6 border-t border-[#6B4132]"></div>
-
-        {/* Bottom Section */}
-        <div className="flex flex-col items-center space-y-4 text-sm text-[#E5D3C8]">
-          <p className="text-center">&copy; 2025 PunjabiMarriageForum. All rights reserved.</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <button onClick={() => handleNavigation("/privacy-policy")} className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
-              Privacy Policy
-            </button>
-            <button onClick={() => handleNavigation("/safety-standards")} className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
-              Safety Standards
-            </button>
-            <a href="#" className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline">
-              Terms of Service
-            </a>
-            
-          </div>
+        <div className="mt-12 border-t border-ivory/15 pt-6">
+          <p className="text-xs leading-5 text-ivory/50">
+            © {new Date().getFullYear()} Punjabi Rishtey. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

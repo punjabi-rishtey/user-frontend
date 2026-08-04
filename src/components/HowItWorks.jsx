@@ -1,197 +1,167 @@
-import React from 'react';
-import { UserPlus, Search, Heart, MessageSquare } from 'lucide-react';
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Play } from "lucide-react";
+import Section from "@/components/Section";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useAppNav } from "@/hooks/useAppNav";
 
-const HowItWorks = () => {
-    const steps = [
-        {
-            title: 'Sign Up',
-            description: 'Create your profile and join our vibrant community.',
-            icon: <UserPlus className="text-orange-800 w-10 h-10" />
-        },
-        {
-            title: 'Find Matches',
-            description: 'Browse and search for compatible profiles with traditional values.',
-            icon: <Search className="text-orange-800 w-10 h-10" />
-        },
-        {
-            title: 'Express Interest',
-            description: 'Connect with potential partners.',
-            icon: <Heart className="text-orange-800 w-10 h-10" />
-        },
-        {
-            title: 'Start Your Journey',
-            description: 'Chat, build connections, and take the first step towards shaadi.',
-            icon: <MessageSquare className="text-orange-800 w-10 h-10" />
-        }
-    ];
+/**
+ * Drop real demo URLs into `videoSrc` when ready (mp4 under /public or CDN).
+ * Leave null to keep the expandable placeholder.
+ */
+const steps = [
+  {
+    step: "01",
+    title: "Create your profile",
+    body: "Share who you are: family, education, profession, and what you seek in a partner.",
+    demoLabel: "Watch: how to register",
+    videoSrc: null,
+  },
+  {
+    step: "02",
+    title: "Unlock Gold",
+    body: "One clear plan: ₹2,000 a year. Verified by the Punjabi Rishtey team after your UPI payment.",
+    demoLabel: "Watch: membership & payment",
+    videoSrc: null,
+  },
+  {
+    step: "03",
+    title: "Meet with intention",
+    body: "Browse opposite-gender profiles. Reach out through support, or directly when a number is shared.",
+    demoLabel: "Watch: browsing & connecting",
+    videoSrc: null,
+  },
+];
 
-    return (
-        <div className="relative bg-amber-50 py-12 sm:py-16 overflow-hidden">
-            {/* Traditional Indian Pattern Background - Top Border */}
-            <div className="absolute top-0 left-0 right-0 h-8 bg-orange-800 overflow-hidden">
-                <div className="flex justify-center">
-                    {Array.from({ length: 30 }).map((_, index) => (
-                        <div key={`top-pattern-${index}`} className="w-8 h-8 relative">
-                            <div className="absolute inset-0 bg-orange-700 rotate-45 transform origin-center scale-50"></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+export default function HowItWorks() {
+  const { navigate, isAuthenticated } = useAppNav();
+  const [activeDemo, setActiveDemo] = useState(null);
 
-            {/* Lotus Pattern Left */}
-            <div className="absolute left-0 top-1/3 w-32 h-32 opacity-10">
-                <svg viewBox="0 0 100 100" className="w-full h-full text-orange-800 fill-current">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                        <path
-                            key={`lotus-petal-left-${i}`}
-                            d={`M 50 50 
-                                Q ${50 + 25 * Math.cos(i * Math.PI / 4)} ${50 + 25 * Math.sin(i * Math.PI / 4)}, 
-                                  ${50 + 50 * Math.cos(i * Math.PI / 4)} ${50 + 50 * Math.sin(i * Math.PI / 4)}
-                                Q ${50 + 25 * Math.cos((i + 0.5) * Math.PI / 4)} ${50 + 25 * Math.sin((i + 0.5) * Math.PI / 4)},
-                                  50 50`}
-                        />
-                    ))}
-                    <circle cx="50" cy="50" r="10" />
-                </svg>
-            </div>
+  return (
+    <Section
+      id="how-it-works"
+      eyebrow="How it works"
+      title="Three clear steps to a serious match"
+      description="Built for Punjabi families who want clarity, privacy, and a premium experience, not endless swiping."
+    >
+      <div className="grid items-stretch gap-10 md:grid-cols-3 md:gap-8">
+        {steps.map((item, index) => (
+          <motion.div
+            key={item.step}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.5, delay: index * 0.08 }}
+            className="flex h-full flex-col gap-4 border-t border-border pt-6"
+          >
+            <span className="font-display text-sm tracking-[0.15em] text-maroon">
+              {item.step}
+            </span>
+            <h3 className="font-display text-2xl font-semibold text-brown">
+              {item.title}
+            </h3>
+            <p className="text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {item.body}
+            </p>
 
-            {/* Lotus Pattern Right */}
-            <div className="absolute right-0 top-2/3 w-32 h-32 opacity-10">
-                <svg viewBox="0 0 100 100" className="w-full h-full text-orange-800 fill-current">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                        <path
-                            key={`lotus-petal-right-${i}`}
-                            d={`M 50 50 
-                                Q ${50 + 25 * Math.cos(i * Math.PI / 4)} ${50 + 25 * Math.sin(i * Math.PI / 4)}, 
-                                  ${50 + 50 * Math.cos(i * Math.PI / 4)} ${50 + 50 * Math.sin(i * Math.PI / 4)}
-                                Q ${50 + 25 * Math.cos((i + 0.5) * Math.PI / 4)} ${50 + 25 * Math.sin((i + 0.5) * Math.PI / 4)},
-                                  50 50`}
-                        />
-                    ))}
-                    <circle cx="50" cy="50" r="10" />
-                </svg>
-            </div>
+            <button
+              type="button"
+              onClick={() => setActiveDemo(item)}
+              className="group relative mt-auto aspect-video w-full overflow-hidden rounded-sm border border-border bg-gradient-to-br from-ivory via-paper to-muted text-left outline-none transition-[border-color,box-shadow] hover:border-maroon/35 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={`${item.demoLabel}, open demo`}
+            >
+              <div
+                className="pointer-events-none absolute inset-0 opacity-60"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 30% 40%, color-mix(in oklab, var(--color-maroon) 12%, transparent), transparent 55%), radial-gradient(circle at 70% 70%, color-mix(in oklab, var(--color-brown) 8%, transparent), transparent 50%)",
+                }}
+                aria-hidden
+              />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
+                <span className="flex size-12 items-center justify-center rounded-full bg-maroon text-primary-foreground shadow-sm transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none">
+                  <Play className="size-5 fill-current" aria-hidden />
+                </span>
+                <span className="font-display text-sm font-medium tracking-wide text-brown">
+                  {item.demoLabel}
+                </span>
+              </div>
+            </button>
+          </motion.div>
+        ))}
+      </div>
 
-            {/* Traditional Rangoli Pattern Background */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-                <svg viewBox="0 0 600 600" className="w-full max-w-4xl text-orange-800 fill-current">
-                    <circle cx="300" cy="300" r="15" />
-                    <path d="M300,240 L360,300 L300,360 L240,300 Z" fillOpacity="0.7" />
-                    <circle cx="300" cy="300" r="100" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="10,5" />
-                    <circle cx="300" cy="300" r="150" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="15,5" />
-                    <circle cx="300" cy="300" r="200" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="5,10" />
-                    {Array.from({ length: 16 }).map((_, i) => (
-                        <line
-                            key={`rangoli-line-${i}`}
-                            x1="300"
-                            y1="300"
-                            x2={300 + 250 * Math.cos(i * Math.PI / 8)}
-                            y2={300 + 250 * Math.sin(i * Math.PI / 8)}
-                            stroke="currentColor"
-                            strokeWidth="1"
-                            strokeDasharray="8,12"
-                        />
-                    ))}
-                    {Array.from({ length: 24 }).map((_, i) => (
-                        <circle
-                            key={`rangoli-dot-${i}`}
-                            cx={300 + 230 * Math.cos(i * Math.PI / 12)}
-                            cy={300 + 230 * Math.sin(i * Math.PI / 12)}
-                            r="5"
-                        />
-                    ))}
-                </svg>
-            </div>
+      <div className="flex justify-center pt-4">
+        <Button
+          size="lg"
+          onClick={() =>
+            navigate(isAuthenticated ? "/membership" : "/signup")
+          }
+        >
+          Begin with Gold
+        </Button>
+      </div>
 
-            {/* Subtle kolam-inspired dot pattern */}
-            <div className="absolute inset-0 opacity-7 pointer-events-none">
-                <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-                    <pattern id="kolam-dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-                        <circle cx="5" cy="5" r="1" fill="#4F2F1D" opacity="0.3" />
-                        <circle cx="15" cy="15" r="1" fill="#4F2F1D" opacity="0.3" />
-                        <circle cx="25" cy="25" r="1" fill="#4F2F1D" opacity="0.3" />
-                    </pattern>
-                    <rect x="0" y="0" width="100%" height="100%" fill="url(#kolam-dots)" />
-                </svg>
-            </div>
+      <Dialog
+        open={Boolean(activeDemo)}
+        onOpenChange={(open) => {
+          if (!open) setActiveDemo(null);
+        }}
+      >
+        <DialogContent
+          className="gap-0 overflow-hidden p-0 sm:max-w-2xl"
+          showCloseButton
+        >
+          {activeDemo ? (
+            <>
+              <DialogHeader className="border-b border-border px-5 py-4 pr-12">
+                <DialogTitle className="font-display text-xl text-brown">
+                  {activeDemo.title}
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground">
+                  {activeDemo.demoLabel}
+                </DialogDescription>
+              </DialogHeader>
 
-            {/* Main Content */}
-            <div className="container mx-auto px-4 text-center relative z-10">
-                {/* Decorative divider above title */}
-                <div className="flex justify-center mb-6">
-                    <div className="relative w-64 h-1">
-                        <div className="absolute inset-0 bg-orange-800"></div>
-                        <div className="absolute inset-x-0 -top-1.5 mx-auto w-8 h-4 bg-amber-50">
-                            <div className="w-8 h-4 bg-amber-50 rotate-45 transform origin-center translate-y-0.5"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <h2 className="text-3xl sm:text-4xl mb-2 text-orange-800 font-medium relative inline-block"
-                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}>
-                    How It Works
-                    {/* Decorative underline */}
-                    <span className="absolute bottom-0 left-0 right-0 h-1 bg-orange-800 opacity-30"></span>
-                </h2>
-
-                {/* Traditional Indian swirl decorative element */}
-                <div className="flex justify-center mb-6 mt-2">
-                    <svg viewBox="0 0 100 20" className="h-4 text-orange-800 fill-current opacity-70">
-                        <path d="M20,10 Q30,5 40,10 T60,10 T80,10" fill="none" stroke="currentColor" strokeWidth="2" />
-                        <circle cx="10" cy="10" r="2" />
-                        <circle cx="90" cy="10" r="2" />
-                    </svg>
-                </div>
-
-                <p className="text-base sm:text-lg text-orange-900 mb-8 sm:mb-12 max-w-2xl mx-auto"
-                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}>
-                    Follow these simple steps to begin your journey.
-                </p>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 max-w-7xl mx-auto">
-                    {steps.map((step, index) => (
-                        <div
-                            key={index}
-                            className="relative bg-gradient-to-b from-amber-50 to-orange-50 px-4 py-6 rounded-lg shadow-md border border-orange-200 group transition duration-300 ease-in-out hover:shadow-lg hover:scale-105"
-                        >
-                            {/* Corner decorative patterns */}
-                            <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-orange-800 opacity-60 rounded-tl"></div>
-                            <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-orange-800 opacity-60 rounded-tr"></div>
-                            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-orange-800 opacity-60 rounded-bl"></div>
-                            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-orange-800 opacity-60 rounded-br"></div>
-
-                            <div className="relative z-10">
-                                <div className="mb-4 flex justify-center">
-                                    <div className="bg-orange-100 rounded-full p-2 group-hover:bg-orange-200 transition duration-300">
-                                        {step.icon}
-                                    </div>
-                                </div>
-                                <h3 className="text-xl sm:text-2xl mb-2 text-orange-900"
-                                    style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}>
-                                    {step.title}
-                                </h3>
-                                <p className="text-orange-800 text-sm sm:text-base"
-                                    style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}>
-                                    {step.description}
-                                </p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Traditional Indian Pattern Background - Bottom Border */}
-            <div className="absolute bottom-0 left-0 right-0 h-8 bg-orange-800 overflow-hidden">
-                <div className="flex justify-center">
-                    {Array.from({ length: 30 }).map((_, index) => (
-                        <div key={`bottom-pattern-${index}`} className="w-8 h-8 relative">
-                            <div className="absolute inset-0 bg-orange-700 rotate-45 transform origin-center scale-50"></div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
-
-export default HowItWorks;
+              <div className="bg-brown/95">
+                {activeDemo.videoSrc ? (
+                  <video
+                    key={activeDemo.videoSrc}
+                    className="aspect-video w-full"
+                    controls
+                    playsInline
+                    autoPlay
+                    src={activeDemo.videoSrc}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <div className="flex aspect-video w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-brown to-maroon/90 px-6 text-center">
+                    <span className="flex size-14 items-center justify-center rounded-full border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground">
+                      <Play className="size-6 fill-current" aria-hidden />
+                    </span>
+                    <p className="font-display text-lg text-primary-foreground">
+                      Demo video coming soon
+                    </p>
+                    <p className="max-w-sm text-sm text-primary-foreground/70">
+                      This slot will play a short walkthrough of “
+                      {activeDemo.title.toLowerCase()}” once the recording is
+                      ready.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </Section>
+  );
+}

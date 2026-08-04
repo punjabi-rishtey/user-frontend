@@ -2,11 +2,9 @@ import { useState, useEffect } from "react";
 import { apiUrl } from "../config/constants";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-// import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
-import Footer from "./Footer";
-import Header from "./Header";
-// import ProfileSlider from "./ProfileSlider";
+import PageShell from "./PageShell";
+import MembershipRequired from "./MembershipRequired";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
@@ -572,60 +570,27 @@ const FindPartner = () => {
   // Loading indicator
   if (!authChecked) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">
-            Checking authentication...
-          </div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking authentication…
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
   // Incomplete profile message
   if (!profileComplete) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2
-              className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              Profile Incomplete
-            </h2>
-            <p
-              className="text-[#6B4132] mb-6 text-center"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              Your profile must be at least 70% complete to access the partner
-              search feature.
-            </p>
-            <div className="flex justify-center">
-              <button
-                onClick={() => navigate("/profilepage")}
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                Complete Your Profile
-              </button>
-            </div>
-          </div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center px-6 py-20">
+          <MembershipRequired
+            title="Complete your profile first"
+            description="Your profile must be at least 70% complete before you can search for a partner."
+            ctaLabel="Complete your profile"
+            onCta={() => navigate("/profilepage")}
+          />
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
@@ -635,410 +600,244 @@ const FindPartner = () => {
 
   if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center h-[50vh]">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2
-              className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              {isSubscriptionExpired
-                ? "Your subscription has expired"
-                : "You don't have any active membership"}
-            </h2>
-            <div className="flex justify-center">
-              <button
-                onClick={() => navigate("/membership")}
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                {isSubscriptionExpired ? "Renew Membership" : "Buy Membership"}
-              </button>
-            </div>
+      <PageShell>
+        <div className="relative min-h-[70vh] overflow-hidden px-6 py-16">
+          <div className="pointer-events-none mx-auto grid max-w-5xl grid-cols-2 gap-4 opacity-60 blur-sm sm:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-[3/4] rounded-xl border border-border bg-secondary"
+              />
+            ))}
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-paper/40 px-6 backdrop-blur-[2px]">
+            <MembershipRequired
+              title={
+                isSubscriptionExpired
+                  ? "Your Gold membership has expired"
+                  : "Gold unlocks full profiles"
+              }
+              description="Verified Punjabi matches are waiting. Unlock Gold for ₹2,000 a year to browse with confidence."
+              ctaLabel={
+                isSubscriptionExpired ? "Renew Gold" : "Unlock with Gold"
+              }
+            />
           </div>
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
+  const filterFieldClass =
+    "w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-ink focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20";
+
+  const renderFilterFields = (forMobile = false) => (
+    <div className="flex flex-col gap-4">
+      <div>
+        <label className="mb-2 block text-sm font-medium text-brown">
+          Age Range
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            name="ageMin"
+            placeholder="Min"
+            value={filters.ageMin}
+            onChange={handleChange}
+            min="18"
+            max="100"
+            className={filterFieldClass}
+          />
+          <span className="text-muted-foreground">to</span>
+          <input
+            type="number"
+            name="ageMax"
+            placeholder="Max"
+            value={filters.ageMax}
+            onChange={handleChange}
+            min="18"
+            max="100"
+            className={filterFieldClass}
+          />
+        </div>
+      </div>
+      {filterOptions.map(({ label, name, options }, index) => (
+        <div key={index}>
+          <label className="mb-2 block text-sm font-medium text-brown">
+            {label}
+          </label>
+          <select
+            name={name}
+            value={filters[name]}
+            onChange={handleChange}
+            className={filterFieldClass}
+          >
+            <option value="">{forMobile ? `Select ${label}` : `Any ${label}`}</option>
+            {Array.isArray(options)
+              ? options.map((option, idx) => {
+                  if (option && typeof option === "object" && "value" in option) {
+                    return (
+                      <option key={idx} value={option.value}>
+                        {option.label || formatOption(option.value)}
+                      </option>
+                    );
+                  }
+                  return (
+                    <option key={idx} value={option}>
+                      {formatOption(option)}
+                    </option>
+                  );
+                })
+              : null}
+          </select>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="rounded-lg bg-maroon px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-maroon/90"
+        onClick={handleClearFilters}
+      >
+        Clear filters
+      </button>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">Loading profiles...</div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Loading profiles…
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
   if (error && profileComplete) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#990000] text-xl">{error}</div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-maroon">
+          {error}
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
   return (
-    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-      <Header />
-      <div className="container mx-auto px-4 sm:px-8 my-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+    <PageShell>
+      <div className="border-b border-border px-4 py-6 sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center">
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder="Search by name…"
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full sm:w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            className="w-full flex-1 rounded-lg border border-border bg-card px-4 py-3 text-ink focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20"
           />
           <select
             value={sortOption}
             onChange={handleSortChange}
-            className="w-full sm:w-1/4 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            className="w-full rounded-lg border border-border bg-card px-4 py-3 text-ink sm:w-56 focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20"
           >
-            <option value="newest">Newest First</option>
-            <option value="alphabetical-asc">Alphabetical (A-Z)</option>
-            <option value="alphabetical-desc">Alphabetical (Z-A)</option>
+            <option value="newest">Newest first</option>
+            <option value="alphabetical-asc">Alphabetical (A–Z)</option>
+            <option value="alphabetical-desc">Alphabetical (Z–A)</option>
           </select>
           <button
-            className="md:hidden bg-[#4F2F1D] text-[#E5D3C8] px-4 py-2 rounded-lg"
+            type="button"
+            className="rounded-lg bg-brown px-4 py-3 text-sm font-medium text-ivory md:hidden"
             onClick={() => setShowFilters(!showFilters)}
           >
-            {showFilters ? "Hide Filters" : "Show Filters"}
+            {showFilters ? "Hide filters" : "Show filters"}
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row flex-grow">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-8 md:flex-row">
         <div
-          className={`fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
-            showFilters ? "opacity-100" : "opacity-0 pointer-events-none"
+          className={`fixed inset-0 z-50 bg-brown-deep/30 backdrop-blur-sm transition-opacity md:hidden ${
+            showFilters ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
           onClick={() => setShowFilters(false)}
         />
-        <div
-          className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#6B4132] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 overflow-y-auto ${
+        <aside
+          className={`fixed top-0 left-0 z-50 h-full w-72 overflow-y-auto border-r border-border bg-card p-5 transition-transform md:hidden ${
             showFilters ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2
-              className="text-2xl text-[#E5D3C8]"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              Filters
-            </h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="font-display text-2xl text-brown">Filters</h2>
             <button
-              className="text-[#E5D3C8] p-2"
+              type="button"
+              className="text-muted-foreground"
               onClick={() => setShowFilters(false)}
             >
               ✕
             </button>
           </div>
-          <div className="space-y-4">
-            <div className="mb-4">
-              <label
-                className="block text-[#E5D3C8] mb-2"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                Age Range
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="number"
-                  name="ageMin"
-                  placeholder="Min"
-                  value={filters.ageMin}
-                  onChange={handleChange}
-                  min="18"
-                  max="100"
-                  className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                />
-                <input
-                  type="number"
-                  name="ageMax"
-                  placeholder="Max"
-                  value={filters.ageMax}
-                  onChange={handleChange}
-                  min="18"
-                  max="100"
-                  className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                />
-              </div>
-            </div>
-            {filterOptions.map(({ label, name, options }, index) => (
-              <div className="mb-4" key={index}>
-                <label
-                  className="block text-[#E5D3C8] mb-2"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {label}
-                </label>
-                <select
-                  name={name}
-                  value={filters[name]}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  <option value="">Select {label}</option>
-                  {Array.isArray(options)
-                    ? options.map((option, idx) => {
-                        if (
-                          option &&
-                          typeof option === "object" &&
-                          "value" in option
-                        ) {
-                          return (
-                            <option key={idx} value={option.value}>
-                              {option.label || formatOption(option.value)}
-                            </option>
-                          );
-                        } else {
-                          return (
-                            <option key={idx} value={option}>
-                              {formatOption(option)}
-                            </option>
-                          );
-                        }
-                      })
-                    : null}
-                </select>
-              </div>
-            ))}
-            <button
-              className="w-full bg-[#4F2F1D] hover:bg-[#6B4132] text-[#E5D3C8] font-bold py-2 px-4 rounded-lg transition duration-300 mt-4"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-              onClick={handleClearFilters}
-            >
-              Clear Filters
-            </button>
+          {renderFilterFields(true)}
+        </aside>
+
+        <aside className="hidden w-72 shrink-0 md:block">
+          <div className="sticky top-6 rounded-xl border border-border bg-card p-6">
+            <h2 className="mb-6 font-display text-2xl text-brown">Filters</h2>
+            {renderFilterFields(false)}
           </div>
-        </div>
-        <div className="hidden md:block w-1/4 p-6 bg-[#F5EDE7] shadow-lg md:sticky md:top-0 md:h-screen md:overflow-y-auto ml-8 rounded-lg border border-[#E5D3C8]">
-          <h2
-            className="text-2xl mb-6 text-[#4F2F1D]"
-            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-          >
-            Filters
-          </h2>
-          <div className="mb-6">
-            <label
-              className="block text-[#6B4132] mb-2"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              Age Range
-            </label>
-            <div className="flex space-x-3 items-center">
-              <input
-                type="number"
-                name="ageMin"
-                placeholder="Min"
-                value={filters.ageMin}
-                onChange={handleChange}
-                min="18"
-                max="100"
-                className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              />
-              <span className="text-[#6B4132]">to</span>
-              <input
-                type="number"
-                name="ageMax"
-                placeholder="Max"
-                value={filters.ageMax}
-                onChange={handleChange}
-                min="18"
-                max="100"
-                className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              />
-            </div>
-          </div>
-          {filterOptions.map(({ label, name, options }, index) => (
-            <div className="mb-4" key={index}>
-              <label
-                className="block text-[#6B4132] mb-2"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                {label}
-              </label>
-              <select
-                name={name}
-                value={filters[name]}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                <option value="">Any {label}</option>
-                {Array.isArray(options)
-                  ? options.map((option, idx) => {
-                      if (
-                        option &&
-                        typeof option === "object" &&
-                        "value" in option
-                      ) {
-                        return (
-                          <option key={idx} value={option.value}>
-                            {option.label || formatOption(option.value)}
-                          </option>
-                        );
-                      } else {
-                        return (
-                          <option key={idx} value={option}>
-                            {formatOption(option)}
-                          </option>
-                        );
-                      }
-                    })
-                  : null}
-              </select>
-            </div>
-          ))}
-          <button
-            className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-            onClick={handleClearFilters}
-          >
-            Clear Filters
-          </button>
-        </div>
-        <div className="w-full md:w-3/4 p-4 sm:p-8">
-          <div className="mb-4 text-[#4F2F1D]">
-            <p>
-              Showing {currentProfiles.length} of {sortedFilteredData.length}{" "}
-              profiles
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
+        </aside>
+
+        <div className="min-w-0 flex-1">
+          <p className="mb-4 text-sm text-muted-foreground">
+            Showing {currentProfiles.length} of {sortedFilteredData.length}{" "}
+            profiles
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
             {sortedFilteredData.length === 0 ? (
-              <div className="col-span-2 text-center py-8 text-[#4F2F1D]">
+              <div className="col-span-full py-12 text-center text-muted-foreground">
                 No profiles match your search criteria.
               </div>
             ) : (
               currentProfiles.map((item) => (
-                <motion.div
+                <motion.button
+                  type="button"
                   key={item._id}
                   variants={cardVariants}
                   initial="initial"
                   animate="animate"
                   whileHover="hover"
-                  className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
+                  className="rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-brown/40 sm:p-5"
                   onClick={() => handleProfileClick(item)}
                 >
-                  <div className="flex items-center flex-col sm:flex-row">
+                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
                     <img
                       src={item.profile_picture || profileIcon}
-                      alt={item.name}
-                      className="w-28 h-28 sm:w-32 sm:h-36 rounded-md mb-4 sm:mb-0 sm:mr-6 object-cover object-top"
+                      alt=""
+                      className="size-28 rounded-lg object-cover object-top sm:h-36 sm:w-32"
                     />
-                    <div className="text-center sm:text-left">
-                      <h3
-                        className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
-                        style={{
-                          fontFamily: "'Tiempos Headline', serif",
-                          fontWeight: 400,
-                        }}
-                      >
+                    <div className="min-w-0 flex-1 text-center sm:text-left">
+                      <h3 className="font-display text-xl font-semibold text-brown">
                         {item.name}
                       </h3>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Age:</strong> {item.age || "Not specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Occupation:</strong>{" "}
-                        {formatOption(item.occupation) || "Not specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Location:</strong>{" "}
-                        {item.city?.trim() || "Not Specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Marital Status:</strong>{" "}
-                        {normalizeMaritalStatus(item.marital_status) ||
-                          "Not specified"}
-                      </p>
+                      <div className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground">
+                        <p>
+                          <span className="text-brown">Age:</span>{" "}
+                          {item.age || "Not specified"}
+                        </p>
+                        <p>
+                          <span className="text-brown">Occupation:</span>{" "}
+                          {formatOption(item.occupation) || "Not specified"}
+                        </p>
+                        <p>
+                          <span className="text-brown">Location:</span>{" "}
+                          {item.city?.trim() || "Not Specified"}
+                        </p>
+                        <p>
+                          <span className="text-brown">Marital status:</span>{" "}
+                          {normalizeMaritalStatus(item.marital_status) ||
+                            "Not specified"}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </motion.div>
+                </motion.button>
               ))
             )}
           </div>
@@ -1052,8 +851,7 @@ const FindPartner = () => {
           )}
         </div>
       </div>
-      <Footer />
-    </div>
+    </PageShell>
   );
 };
 

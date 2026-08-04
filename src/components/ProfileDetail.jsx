@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, useScroll } from "framer-motion";
-import Footer from "./Footer";
-import Header from "./Header";
-import ProfilePhotosLayout from "./ProfilePhotosLayout"; // Import the new component
+import PageShell from "./PageShell";
+import MembershipRequired from "./MembershipRequired";
+import ProfilePhotosLayout from "./ProfilePhotosLayout";
 import AboutLookingSection from "./AboutLookingSection";
+import { Button } from "@/components/ui/button";
 import {
   FaHeart,
   FaUser,
@@ -27,56 +28,23 @@ import {
   SUPPORT_WHATSAPP_LINK,
 } from "../config/constants";
 
-// Define a vibrant color palette for different card types
+// Hybrid brand surfaces (atelier paper + brown ink) - no Material rainbow
+const brandCard = {
+  bg: "#FFFcf8",
+  border: "#E5D9CE",
+  title: "#4F2F1D",
+  icon: "#990000",
+  label: "#6B5344",
+  value: "#1C1410",
+};
+
 const cardColorSchemes = {
-  basicDetails: {
-    bg: "#E3F2FD", // Light blue
-    border: "#90CAF9",
-    title: "#1565C0",
-    icon: "#1565C0",
-    label: "#0D47A1",
-    value: "#1976D2",
-  },
-  lifestyle: {
-    bg: "#F3E5F5", // Light purple
-    border: "#CE93D8",
-    title: "#7B1FA2",
-    icon: "#7B1FA2",
-    label: "#4A148C",
-    value: "#8E24AA",
-  },
-  horoscope: {
-    bg: "#FFF3E0", // Light orange
-    border: "#FFCC80",
-    title: "#E65100",
-    icon: "#E65100",
-    label: "#BF360C",
-    value: "#EF6C00",
-  },
-  education: {
-    bg: "#E8F5E9", // Light green
-    border: "#A5D6A7",
-    title: "#2E7D32",
-    icon: "#2E7D32",
-    label: "#1B5E20",
-    value: "#388E3C",
-  },
-  profession: {
-    bg: "#E0F7FA", // Light cyan
-    border: "#80DEEA",
-    title: "#00838F",
-    icon: "#00838F",
-    label: "#006064",
-    value: "#0097A7",
-  },
-  family: {
-    bg: "#FFF8E1", // Light amber
-    border: "#FFE082",
-    title: "#FF8F00",
-    icon: "#FF8F00",
-    label: "#FF6F00",
-    value: "#FFA000",
-  },
+  basicDetails: brandCard,
+  lifestyle: brandCard,
+  horoscope: brandCard,
+  education: brandCard,
+  profession: brandCard,
+  family: brandCard,
 };
 
 const ProfileDetail = () => {
@@ -215,13 +183,11 @@ const ProfileDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">Loading profile data...</div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Loading profile…
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
@@ -232,13 +198,26 @@ const ProfileDetail = () => {
       error.toLowerCase().includes("renew") ||
       error.toLowerCase().includes("subscription");
 
+    if (isMembershipError) {
+      return (
+        <PageShell>
+          <div className="flex flex-1 items-center justify-center px-6 py-20">
+            <MembershipRequired
+              title="Gold membership required"
+              description={error}
+              ctaLabel="Unlock with Gold"
+            />
+          </div>
+        </PageShell>
+      );
+    }
+
     return (
-      <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center px-4 py-12">
-          <div className="w-full max-w-xl rounded-2xl border border-[#E8DED7] bg-white p-6 shadow-[0_18px_45px_rgba(79,47,29,0.10)] sm:p-8">
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center px-4 py-12">
+          <div className="w-full max-w-xl rounded-xl border border-border bg-card p-6 sm:p-8">
             <div className="mb-5 flex items-start gap-3">
-              <div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5EDE7] text-[#990000]">
+              <div className="mt-1 flex size-9 shrink-0 items-center justify-center rounded-full bg-secondary text-maroon">
                 {isPrivateProfileError ? (
                   <FaLock aria-hidden="true" />
                 ) : (
@@ -246,106 +225,70 @@ const ProfileDetail = () => {
                 )}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[#990000]">
-                  {isPrivateProfileError
-                    ? "Profile Unavailable"
-                    : isMembershipError
-                      ? "Membership Required"
-                      : "Error"}
+                <h2 className="font-display text-2xl font-semibold text-brown">
+                  {isPrivateProfileError ? "Profile unavailable" : "Something went wrong"}
                 </h2>
-                <p className="mt-2 leading-relaxed text-[#4F2F1D]">{error}</p>
+                <p className="mt-2 leading-relaxed text-muted-foreground">
+                  {error}
+                </p>
               </div>
             </div>
             {isPrivateProfileError && (
-              <div className="mb-6 border-t border-[#E8DED7] pt-5">
-                <p className="mb-3 text-sm font-semibold uppercase tracking-[0.08em] text-[#8A6A58]">
+              <div className="mb-6 border-t border-border pt-5">
+                <p className="mb-3 text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                   Request an introduction
                 </p>
                 {renderSupportLinks()}
               </div>
             )}
             <div className="flex flex-col gap-3 sm:flex-row">
-              <button
-                className="inline-flex min-h-[42px] items-center justify-center rounded-full bg-[#4F2F1D] px-5 py-2 text-sm font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-[#6B4132] active:scale-[0.98]"
-                onClick={handleGoBack}
-              >
-                Go Back
-              </button>
-              {isMembershipError ? (
-                <button
-                  className="inline-flex min-h-[42px] items-center justify-center rounded-full bg-[#990000] px-5 py-2 text-sm font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-[#800000] active:scale-[0.98]"
-                  onClick={() => navigate("/membership")}
-                >
-                  Renew Membership
-                </button>
-              ) : !isPrivateProfileError && (
-                <button
-                  className="inline-flex min-h-[42px] items-center justify-center rounded-full bg-[#990000] px-5 py-2 text-sm font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-[#800000] active:scale-[0.98]"
+              <Button variant="outline" onClick={handleGoBack}>
+                Go back
+              </Button>
+              {!isPrivateProfileError && (
+                <Button
                   onClick={() => {
                     logout();
                     navigate("/");
                   }}
                 >
                   Logout
-                </button>
+                </Button>
               )}
             </div>
           </div>
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">No profile data found.</div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          No profile data found.
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
-  // Subscription status check
   const isSubscriptionExpired =
     user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
 
   if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
     return (
-      <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2
-              className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              {isSubscriptionExpired
-                ? "Your subscription has expired"
-                : "You don't have any active membership"}
-            </h2>
-            <div className="flex justify-center">
-              <button
-                onClick={() => navigate("/membership")}
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                {isSubscriptionExpired ? "Renew Membership" : "Buy Membership"}
-              </button>
-            </div>
-          </div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center px-6 py-20">
+          <MembershipRequired
+            title={
+              isSubscriptionExpired
+                ? "Your Gold membership has expired"
+                : "Gold unlocks this profile"
+            }
+            ctaLabel={isSubscriptionExpired ? "Renew Gold" : "Unlock with Gold"}
+          />
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
@@ -590,41 +533,26 @@ const ProfileDetail = () => {
     familyDetails["City"] = profileData.location.city;
   }
 
-  // Card variants for animation
-  const getCardVariants = () => {
-    return {
-      initial: { opacity: 0, y: 20 },
-      animate: { opacity: 1, y: 0 },
-      hover: {
-        scale: 1.05,
-        boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
-        transition: { duration: 0.3 },
-      },
-    };
-  };
+  const getCardVariants = () => ({
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+  });
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FCF9F2]">
-      <Header />
-
-      {/* Back Button */}
-      <div className="container mx-auto px-6 mt-8">
-        <button
-          className="bg-[#4F2F1D] hover:bg-[#6B4132] text-[#E5D3C8] font-bold py-2 px-4 rounded-full transition duration-300 shadow-lg flex items-center"
-          onClick={handleGoBack}
-          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-        >
-          <FaArrowLeft className="mr-2" /> Back to Search
-        </button>
+    <PageShell>
+      <div className="mx-auto w-full max-w-6xl px-6 pt-8">
+        <Button variant="outline" onClick={handleGoBack} className="gap-2">
+          <FaArrowLeft /> Back to search
+        </Button>
+        <header className="mt-10 mb-8 text-center">
+          <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+            Profile
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-semibold text-brown sm:text-5xl">
+            {profileData.name}
+          </h1>
+        </header>
       </div>
-
-      {/* Profile Name */}
-      <h2
-        className="text-5xl font-bold text-center text-[#4F2F1D] mt-10 mb-6"
-        style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-      >
-        {profileData.name}
-      </h2>
 
       {/* ProfilePhotosLayout Component - Replaces previous slideshow implementation */}
       <ProfilePhotosLayout photos={profileData.profile_pictures} />
@@ -1112,8 +1040,7 @@ const ProfileDetail = () => {
         )}
       </div>
 
-      <Footer />
-    </div>
+    </PageShell>
   );
 };
 

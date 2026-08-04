@@ -63,12 +63,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await axios.post(
         apiUrl("/api/users/login"),
-        credentials,
+        { ...credentials, clientType: "web" },
         {
           headers: { "Content-Type": "application/json" },
         }
       );
-      console.log("Response data:", response.data);
 
       if (response.data && response.data.token) {
         localStorage.setItem("currentUser", JSON.stringify(response.data.user));
@@ -76,18 +75,47 @@ export const AuthProvider = ({ children }) => {
         setUser(response.data.user);
         setIsAuthenticated(true);
         return true;
-      } else {
-        return false;
       }
+
+      return false;
     } catch (error) {
       console.error("Login error:", error);
+
+      if (!error.response) {
+        return "networkError";
+      }
+
+      if (
+        error.response?.status === 403 &&
+        error.response?.data?.code === "SESSION_LIMIT_REACHED"
+      ) {
+        return "sessionLimit";
+      }
+
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        await axios.post(
+          apiUrl("/api/users/logout"),
+          {},
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+      } catch (error) {
+        // Still clear local session even if the server revoke fails
+        console.error("Logout request failed:", error);
+      }
+    }
+
     clearStoredSession();
     setUser(null);
     setIsAuthenticated(false);

@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Header from "./Header";
-import Footer from "./Footer";
+import PageShell from "./PageShell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { apiUrl } from "../config/constants";
 import { authApi, isSessionExpiryError } from "../config/authClient";
 
@@ -280,12 +283,6 @@ const MembershipPage = () => {
     }
   };
 
-  const cardVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    hover: { scale: 1.05, transition: { duration: 0.3 } },
-  };
-
   const modalVariants = {
     hidden: { opacity: 0, scale: 0.9 },
     visible: { opacity: 1, scale: 1 },
@@ -298,16 +295,13 @@ const MembershipPage = () => {
     exit: { opacity: 0 },
   };
 
-  // Don't render anything substantial until we've checked authentication
   if (!authChecked) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">Loading...</div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Loading…
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
@@ -355,170 +349,137 @@ const MembershipPage = () => {
   //   );
   // }
 
-  // If payment was successful, show success message
   if (success) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2
-              className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              Payment Request Submitted
-            </h2>
-            <p
-              className="text-[#6B4132] mb-6 text-center"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              Your payment request has been submitted. Our team will verify the
-              screenshot and activate your membership shortly.
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center px-6 py-20">
+          <div className="w-full max-w-md rounded-xl border border-border bg-card px-8 py-12 text-center">
+            <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+              Punjabi Rishtey
             </p>
-            <div className="flex justify-center">
-              <button
-                onClick={() => {
-                  setSuccess(false);
-                  navigate("/");
-                }}
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                Go to Dashboard
-              </button>
-            </div>
+            <h2 className="mt-3 font-display text-3xl font-semibold text-brown">
+              Payment request submitted
+            </h2>
+            <p className="mt-4 text-muted-foreground leading-relaxed">
+              Our team will verify your screenshot and activate Gold shortly.
+              You will be able to browse profiles once approved.
+            </p>
+            <Button
+              className="mt-8"
+              onClick={() => {
+                setSuccess(false);
+                navigate("/");
+              }}
+            >
+              Back to home
+            </Button>
           </div>
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
+  const featuredPlan = plans[0];
+
   return (
-    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-      <Header />
-
-      <main className="flex-grow py-16 px-6">
-        <h2
-          className="text-5xl text-center mb-12 text-[#4F2F1D]"
-          style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-        >
-          Choose Your Perfect Plan
-        </h2>
-
-        {error && (
-          <div className="mb-8 max-w-3xl mx-auto bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
-            {error}
+    <PageShell>
+      <div className="px-6 py-16 sm:px-10">
+        <div className="mx-auto max-w-5xl">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+              Membership
+            </p>
+            <h1 className="mt-3 font-display text-4xl font-semibold text-brown sm:text-5xl">
+              Gold Membership
+            </h1>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+              One clear plan. Unlimited browsing of verified Punjabi profiles
+              for a year, verified personally by the Punjabi Rishtey team.
+            </p>
           </div>
-        )}
 
-        {loading ? (
-          <p className="text-center text-[#4F2F1D] text-xl">
-            Loading membership plans...
-          </p>
-        ) : (
-          <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto">
-            {plans.map((plan, index) => (
-              <motion.div
-                key={index}
-                variants={cardVariants}
-                initial="initial"
-                animate="animate"
-                whileHover="hover"
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="relative w-full md:w-[380px] p-8 rounded-lg shadow-lg hover:ring-2 hover:ring-[#4F2F1D] bg-[#F5EDE7] cursor-pointer"
-                onClick={() => handlePlanClick(plan)}
-              >
-                {plan.mostPopular && (
-                  <div
-                    className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-[#4F2F1D] text-[#E5D3C8] px-4 py-1 rounded-full z-10"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    Most Popular
-                  </div>
-                )}
+          {error && !showModal && (
+            <div className="mx-auto mt-8 max-w-2xl rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+              {error}
+            </div>
+          )}
 
-                <h3
-                  className="text-2xl mb-4 text-[#4F2F1D]"
-                  style={{
-                    fontFamily: "'Tiempos Headline', serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {plan.name}
-                </h3>
-                <p
-                  className="text-3xl mb-2 text-[#4F2F1D]"
-                  style={{
-                    fontFamily: "'Tiempos Headline', serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {formatPlanPrice(plan.price)}
-                  <span
-                    className="text-[#6B4132] text-lg ml-1"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    / {formatDuration(plan.duration)}
-                  </span>
-                </p>
-
-                <ul className="space-y-4 mb-8">
-                  {plan.features.map((feature, i) => (
+          {loading ? (
+            <p className="mt-16 text-center text-brown">Loading membership…</p>
+          ) : featuredPlan ? (
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mx-auto mt-14 grid max-w-4xl gap-10 rounded-xl border border-border bg-card p-8 md:grid-cols-[1.1fr_0.9fr] md:p-10"
+            >
+              <div className="flex flex-col gap-6">
+                <div>
+                  <h2 className="font-display text-3xl font-semibold text-brown">
+                    {featuredPlan.name || "Gold"}
+                  </h2>
+                  <p className="mt-2 font-display text-4xl text-maroon">
+                    {formatPlanPrice(featuredPlan.price)}
+                    <span className="ml-2 text-lg text-muted-foreground">
+                      / {formatDuration(featuredPlan.duration)}
+                    </span>
+                  </p>
+                </div>
+                <Separator />
+                <ul className="flex flex-col gap-3">
+                  {(featuredPlan.features || []).map((feature, i) => (
                     <li
                       key={i}
-                      className="flex items-center text-[#6B4132]"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                      }}
+                      className="flex gap-3 text-sm text-foreground sm:text-base"
                     >
-                      {feature.available ? (
-                        <span className="text-[#4F2F1D] mr-2">✓</span>
-                      ) : (
-                        <span className="text-[#8B7355] mr-2">✕</span>
-                      )}
-                      {feature.feature}
+                      <span className="text-maroon">
+                        {feature.available ? "✓" : "–"}
+                      </span>
+                      <span
+                        className={
+                          feature.available
+                            ? "text-ink"
+                            : "text-muted-foreground line-through"
+                        }
+                      >
+                        {feature.feature}
+                      </span>
                     </li>
                   ))}
                 </ul>
-
-                <button
-                  className="w-full py-3 text-[#E5D3C8] bg-[#4F2F1D] rounded-md hover:bg-[#6B4132] transition-colors"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 500,
-                  }}
+                <Button
+                  size="lg"
+                  className="mt-2 w-full sm:w-auto"
+                  onClick={() => handlePlanClick(featuredPlan)}
                 >
-                  Select Plan
-                </button>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </main>
+                  Unlock with Gold
+                </Button>
+              </div>
+              <div className="flex flex-col justify-center gap-4 rounded-lg border border-border bg-secondary/40 p-6">
+                <p className="font-display text-xl text-brown">What you unlock</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Browse opposite-gender profiles, open full details, and
+                  connect with intention, through support, or directly when a
+                  phone number is available.
+                </p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  Pay via UPI, upload your screenshot, and we activate your
+                  year after a quick human check.
+                </p>
+              </div>
+            </motion.div>
+          ) : (
+            <p className="mt-16 text-center text-muted-foreground">
+              No membership plans available right now.
+            </p>
+          )}
+        </div>
+      </div>
 
-      {/* Payment Modal */}
       <AnimatePresence>
         {showModal && selectedPlan && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center p-4 overflow-y-auto"
+              className="fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-brown-deep/50 p-4"
               variants={backgroundVariants}
               initial="hidden"
               animate="visible"
@@ -526,190 +487,119 @@ const MembershipPage = () => {
               onClick={closeModal}
             >
               <motion.div
-                className="bg-white rounded-lg p-6 w-full max-w-3xl my-8 z-50"
+                className="z-50 my-8 w-full max-w-3xl rounded-xl border border-border bg-card p-6"
                 variants={modalVariants}
                 initial="hidden"
                 animate="visible"
                 exit="exit"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex justify-between items-center mb-6">
-                  <h3
-                    className="text-xl text-[#4F2F1D]"
-                    style={{
-                      fontFamily: "'Tiempos Headline', serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    Complete Your {selectedPlan.name} Subscription
+                <div className="mb-6 flex items-center justify-between">
+                  <h3 className="font-display text-xl text-brown sm:text-2xl">
+                    Complete your {selectedPlan.name} subscription
                   </h3>
                   <button
+                    type="button"
                     onClick={closeModal}
-                    className="text-[#6B4132] hover:text-[#4F2F1D] text-2xl"
+                    className="text-2xl text-muted-foreground hover:text-brown"
                   >
                     ×
                   </button>
                 </div>
 
                 {error && (
-                  <div className="mb-4 bg-red-50 border border-red-200 text-red-700 p-3 rounded">
+                  <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
                     {error}
                   </div>
                 )}
 
-                <div className="flex flex-col md:flex-row gap-6">
-                  {/* QR Code Section */}
-                  <div className="flex-1 bg-[#F9F3EE] p-6 rounded-lg">
-                    <h4
-                      className="text-lg mb-4 text-center text-[#4F2F1D]"
-                      style={{
-                        fontFamily: "'Tiempos Headline', serif",
-                        fontWeight: 400,
-                      }}
-                    >
+                <div className="flex flex-col gap-6 md:flex-row">
+                  <div className="flex-1 rounded-lg border border-border bg-secondary/50 p-6">
+                    <h4 className="mb-4 text-center font-display text-lg text-brown">
                       Pay exactly {formatPlanPrice(selectedPlan.price)}
-                      <span className="block mt-1 text-sm text-[#6B4132]">
+                      <span className="mt-1 block text-sm font-sans text-muted-foreground">
                         Annual membership for one user
                       </span>
                     </h4>
 
-                    <div className="flex justify-center mb-4">
-                      {/* QR code container with white background */}
-                      <div className="w-48 h-48 bg-white p-4 rounded-lg flex items-center justify-center">
+                    <div className="mb-4 flex justify-center">
+                      <div className="flex size-48 items-center justify-center rounded-lg bg-white p-4">
                         {!qr && (
-                          <div className="w-full h-full bg-[#F1F1F1] flex items-center justify-center">
-                            <span className="text-gray-500">QR Code</span>
-                          </div>
+                          <span className="text-muted-foreground">QR Code</span>
                         )}
                         {qr && (
-                          <div className="mb-6 text-center w-full h-full bg-[#F1F1F1] flex items-center justify-center">
-                            <img
-                              src={qr?.imageUrl}
-                              alt="QR Code"
-                              className="w-48 h-48 object-contain mx-auto"
-                            />
-                          </div>
+                          <img
+                            src={qr?.imageUrl}
+                            alt="QR Code"
+                            className="size-full object-contain"
+                          />
                         )}
                       </div>
                     </div>
 
-                    <div
-                      className="text-center text-[#6B4132]"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                      }}
-                    >
-                      <p className="mb-1 text-sm">
+                    <div className="text-center text-sm text-muted-foreground">
+                      <p className="mb-1">
                         UPI ID: {qr?.name || "yourcompany@upi"}
                       </p>
-                      <p className="text-sm">
-                        Pay exactly {formatPlanPrice(selectedPlan.price)}, then upload the
-                        payment screenshot.
+                      <p>
+                        Pay exactly {formatPlanPrice(selectedPlan.price)}, then
+                        upload the payment screenshot. Verified by the Punjabi
+                        Rishtey team.
                       </p>
                     </div>
                   </div>
 
-                  {/* Form Section */}
                   <div className="flex-1">
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                      <div>
-                        <label
-                          htmlFor="name"
-                          className="block mb-2 text-[#4F2F1D]"
-                          style={{
-                            fontFamily: "'Modern Era', sans-serif",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Full Name *
-                        </label>
-                        <input
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="name">Full Name *</Label>
+                        <Input
                           type="text"
                           id="name"
                           name="name"
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          className="w-full p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D]"
-                          style={{ fontFamily: "'Modern Era', sans-serif" }}
                           placeholder="Enter your full name"
                         />
                       </div>
 
-                      <div>
-                        <label
-                          htmlFor="phone"
-                          className="block mb-2 text-[#4F2F1D]"
-                          style={{
-                            fontFamily: "'Modern Era', sans-serif",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Phone Number *
-                        </label>
-                        <input
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="phone">Phone Number *</Label>
+                        <Input
                           type="tel"
                           id="phone"
                           name="phone"
                           value={formData.phone}
                           onChange={handleInputChange}
                           required
-                          className="w-full p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D]"
-                          style={{ fontFamily: "'Modern Era', sans-serif" }}
-                          placeholder="Enter your phone number"
+                          placeholder="10-digit phone number"
                           maxLength={10}
                         />
                       </div>
 
-                      <div>
-                        <label
-                          htmlFor="screenshot"
-                          className="block mb-2 text-[#4F2F1D]"
-                          style={{
-                            fontFamily: "'Modern Era', sans-serif",
-                            fontWeight: 500,
-                          }}
-                        >
-                          Payment Screenshot *
-                        </label>
-                        <p className="mb-2 text-sm text-[#6B4132]">
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="screenshot">Payment Screenshot *</Label>
+                        <p className="text-sm text-muted-foreground">
                           Upload a clear screenshot that shows the paid amount,
                           date, and UPI transaction details.
                         </p>
 
-                        <div
+                        <button
+                          type="button"
                           onClick={() => fileInputRef.current.click()}
-                          className="w-full p-3 border border-dashed border-[#C9C9C9] rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-[#4F2F1D] transition-colors"
+                          className="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border p-3 transition-colors hover:border-brown"
                         >
                           {previewUrl ? (
                             <img
                               src={previewUrl}
                               alt="Payment screenshot preview"
-                              className="max-h-40 object-contain mb-2"
+                              className="mb-2 max-h-40 object-contain"
                             />
                           ) : (
-                            <div className="flex text-center py-6">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="32"
-                                height="32"
-                                fill="#6B4132"
-                                viewBox="0 0 24 24"
-                              >
-                                <path d="M4 5h13v7h2V5c0-1.103-.897-2-2-2H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h8v-2H4V5z"></path>
-                                <path d="m8 11-3 4h11l-4-6-3 4z"></path>
-                                <path d="M19 14h-2v3h-3v2h3v3h2v-3h3v-2h-3z"></path>
-                              </svg>
-                              <p
-                                className="mt-2 text-sm text-[#6B4132]"
-                                style={{
-                                  fontFamily: "'Modern Era', sans-serif",
-                                }}
-                              >
-                                Click to upload payment screenshot
-                              </p>
-                            </div>
+                            <p className="py-6 text-center text-sm text-muted-foreground">
+                              Click to upload payment screenshot
+                            </p>
                           )}
 
                           <input
@@ -722,49 +612,32 @@ const MembershipPage = () => {
                             className="hidden"
                             required
                           />
-                        </div>
+                        </button>
                       </div>
 
-                      <div>
-                        <label
-                          htmlFor="transactionId"
-                          className="block mb-2 text-[#4F2F1D]"
-                          style={{
-                            fontFamily: "'Modern Era', sans-serif",
-                            fontWeight: 500,
-                          }}
-                        >
+                      <div className="flex flex-col gap-2">
+                        <Label htmlFor="transactionId">
                           UPI Transaction ID
-                        </label>
-                        <input
+                        </Label>
+                        <Input
                           type="text"
                           id="transactionId"
                           name="transactionId"
                           value={formData.transactionId}
                           onChange={handleInputChange}
-                          className="w-full p-3 border border-[#E5E5E5] rounded-md focus:outline-none focus:ring-1 focus:ring-[#4F2F1D]"
-                          style={{ fontFamily: "'Modern Era', sans-serif" }}
                           placeholder="Optional"
                         />
                       </div>
 
-                      <button
+                      <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`w-full py-3 mt-2 text-white ${
-                          isSubmitting
-                            ? "bg-[#8B7355]"
-                            : "bg-[#53392A] hover:bg-[#6B4132]"
-                        } rounded-md transition-colors`}
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 500,
-                        }}
+                        className="mt-2 w-full"
                       >
                         {isSubmitting
-                          ? "Submitting..."
-                          : "Submit Payment Details"}
-                      </button>
+                          ? "Submitting…"
+                          : "Submit payment details"}
+                      </Button>
                     </form>
                   </div>
                 </div>
@@ -773,9 +646,7 @@ const MembershipPage = () => {
           </>
         )}
       </AnimatePresence>
-
-      <Footer />
-    </div>
+    </PageShell>
   );
 };
 

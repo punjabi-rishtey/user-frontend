@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AlertCircle, CheckCircle } from "lucide-react";
-import Header from "./Header";
-import Footer from "./Footer";
+import PageShell from "./PageShell";
 import { apiUrl } from "../config/constants";
 import {
   authCardClassName,
@@ -25,18 +24,13 @@ const ResetPasswordPage = () => {
 
   const updatePassword = (setter) => (event) => {
     setter(event.target.value);
-    if (status) {
-      setStatus(null);
-    }
+    if (status) setStatus(null);
   };
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setStatus({
-        type: "error",
-        message: "Passwords do not match.",
-      });
+      setStatus({ type: "error", message: "Passwords do not match." });
       return;
     }
 
@@ -77,26 +71,17 @@ const ResetPasswordPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#FCF9F2]">
-      <Header />
-
-      {/* Reset Password Form */}
-      <main className="flex-grow px-4 py-12 sm:py-16">
+    <PageShell>
+      <div className="px-4 py-12 sm:py-16">
         <div className={`mx-auto max-w-md ${authCardClassName}`}>
           <div className="mb-7">
-            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#8A6A58]">
-              Account Help
+            <p className="mb-2 text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+              Account help
             </p>
-            <h1
-              className="text-3xl text-[#4F2F1D]"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
+            <h1 className="font-display text-3xl font-semibold text-brown sm:text-4xl">
               Reset Password
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-[#6B4132]">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Choose a new password for your Punjabi Rishtey account.
             </p>
           </div>
@@ -122,7 +107,7 @@ const ResetPasswordPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleResetPassword} className="space-y-5">
+          <form onSubmit={handleResetPassword} className="flex flex-col gap-5">
             <div>
               <label htmlFor="reset-password-new" className={authLabelClassName}>
                 New Password
@@ -158,21 +143,17 @@ const ResetPasswordPage = () => {
               />
             </div>
 
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                className={`w-full sm:w-auto ${authPrimaryButtonClassName}`}
-              >
-                {loading ? "Resetting…" : "Reset Password"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className={`w-full ${authPrimaryButtonClassName}`}
+            >
+              {loading ? "Resetting…" : "Reset Password"}
+            </button>
           </form>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </PageShell>
   );
 };
 

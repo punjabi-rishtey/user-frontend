@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Footer from "./Footer";
-import Header from "./Header";
+import PageShell from "./PageShell";
 import ForgotPasswordPopup from "./ForgotPasswordPopup";
 import {
   SUPPORT_PHONE_LINK,
@@ -36,21 +35,20 @@ const LoginPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (loginError) {
-      setLoginError("");
-    }
+    if (loginError) setLoginError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoginError("");
-
     const success = await login(formData);
 
     if (success === "networkError") {
       setLoginError(
         "The server is not responding right now. Please try again in a moment."
       );
+    } else if (success === "sessionLimit") {
+      navigate("/session-limit", { replace: true });
     } else if (!success) {
       setLoginError("Please check your email and password, then try again.");
     } else {
@@ -58,34 +56,22 @@ const LoginPage = () => {
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-[#FCF9F2]">
-      <Header />
+    <PageShell>
       {showForgotPassword && (
         <ForgotPasswordPopup onClose={() => setShowForgotPassword(false)} />
       )}
 
-      {/* Login Form */}
-      <main className="flex-grow px-4 py-12 sm:py-16">
+      <div className="px-4 py-12 sm:py-16">
         <div className={`mx-auto max-w-md ${authCardClassName}`}>
           <div className="mb-7">
-            <p className="mb-2 text-sm font-semibold uppercase tracking-[0.08em] text-[#8A6A58]">
+            <p className="mb-2 text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
               Punjabi Rishtey
             </p>
-            <h1
-              className="text-3xl text-[#4F2F1D]"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
+            <h1 className="font-display text-3xl font-semibold text-brown sm:text-4xl">
               Login
             </h1>
-            <p className="mt-2 text-sm leading-relaxed text-[#6B4132]">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Access your profile, membership, and partner search.
             </p>
           </div>
@@ -96,21 +82,17 @@ const LoginPage = () => {
               aria-live="polite"
               role="alert"
             >
-              <AlertCircle className={authNoticeIconClassName} aria-hidden="true" />
+              <AlertCircle
+                className={authNoticeIconClassName}
+                aria-hidden="true"
+              />
               <p>{loginError}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
-              <label
-                htmlFor="login-email"
-                className={authLabelClassName}
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
+              <label htmlFor="login-email" className={authLabelClassName}>
                 Email
               </label>
               <input
@@ -122,19 +104,12 @@ const LoginPage = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className={authInputClassName}
-                placeholder="you@example.com…"
+                placeholder="you@example.com"
                 required
               />
             </div>
             <div>
-              <label
-                htmlFor="login-password"
-                className={authLabelClassName}
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
+              <label htmlFor="login-password" className={authLabelClassName}>
                 Password
               </label>
               <div className="relative">
@@ -150,15 +125,11 @@ const LoginPage = () => {
                 />
                 <button
                   type="button"
-                  className={`absolute right-3 top-1/2 -translate-y-1/2 ${authIconButtonClassName}`}
-                  onClick={togglePasswordVisibility}
+                  className={`absolute top-1/2 right-3 -translate-y-1/2 ${authIconButtonClassName}`}
+                  onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <EyeOff size={20} />
-                  ) : (
-                    <Eye size={20} />
-                  )}
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
@@ -166,22 +137,15 @@ const LoginPage = () => {
               type="submit"
               disabled={isLoading}
               className={`w-full ${authPrimaryButtonClassName}`}
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
             >
               {isLoading ? "Logging in…" : "Login"}
             </button>
           </form>
 
-          <div className="mt-6 space-y-3 border-t border-[#E8DED7] pt-5 text-center">
-            <p className="text-sm text-[#6B4132]">
+          <div className="mt-6 flex flex-col gap-3 border-t border-border pt-5 text-center">
+            <p className="text-sm text-muted-foreground">
               New to Punjabi Rishtey?{" "}
-              <Link
-                to="/signup"
-                className={authInlineLinkClassName}
-              >
+              <Link to="/signup" className={authInlineLinkClassName}>
                 Create an account
               </Link>
             </p>
@@ -189,27 +153,17 @@ const LoginPage = () => {
               type="button"
               className={authTextButtonClassName}
               onClick={() => setShowForgotPassword(true)}
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
             >
               Forgot Password?
             </button>
 
-            <div
-              className="pt-2"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-[#8A6A58]">
+            <div className="pt-2">
+              <p className="mb-3 text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                 Need help signing in?
               </p>
               <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
                 <a href={SUPPORT_PHONE_LINK} className={authSupportChipClassName}>
-                  <Phone className="h-4 w-4 text-[#990000]" aria-hidden="true" />
+                  <Phone className="size-4 text-maroon" aria-hidden="true" />
                   <span>Call {SUPPORT_PHONE_NUMBER}</span>
                 </a>
                 <a
@@ -218,20 +172,15 @@ const LoginPage = () => {
                   rel="noreferrer"
                   className={authSupportChipClassName}
                 >
-                  <MessageCircle
-                    className="h-4 w-4 text-[#128C7E]"
-                    aria-hidden="true"
-                  />
+                  <MessageCircle className="size-4 text-maroon" aria-hidden="true" />
                   <span>WhatsApp</span>
                 </a>
               </div>
             </div>
           </div>
         </div>
-      </main>
-
-      <Footer />
-    </div>
+      </div>
+    </PageShell>
   );
 };
 
