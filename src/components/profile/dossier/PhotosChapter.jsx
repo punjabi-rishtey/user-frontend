@@ -8,6 +8,7 @@ import {
   authTextButtonClassName,
 } from "@/components/ui/formStyles";
 import { cn } from "@/lib/utils";
+import SectionGroup, { SectionStack } from "../studio/SectionGroup";
 
 const API_URL = apiUrl("/api/users");
 const CROP_WIDTH = 280;
@@ -290,96 +291,97 @@ export default function PhotosChapter({ onStatus }) {
   const photoCount = images.filter(Boolean).length;
 
   return (
-    <div className="space-y-6">
-      <p className="text-sm leading-relaxed text-muted-foreground">
-        Add at least 2 photos — one clear primary portrait helps matches trust
-        you. You can upload up to {MAX_PHOTOS}.
-      </p>
+    <SectionStack>
+      <SectionGroup title="Primary">
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Add at least 2 photos — families see the primary portrait first (shown
+          on the left). Up to {MAX_PHOTOS} photos.
+        </p>
 
-      {profilePicture ? (
-        <div>
-          <div className="overflow-hidden rounded-xl bg-secondary">
-            <img
-              src={profilePicture}
-              alt="Primary portrait"
-              className="aspect-[3/4] w-full object-cover object-top"
-            />
-          </div>
-          <p className="mt-2 text-sm font-medium text-brown">Primary</p>
-          <p className="text-xs text-muted-foreground">
-            Families see this portrait first.
-          </p>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="flex aspect-[3/4] w-full flex-col items-center justify-center rounded-xl border border-dashed border-brown/25 bg-secondary/40 px-6 text-center transition-colors hover:border-maroon/40 hover:bg-secondary"
-        >
-          <span className="font-display text-2xl text-brown">
-            Add your first portrait
-          </span>
-          <span className="mt-2 text-sm text-muted-foreground">
-            JPG or PNG · crop after you choose
-          </span>
-        </button>
-      )}
-
-      {otherImages.length > 0 ? (
-        <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
-          {otherImages.map((url) => (
-            <div key={url} className="w-24 shrink-0">
-              <div className="overflow-hidden rounded-lg bg-secondary">
-                <img
-                  src={url}
-                  alt=""
-                  className="aspect-[3/4] w-full object-cover object-top"
-                />
-              </div>
-              <div className="mt-2 flex flex-col gap-1">
+        {profilePicture ? (
+          <div className="flex items-start gap-4">
+            <div className="w-28 shrink-0 overflow-hidden rounded-lg bg-secondary sm:w-32">
+              <img
+                src={profilePicture}
+                alt="Primary portrait"
+                className="aspect-[3/4] w-full object-cover object-top"
+              />
+            </div>
+            <div className="min-w-0 pt-1">
+              <p className="text-sm font-semibold text-brown">Current primary</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                The large portrait on the left updates when you change this.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
                 <button
                   type="button"
-                  className={authTextButtonClassName}
-                  onClick={() => handleSetProfilePicture(url)}
-                  disabled={operation === "setting-profile"}
+                  className={authSecondaryButtonClassName}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={photoCount >= MAX_PHOTOS || Boolean(operation)}
                 >
-                  Use as primary
+                  Add photo
                 </button>
                 <button
                   type="button"
-                  className="text-left text-xs text-muted-foreground hover:text-maroon"
-                  onClick={() => handleRemoveImage(url)}
+                  className={cn(authTextButtonClassName, "self-center")}
+                  onClick={() => handleRemoveImage(profilePicture)}
                   disabled={operation === "deleting"}
                 >
-                  Remove
+                  Remove primary
                 </button>
               </div>
             </div>
-          ))}
-        </div>
-      ) : null}
-
-      {profilePicture ? (
-        <div className="flex flex-wrap gap-3">
+          </div>
+        ) : (
           <button
             type="button"
-            className={authSecondaryButtonClassName}
             onClick={() => fileInputRef.current?.click()}
-            disabled={photoCount >= MAX_PHOTOS || Boolean(operation)}
+            className="flex min-h-[10rem] w-full flex-col items-center justify-center rounded-xl border border-dashed border-brown/25 bg-secondary/40 px-6 py-8 text-center transition-colors hover:border-maroon/40 hover:bg-secondary"
           >
-            Add photo
+            <span className="font-display text-2xl text-brown">
+              Add your first portrait
+            </span>
+            <span className="mt-2 text-sm text-muted-foreground">
+              JPG or PNG · crop after you choose
+            </span>
           </button>
-          {profilePicture ? (
-            <button
-              type="button"
-              className={cn(authTextButtonClassName, "self-center")}
-              onClick={() => handleRemoveImage(profilePicture)}
-              disabled={operation === "deleting"}
-            >
-              Remove primary
-            </button>
-          ) : null}
-        </div>
+        )}
+      </SectionGroup>
+
+      {otherImages.length > 0 ? (
+        <SectionGroup title="More photos">
+          <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+            {otherImages.map((url) => (
+              <div key={url} className="w-24 shrink-0">
+                <div className="overflow-hidden rounded-lg bg-secondary">
+                  <img
+                    src={url}
+                    alt=""
+                    className="aspect-[3/4] w-full object-cover object-top"
+                  />
+                </div>
+                <div className="mt-2 flex flex-col gap-1">
+                  <button
+                    type="button"
+                    className={authTextButtonClassName}
+                    onClick={() => handleSetProfilePicture(url)}
+                    disabled={operation === "setting-profile"}
+                  >
+                    Use as primary
+                  </button>
+                  <button
+                    type="button"
+                    className="text-left text-xs text-muted-foreground hover:text-maroon"
+                    onClick={() => handleRemoveImage(url)}
+                    disabled={operation === "deleting"}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </SectionGroup>
       ) : null}
 
       <input
@@ -468,7 +470,7 @@ export default function PhotosChapter({ onStatus }) {
           </div>
         </div>
       ) : null}
-    </div>
+    </SectionStack>
   );
 }
 

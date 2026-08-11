@@ -50,7 +50,10 @@ export default function DossierShell({
         <div className="relative shrink-0">
           <button
             type="button"
-            onClick={onToggleAccountMenu}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleAccountMenu(e);
+            }}
             className="inline-flex size-10 items-center justify-center rounded-lg text-brown transition-colors hover:bg-secondary"
             aria-label="Account options"
             aria-expanded={accountMenuOpen}
@@ -58,7 +61,10 @@ export default function DossierShell({
             <MoreHorizontal className="size-5" />
           </button>
           {accountMenuOpen ? (
-            <div className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 shadow-lg">
+            <div
+              className="absolute right-0 z-20 mt-2 w-48 rounded-lg border border-border bg-card py-1 shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 type="button"
                 className="block w-full px-4 py-2.5 text-left text-sm text-brown hover:bg-secondary"
@@ -156,7 +162,7 @@ export default function DossierShell({
               disabled={saving}
               className={cn(authTextButtonClassName, "px-2")}
             >
-              {saving ? "Saving…" : "Save"}
+              {saving ? "Saving…" : "Save this chapter"}
             </button>
           ) : null}
           <button

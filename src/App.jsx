@@ -18,7 +18,7 @@ import CustomerReviews from "./components/CustomerReviews";
 import ResetPasswordPage from "./components/ResetPasswordPage";
 import BlockingPage from "./components/BlockingPage";
 import SessionLimitPage from "./components/SessionLimitPage";
-import ProfileSettings from "./components/Profilepage";
+import ProfileSettings from "./components/ProfileStudioPage";
 import CurrentMembershipPage from "./components/CurrentMembershipPage";
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import SafetyStandards from "./components/SafetyStandards";
