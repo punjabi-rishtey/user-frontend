@@ -386,12 +386,11 @@ const FindPartner = () => {
 
   // Card variants for animation
   const cardVariants = {
-    initial: { opacity: 0, y: 20 },
+    initial: { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
     hover: {
-      scale: 1.05,
-      backgroundColor: "#E5D3C8",
-      transition: { duration: 0.3 },
+      y: -2,
+      transition: { duration: 0.25 },
     },
   };
 
@@ -795,50 +794,65 @@ const FindPartner = () => {
                 No profiles match your search criteria.
               </div>
             ) : (
-              currentProfiles.map((item) => (
-                <motion.button
-                  type="button"
-                  key={item._id}
-                  variants={cardVariants}
-                  initial="initial"
-                  animate="animate"
-                  whileHover="hover"
-                  className="rounded-xl border border-border bg-card p-4 text-left transition-colors hover:border-brown/40 sm:p-5"
-                  onClick={() => handleProfileClick(item)}
-                >
-                  <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-                    <img
-                      src={item.profile_picture || profileIcon}
-                      alt=""
-                      className="size-28 rounded-lg object-cover object-top sm:h-36 sm:w-32"
-                    />
-                    <div className="min-w-0 flex-1 text-center sm:text-left">
-                      <h3 className="font-display text-xl font-semibold text-brown">
-                        {item.name}
-                      </h3>
-                      <div className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground">
-                        <p>
-                          <span className="text-brown">Age:</span>{" "}
-                          {item.age || "Not specified"}
-                        </p>
-                        <p>
-                          <span className="text-brown">Occupation:</span>{" "}
-                          {formatOption(item.occupation) || "Not specified"}
-                        </p>
-                        <p>
-                          <span className="text-brown">Location:</span>{" "}
-                          {item.city?.trim() || "Not Specified"}
-                        </p>
-                        <p>
-                          <span className="text-brown">Marital status:</span>{" "}
-                          {normalizeMaritalStatus(item.marital_status) ||
-                            "Not specified"}
-                        </p>
+              currentProfiles.map((item) => {
+                const facts = [
+                  { label: "Age", value: item.age ? String(item.age) : null },
+                  { label: "City", value: item.city?.trim() || null },
+                  { label: "Caste", value: formatOption(item.caste) || null },
+                  {
+                    label: "Profession",
+                    value: formatOption(item.occupation) || null,
+                  },
+                ].filter((fact) => fact.value);
+
+                return (
+                  <motion.button
+                    type="button"
+                    key={item.user || item._id}
+                    variants={cardVariants}
+                    initial="initial"
+                    animate="animate"
+                    whileHover="hover"
+                    className="group rounded-xl border border-border bg-card text-left transition-colors hover:border-brown/40"
+                    onClick={() => handleProfileClick(item)}
+                  >
+                    <div className="flex flex-col">
+                      <div className="w-full overflow-hidden rounded-t-xl bg-secondary">
+                        <img
+                          src={item.profile_picture || profileIcon}
+                          alt=""
+                          className="aspect-[3/4] w-full object-cover object-top"
+                        />
+                      </div>
+                      <div className="flex flex-col px-4 py-4 sm:px-5 sm:py-5">
+                        <h3 className="font-display text-2xl font-semibold leading-tight text-brown sm:text-[1.65rem]">
+                          {item.name}
+                        </h3>
+                        {facts.length > 0 ? (
+                          <dl className="mt-3 space-y-2.5">
+                            {facts.map(({ label, value }) => (
+                              <div
+                                key={label}
+                                className="flex items-baseline gap-3 text-sm leading-none"
+                              >
+                                <dt className="w-24 shrink-0 text-muted-foreground">
+                                  {label}
+                                </dt>
+                                <dd className="font-medium whitespace-nowrap text-brown">
+                                  {value}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : null}
+                        <span className="mt-4 text-sm font-semibold text-maroon underline-offset-4 group-hover:underline">
+                          View profile
+                        </span>
                       </div>
                     </div>
-                  </div>
-                </motion.button>
-              ))
+                  </motion.button>
+                );
+              })
             )}
           </div>
           {sortedFilteredData.length > 0 && (

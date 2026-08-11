@@ -1,66 +1,66 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion, useScroll } from "framer-motion";
 import PageShell from "./PageShell";
 import MembershipRequired from "./MembershipRequired";
-import ProfilePhotosLayout from "./ProfilePhotosLayout";
-import AboutLookingSection from "./AboutLookingSection";
 import { Button } from "@/components/ui/button";
-import {
-  FaHeart,
-  FaUser,
-  FaGraduationCap,
-  FaUsers,
-  FaArrowLeft,
-  FaLock,
-  FaPhoneAlt,
-  FaWhatsapp,
-  FaEnvelope,
-} from "react-icons/fa";
+import { FaUser, FaLock } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import {
   apiUrl,
-  SUPPORT_EMAIL,
-  SUPPORT_EMAIL_LINK,
   SUPPORT_PHONE_LINK,
   SUPPORT_PHONE_NUMBER,
   SUPPORT_WHATSAPP_LINK,
 } from "../config/constants";
+import ViewShell from "./profile/view/ViewShell";
+import ViewSection from "./profile/view/ViewSection";
+import SupportLinks from "./profile/view/SupportLinks";
+import {
+  calculateAge,
+  formatAbroadReady,
+  formatDate,
+  formatDietPreference,
+  formatManglikStatus,
+  formatNRIStatus,
+  formatOption,
+  formatRaw,
+  factsFromEntries,
+} from "./profile/view/formatters";
 
-// Hybrid brand surfaces (atelier paper + brown ink) - no Material rainbow
-const brandCard = {
-  bg: "#FFFcf8",
-  border: "#E5D9CE",
-  title: "#4F2F1D",
-  icon: "#990000",
-  label: "#6B5344",
-  value: "#1C1410",
-};
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return reduced;
+}
 
-const cardColorSchemes = {
-  basicDetails: brandCard,
-  lifestyle: brandCard,
-  horoscope: brandCard,
-  education: brandCard,
-  profession: brandCard,
-  family: brandCard,
-};
+function possessivePronoun(gender) {
+  const g = String(gender || "").toLowerCase();
+  if (g === "female") return { own: "her", looking: "she's", who: "she" };
+  if (g === "male") return { own: "his", looking: "he's", who: "he" };
+  return { own: "their", looking: "they're", who: "they" };
+}
 
 const ProfileDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const reducedMotion = usePrefersReducedMotion();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  useScroll();
-
-  // Dynamic Scroll Effects for Boxes
-  // Scroll progress available for future subtle effects if needed
+  const [activeSectionId, setActiveSectionId] = useState(null);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: reducedMotion ? "auto" : "smooth",
+    });
 
     const fetchProfileData = async () => {
       setLoading(true);
@@ -75,10 +75,6 @@ const ProfileDetail = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-
-        console.log("=== PROFILE DATA FROM BACKEND ===");
-        console.log("Full response:", response.data);
-        console.log("================================");
 
         setProfileData(response.data);
         setError(null);
@@ -103,83 +99,268 @@ const ProfileDetail = () => {
     if (id) {
       fetchProfileData();
     }
-  }, [id, navigate]);
+  }, [id, navigate, reducedMotion]);
 
   const handleGoBack = () => {
     navigate(-1);
   };
 
-  // Format values for better display
-  const formatValue = (value) => {
-    if (value === undefined || value === null) return "Not specified";
-    if (typeof value === "boolean") return value ? "Yes" : "No";
-    if (value === "") return "Not specified";
-
-    // Format snake_case to Title Case
-    if (typeof value === "string" && value.includes("_")) {
-      return value
-        .split("_")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
+  const scrollToSection = (sectionId) => {
+    setActiveSectionId(sectionId);
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({
+        behavior: reducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
     }
-
-    return value;
   };
 
-  const formatSelectionValue = (value) => {
-    if (value === undefined || value === null || value === "") {
-      return "Not specified";
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: profileData?.name
+            ? `${profileData.name} · Punjabi Rishtey`
+            : "Punjabi Rishtey profile",
+          url,
+        });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // User cancelled share or clipboard unavailable — ignore
     }
-
-    if (typeof value !== "string") {
-      return formatValue(value);
-    }
-
-    const normalizedValue = value.replace(/_/g, " ").trim();
-
-    if (!normalizedValue) {
-      return "Not specified";
-    }
-
-    if (normalizedValue === normalizedValue.toLowerCase()) {
-      return normalizedValue.replace(/\b\w/g, (char) => char.toUpperCase());
-    }
-
-    return normalizedValue;
   };
 
-  const supportLinkBaseClass =
-    "inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full border border-[#D8C5B8] bg-white px-4 py-2 text-sm font-semibold text-[#4F2F1D] shadow-[0_1px_0_rgba(79,47,29,0.06)] transition-[transform,background-color,border-color,color,box-shadow] duration-150 ease-out hover:border-[#B99682] hover:bg-[#FCF9F2] active:scale-[0.98]";
+  useEffect(() => {
+    if (!profileData) return undefined;
 
-  const renderSupportLinks = ({ className = "" } = {}) => (
-    <div className={`flex flex-col gap-2 sm:flex-row sm:flex-wrap ${className}`}>
-      <a
-        href={SUPPORT_PHONE_LINK}
-        className={supportLinkBaseClass}
-      >
-        <FaPhoneAlt className="text-xs text-[#990000]" aria-hidden="true" />
-        <span>Call {SUPPORT_PHONE_NUMBER}</span>
-      </a>
-      <a
-        href={SUPPORT_WHATSAPP_LINK}
-        target="_blank"
-        rel="noreferrer"
-        className={supportLinkBaseClass}
-      >
-        <FaWhatsapp className="text-base text-[#128C7E]" aria-hidden="true" />
-        <span>WhatsApp</span>
-      </a>
-      <a
-        href={SUPPORT_EMAIL_LINK}
-        className={supportLinkBaseClass}
-      >
-        <FaEnvelope className="text-sm text-[#990000]" aria-hidden="true" />
-        <span>{SUPPORT_EMAIL}</span>
-      </a>
-    </div>
-  );
+    const ids = ["about", "who", "family", "work", "contact"];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]?.target?.id) {
+          setActiveSectionId(visible[0].target.id);
+        }
+      },
+      { rootMargin: "-20% 0px -55% 0px", threshold: [0.1, 0.4, 0.7] }
+    );
+
+    ids.forEach((sectionId) => {
+      const el = document.getElementById(sectionId);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [profileData]);
+
+  const built = useMemo(() => {
+    if (!profileData) return null;
+
+    const contactIntroRequired =
+      profileData.contact_access === "admin_intro_required";
+    const pronouns = possessivePronoun(profileData.gender);
+
+    const age = calculateAge(profileData.dob);
+    const city =
+      formatRaw(profileData.location?.city) ||
+      formatRaw(profileData.profession_details?.work_address?.city);
+    const caste = formatOption(profileData.caste);
+    const profession =
+      formatOption(profileData.profession_details?.occupation) ||
+      formatRaw(profileData.profession_details?.occupation);
+
+    const identityLine = [
+      age ? `${age} years` : null,
+      city,
+      caste,
+      profession,
+    ]
+      .filter(Boolean)
+      .join("  ·  ");
+
+    const about = (profileData.about_myself ?? "").trim();
+    const looking = (profileData.looking_for ?? "").trim();
+
+    const disability =
+      profileData.physical_attributes?.physical_disability === true
+        ? "Yes"
+        : profileData.physical_attributes?.physical_disability === false
+          ? "No"
+          : null;
+
+    const whoFacts = factsFromEntries([
+      { label: "Date of Birth", value: formatDate(profileData.dob) },
+      { label: "Gender", value: formatOption(profileData.gender) },
+      { label: "Height", value: formatRaw(profileData.height) },
+      { label: "Religion", value: formatOption(profileData.religion) },
+      { label: "Caste", value: caste },
+      { label: "Language", value: formatRaw(profileData.language) },
+      {
+        label: "Marital Status",
+        value: formatOption(profileData.marital_status),
+      },
+      {
+        label: "Birth Time",
+        value: formatRaw(profileData.birth_details?.birth_time),
+      },
+      {
+        label: "Birth Place",
+        value: formatRaw(profileData.birth_details?.birth_place),
+      },
+      {
+        label: "Skin Tone",
+        value: formatOption(profileData.physical_attributes?.skin_tone),
+      },
+      {
+        label: "Body Type",
+        value: formatOption(profileData.physical_attributes?.body_type),
+      },
+      { label: "Physical Disability", value: disability },
+      {
+        label: "Smoke",
+        value: formatRaw(profileData.lifestyle?.smoke) || null,
+      },
+      {
+        label: "Drink",
+        value: formatRaw(profileData.lifestyle?.drink) || null,
+      },
+      {
+        label: "Diet",
+        value: formatDietPreference(profileData.lifestyle?.veg_nonveg),
+      },
+      {
+        label: "NRI Status",
+        value: formatNRIStatus(profileData.lifestyle?.nri_status),
+      },
+      {
+        label: "Ready to move Abroad",
+        value: formatAbroadReady(profileData.lifestyle?.abroad_ready),
+      },
+      {
+        label: "Manglik Status",
+        value: formatManglikStatus(profileData.mangalik),
+      },
+      {
+        label: "Hobbies",
+        value:
+          Array.isArray(profileData.hobbies) && profileData.hobbies.length > 0
+            ? profileData.hobbies.join(", ")
+            : null,
+        multiline: true,
+      },
+    ]);
+
+    const ed = profileData.education_details;
+    const pr = profileData.profession_details;
+    const workFacts = factsFromEntries([
+      { label: "Education Level", value: formatOption(ed?.education_level) },
+      { label: "Field of Study", value: formatOption(ed?.education_field) },
+      { label: "College", value: formatRaw(ed?.college_details?.name) },
+      { label: "College City", value: formatRaw(ed?.college_details?.city) },
+      {
+        label: "Passout Year",
+        value: formatRaw(ed?.college_details?.passout_year),
+      },
+      {
+        label: "Education notes",
+        value: formatRaw(ed?.additional_info),
+        multiline: true,
+      },
+      {
+        label: "Occupation",
+        value: formatOption(pr?.occupation) || formatRaw(pr?.occupation),
+      },
+      { label: "Designation", value: formatRaw(pr?.designation) },
+      { label: "Working With", value: formatRaw(pr?.working_with) },
+      { label: "Annual Income", value: formatRaw(pr?.income) },
+      { label: "Work City", value: formatRaw(pr?.work_address?.city) },
+      { label: "Work Address", value: formatRaw(pr?.work_address?.address) },
+      {
+        label: "Work notes",
+        value: formatRaw(pr?.additional_info),
+        multiline: true,
+      },
+    ]);
+
+    const fam = profileData.family_details;
+    let siblings = null;
+    if (fam?.siblings) {
+      const brothers = fam.siblings.brother_count ?? 0;
+      const sisters = fam.siblings.sister_count ?? 0;
+      if (brothers > 0 || sisters > 0) {
+        siblings = `${brothers} Brother(s), ${sisters} Sister(s)`;
+      }
+    }
+
+    const familyFacts = factsFromEntries([
+      { label: "Family Type", value: formatOption(fam?.family_type) },
+      { label: "Family Values", value: formatOption(fam?.family_value) },
+      { label: "Father", value: formatRaw(fam?.father?.name) },
+      {
+        label: "Father's Occupation",
+        value: formatRaw(fam?.father?.occupation),
+      },
+      { label: "Mother", value: formatRaw(fam?.mother?.name) },
+      {
+        label: "Mother's Occupation",
+        value: formatRaw(fam?.mother?.occupation),
+      },
+      { label: "Siblings", value: siblings },
+      {
+        label: "Permanent Address",
+        value: formatRaw(profileData.location?.address),
+      },
+      { label: "City", value: formatRaw(profileData.location?.city) },
+    ]);
+
+    const contactFacts = contactIntroRequired
+      ? []
+      : factsFromEntries([
+          { label: "Email", value: formatRaw(profileData.email) },
+          { label: "Mobile", value: formatRaw(profileData.mobile) },
+          {
+            label: "Secondary Contact",
+            value: formatRaw(profileData.secondary_contact),
+          },
+        ]);
+
+    const whoTitle =
+      pronouns.who === "they"
+        ? "Who they are"
+        : `Who ${pronouns.who} is`;
+
+    const navSections = [];
+    if (about || looking) navSections.push({ id: "about", label: "About" });
+    if (whoFacts.length) navSections.push({ id: "who", label: whoTitle });
+    if (familyFacts.length) navSections.push({ id: "family", label: "Family" });
+    if (workFacts.length)
+      navSections.push({ id: "work", label: "Education & work" });
+    if (contactFacts.length || contactIntroRequired)
+      navSections.push({ id: "contact", label: "Contact" });
+
+    return {
+      contactIntroRequired,
+      identityLine,
+      about,
+      looking,
+      whoFacts,
+      whoTitle,
+      familyFacts,
+      workFacts,
+      contactFacts,
+      navSections,
+      pronouns,
+      photos: Array.isArray(profileData.profile_pictures)
+        ? profileData.profile_pictures.filter(Boolean)
+        : [],
+    };
+  }, [profileData]);
 
   if (loading) {
     return (
@@ -226,7 +407,9 @@ const ProfileDetail = () => {
               </div>
               <div>
                 <h2 className="font-display text-2xl font-semibold text-brown">
-                  {isPrivateProfileError ? "Profile unavailable" : "Something went wrong"}
+                  {isPrivateProfileError
+                    ? "Profile unavailable"
+                    : "Something went wrong"}
                 </h2>
                 <p className="mt-2 leading-relaxed text-muted-foreground">
                   {error}
@@ -238,7 +421,7 @@ const ProfileDetail = () => {
                 <p className="mb-3 text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
                   Request an introduction
                 </p>
-                {renderSupportLinks()}
+                <SupportLinks />
               </div>
             )}
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -262,7 +445,7 @@ const ProfileDetail = () => {
     );
   }
 
-  if (!profileData) {
+  if (!profileData || !built) {
     return (
       <PageShell>
         <div className="flex flex-1 items-center justify-center py-24 text-brown">
@@ -292,754 +475,195 @@ const ProfileDetail = () => {
     );
   }
 
-  // Calculate age from DOB
-  const calculateAge = (dob) => {
-    if (!dob) return "Not specified";
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
+  const {
+    contactIntroRequired,
+    identityLine,
+    about,
+    looking,
+    whoFacts,
+    whoTitle,
+    familyFacts,
+    workFacts,
+    contactFacts,
+    navSections,
+    pronouns,
+    photos,
+  } = built;
 
-  // Format date to readable format
-  const formatDate = (dateString) => {
-    if (!dateString) return "Not specified";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  const contactIntroRequired =
-    profileData.contact_access === "admin_intro_required";
-  const hiddenContactText = "Hidden in Private Mode";
-
-  // Organize profile data into sections for display
-  const basicDetails = {
-    Age: calculateAge(profileData.dob),
-    "Date of Birth": formatDate(profileData.dob),
-    Gender: formatSelectionValue(profileData.gender),
-    Height: formatValue(profileData.height),
-    Religion: formatSelectionValue(profileData.religion),
-    Caste: formatSelectionValue(profileData.caste),
-    Language: formatValue(profileData.language),
-    "Marital Status": formatValue(profileData.marital_status),
-    "Birth Time": formatValue(profileData.birth_details?.birth_time),
-    "Birth Place": formatValue(profileData.birth_details?.birth_place),
-    Email: contactIntroRequired
-      ? hiddenContactText
-      : profileData.email || "Not specified",
-    Mobile: contactIntroRequired
-      ? hiddenContactText
-      : profileData.mobile || "Not specified",
-    "Secondary Contact": contactIntroRequired
-      ? hiddenContactText
-      : profileData.secondary_contact || "Not specified",
-  };
-
-  // Helper function to format manglik status
-  const formatManglikStatus = (value) => {
-    // Handle boolean values first (including false)
-    if (typeof value === "boolean") {
-      return value ? "Manglik" : "Non Manglik";
-    }
-    // Handle string values
-    if (typeof value === "string") {
-      if (value === "manglik") return "Manglik";
-      if (value === "non_manglik") return "Non Manglik";
-      if (value === "partial_manglik") return "Partial Manglik";
-      if (value === "true") return "Manglik";
-      if (value === "false") return "Non Manglik";
-    }
-    // Handle null, undefined, or empty string
-    if (value === null || value === undefined || value === "") {
-      return "Not specified";
-    }
-    return formatValue(value);
-  };
-
-  // Helper function to format NRI status
-  const formatNRIStatus = (value) => {
-    if (!value && value !== false) return "Not specified";
-    if (typeof value === "boolean") {
-      return value ? "NRI" : "Indian";
-    }
-    if (typeof value === "string") {
-      if (value === "true" || value.toLowerCase() === "yes") return "NRI";
-      if (value === "false" || value.toLowerCase() === "no") return "Indian";
-    }
-    return formatValue(value);
-  };
-
-  // Helper function to format diet preferences
-  const formatDietPreference = (value) => {
-    if (!value) return "Not specified";
-    if (value === "veg") return "Vegetarian";
-    if (value === "nonveg") return "Non-Vegetarian";
-    if (value === "occasionally_nonveg") return "Occasionally Non-Vegetarian";
-    return formatValue(value);
-  };
-
-  // Helper function to format abroad_ready
-  const formatAbroadReady = (value) => {
-    if (value === null || value === undefined || value === "")
-      return "Not specified";
-    if (typeof value === "boolean") return value ? "Yes" : "No";
-    if (typeof value === "string") {
-      if (value === "true" || value.toLowerCase() === "yes") return "Yes";
-      if (value === "false" || value.toLowerCase() === "no") return "No";
-    }
-    return formatValue(value);
-  };
-
-  // Physical and lifestyle information
-  const lifestyleDetails = {
-    "Skin Tone": formatValue(profileData.physical_attributes?.skin_tone),
-    "Body Type": formatValue(profileData.physical_attributes?.body_type),
-    "Physical Disability": profileData.physical_attributes?.physical_disability
-      ? "Yes"
-      : "No",
-    Smoke: profileData.lifestyle?.smoke ? profileData.lifestyle.smoke : "No",
-    Drink: profileData.lifestyle?.drink ? profileData.lifestyle.drink : "No",
-    "Diet Preference": formatDietPreference(profileData.lifestyle?.veg_nonveg),
-    "NRI Status": formatNRIStatus(profileData.lifestyle?.nri_status),
-    "Ready to move Abroad": formatAbroadReady(
-      profileData.lifestyle?.abroad_ready
-    ),
-  };
-
-  // Hobbies details
-  const hobbiesDetails = {
-    Hobbies:
-      Array.isArray(profileData.hobbies) && profileData.hobbies.length > 0
-        ? profileData.hobbies.join(", ")
-        : "Not specified",
-  };
-
-  // Astrology details
-  // const astrologyDetails = {
-  //   Manglik: formatManglikStatus(profileData.mangalik),
-  //   ...profileData.astrology_details,
-  // };
-
-  // Education and profession details
-  const educationDetails = {};
-  if (profileData.education_details) {
-    if (profileData.education_details.education_level) {
-      educationDetails["Education Level"] =
-        formatValue(profileData.education_details.education_level);
-    }
-    if (profileData.education_details.education_field) {
-      educationDetails["Field of Study"] =
-        formatValue(profileData.education_details.education_field);
-    }
-    if (profileData.education_details.college_details?.name) {
-      educationDetails["College"] =
-        profileData.education_details.college_details.name;
-    }
-    if (profileData.education_details.college_details?.city) {
-      educationDetails["College City"] =
-        profileData.education_details.college_details.city;
-    }
-    if (profileData.education_details.college_details?.passout_year) {
-      educationDetails["Passout Year"] =
-        profileData.education_details.college_details.passout_year;
-    }
-    if (profileData.education_details.additional_info) {
-      educationDetails["Additional Information"] =
-        profileData.education_details.additional_info;
-    }
-  }
-
-  // Profession details
-  const professionDetails = {};
-  if (profileData.profession_details) {
-    if (profileData.profession_details.occupation) {
-      professionDetails["Occupation"] =
-        profileData.profession_details.occupation;
-    }
-    if (profileData.profession_details.designation) {
-      professionDetails["Designation"] =
-        profileData.profession_details.designation;
-    }
-    if (profileData.profession_details.working_with) {
-      professionDetails["Working With"] =
-        profileData.profession_details.working_with;
-    }
-    if (profileData.profession_details.income) {
-      professionDetails["Annual Income"] =
-        profileData.profession_details.income;
-    }
-    if (profileData.profession_details.work_address?.city) {
-      professionDetails["Work City"] =
-        profileData.profession_details.work_address.city;
-    }
-    if (profileData.profession_details.work_address?.address) {
-      professionDetails["Work Address"] =
-        profileData.profession_details.work_address.address;
-    }
-    if (profileData.profession_details.additional_info) {
-      professionDetails["Additional Information"] =
-        profileData.profession_details.additional_info;
-    }
-  }
-
-  // Family details
-  const familyDetails = {};
-  if (profileData.family_details) {
-    if (profileData.family_details.family_type) {
-      familyDetails["Family Type"] = profileData.family_details.family_type;
-    }
-    if (profileData.family_details.family_value) {
-      familyDetails["Family Values"] = profileData.family_details.family_value;
-    }
-    if (profileData.family_details.father?.name) {
-      familyDetails["Father"] = profileData.family_details.father.name;
-    }
-    if (profileData.family_details.father?.occupation) {
-      familyDetails["Father's Occupation"] =
-        profileData.family_details.father.occupation;
-    }
-    if (profileData.family_details.mother?.name) {
-      familyDetails["Mother"] = profileData.family_details.mother.name;
-    }
-    if (profileData.family_details.mother?.occupation) {
-      familyDetails["Mother's Occupation"] =
-        profileData.family_details.mother.occupation;
-    }
-    if (profileData.family_details.siblings) {
-      const brothers = profileData.family_details.siblings.brother_count || 0;
-      const sisters = profileData.family_details.siblings.sister_count || 0;
-      familyDetails[
-        "Siblings"
-      ] = `${brothers} Brother(s), ${sisters} Sister(s)`;
-    }
-  }
-
-  // Add permanent address and city from user location
-  if (profileData.location?.address) {
-    familyDetails["Permanent Address"] = profileData.location.address;
-  }
-  if (profileData.location?.city) {
-    familyDetails["City"] = profileData.location.city;
-  }
-
-  const getCardVariants = () => ({
-    initial: { opacity: 0, y: 16 },
-    animate: { opacity: 1, y: 0 },
-  });
+  const aboutHeading = `In ${pronouns.own} own words`;
+  const lookingHeading =
+    pronouns.looking === "they're"
+      ? "What they're looking for"
+      : `What ${pronouns.looking} looking for`;
 
   return (
     <PageShell>
-      <div className="mx-auto w-full max-w-6xl px-6 pt-8">
-        <Button variant="outline" onClick={handleGoBack} className="gap-2">
-          <FaArrowLeft /> Back to search
-        </Button>
-        <header className="mt-10 mb-8 text-center">
-          <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
-            Profile
+      <ViewShell
+        photos={photos}
+        sections={navSections}
+        activeSectionId={activeSectionId || navSections[0]?.id}
+        onSelectSection={scrollToSection}
+        memberName={profileData.name}
+        identityLine={identityLine}
+      >
+        <button
+          type="button"
+          onClick={handleGoBack}
+          className="inline-flex min-h-11 items-center px-1 text-sm font-medium text-muted-foreground transition-colors hover:text-brown"
+        >
+          ← Back to search
+        </button>
+
+        {/* Desktop identity band — mobile gets name via portrait scrim */}
+        <div className="mt-5 hidden -mx-0 rounded-xl bg-brown-deep px-6 py-8 sm:px-9 sm:py-10 lg:block">
+          <p className="text-[11px] font-semibold tracking-[0.2em] text-ivory/55 uppercase">
+            Punjabi Rishtey member
           </p>
-          <h1 className="mt-2 font-display text-4xl font-semibold text-brown sm:text-5xl">
+          <h1 className="mt-3 font-display text-[2.75rem] leading-[1.05] font-semibold tracking-[-0.01em] text-ivory sm:text-6xl">
             {profileData.name}
           </h1>
-        </header>
-      </div>
-
-      {/* ProfilePhotosLayout Component - Replaces previous slideshow implementation */}
-      <ProfilePhotosLayout photos={profileData.profile_pictures} />
-
-      {/* About & Looking For section: placed between gallery and details */}
-      {(() => {
-        const about = (profileData.about_myself ?? "").trim();
-        const looking = (profileData.looking_for ?? "").trim();
-        const showSection = about.length > 0 || looking.length > 0;
-        return (
-          showSection && (
-            <AboutLookingSection aboutMyself={about} lookingFor={looking} />
-          )
-        );
-      })()}
-
-      {/* Profile Details Sections - Masonry Layout */}
-      <div className="columns-1 md:columns-2 lg:columns-3 gap-8 w-full px-8 md:px-16 mb-20 mt-8">
-        {contactIntroRequired && (
-          <motion.div
-            variants={getCardVariants("basicDetails")}
-            initial="initial"
-            animate="animate"
-            className="mb-8 inline-block w-full break-inside-avoid rounded-2xl border p-6 shadow-[0_12px_30px_rgba(79,47,29,0.08)]"
-            style={{
-              backgroundColor: "#FFFDF8",
-              borderColor: "#D8C5B8",
-            }}
-          >
-            <div className="mb-4 flex items-start gap-3">
-              <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F5EDE7] text-[#990000]">
-                <FaLock aria-hidden="true" />
-              </div>
-              <div>
-                <h3
-                  className="text-xl"
-                  style={{
-                    fontFamily: "'Tiempos Headline', serif",
-                    fontWeight: 400,
-                    color: "#4F2F1D",
-                  }}
-                >
-                  Introductions are handled by support
-                </h3>
-                <p
-                  className="mt-1 text-base leading-relaxed text-[#6B4132]"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {profileData.contact_message ||
-                    "For an introduction, please contact Punjabi Rishtey support."}
-                </p>
-              </div>
-            </div>
-            {renderSupportLinks()}
-          </motion.div>
-        )}
-
-        {/* Basic Details */}
-        <motion.div
-          variants={getCardVariants("basicDetails")}
-          initial="initial"
-          animate="animate"
-          whileHover="hover"
-          className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
-          style={{
-            backgroundColor: cardColorSchemes.basicDetails.bg,
-            borderColor: cardColorSchemes.basicDetails.border,
-            borderWidth: "2px",
-            borderStyle: "solid",
-          }}
-        >
-          <h3
-            className="text-2xl mb-4 flex items-center"
-            style={{
-              fontFamily: "'Tiempos Headline', serif",
-              fontWeight: 400,
-              color: cardColorSchemes.basicDetails.title,
-            }}
-          >
-            <FaUser
-              className="mr-2"
-              style={{ color: cardColorSchemes.basicDetails.icon }}
-            />{" "}
-            Basic Details
-          </h3>
-          <div className="space-y-2">
-            {Object.entries(basicDetails).map(([key, value]) => (
-              <p
-                key={key}
-                className="text-lg"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                <strong style={{ color: cardColorSchemes.basicDetails.label }}>
-                  {key}:
-                </strong>
-                <span
-                  style={{ color: cardColorSchemes.basicDetails.value }}
-                  className="ml-2"
-                >
-                  {value}
-                </span>
-              </p>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Lifestyle Details */}
-        <motion.div
-          variants={getCardVariants("lifestyle")}
-          initial="initial"
-          animate="animate"
-          whileHover="hover"
-          className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
-          style={{
-            backgroundColor: cardColorSchemes.lifestyle.bg,
-            borderColor: cardColorSchemes.lifestyle.border,
-            borderWidth: "2px",
-            borderStyle: "solid",
-          }}
-        >
-          <h3
-            className="text-2xl mb-4 flex items-center"
-            style={{
-              fontFamily: "'Tiempos Headline', serif",
-              fontWeight: 400,
-              color: cardColorSchemes.lifestyle.title,
-            }}
-          >
-            <FaHeart
-              className="mr-2"
-              style={{ color: cardColorSchemes.lifestyle.icon }}
-            />{" "}
-            Lifestyle
-          </h3>
-          <div className="space-y-2">
-            {Object.entries(lifestyleDetails).map(([key, value]) => (
-              <p
-                key={key}
-                className="text-lg"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                <strong style={{ color: cardColorSchemes.lifestyle.label }}>
-                  {key}:
-                </strong>
-                <span
-                  style={{ color: cardColorSchemes.lifestyle.value }}
-                  className="ml-2"
-                >
-                  {value}
-                </span>
-              </p>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Hobbies Details */}
-        {Object.keys(hobbiesDetails).length > 0 &&
-          hobbiesDetails.Hobbies !== "Not specified" && (
-            <motion.div
-              variants={getCardVariants("basicDetails")}
-              initial="initial"
-              animate="animate"
-              whileHover="hover"
-              className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
-              style={{
-                backgroundColor: cardColorSchemes.basicDetails.bg,
-                borderColor: cardColorSchemes.basicDetails.border,
-                borderWidth: "2px",
-                borderStyle: "solid",
-              }}
+          {identityLine ? (
+            <p className="mt-4 text-[17px] leading-relaxed text-ivory/80">
+              {identityLine}
+            </p>
+          ) : null}
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <Button
+              size="lg"
+              className="min-w-[13rem]"
+              onClick={() => scrollToSection("contact")}
             >
-              <h3
-                className="text-2xl mb-4 flex items-center"
-                style={{
-                  fontFamily: "'Tiempos Headline', serif",
-                  fontWeight: 400,
-                  color: cardColorSchemes.basicDetails.title,
-                }}
-              >
-                <FaUser
-                  className="mr-3"
-                  style={{ color: cardColorSchemes.basicDetails.icon }}
-                />
-                Hobbies & Interests
-              </h3>
-              <div className="space-y-2">
-                {Object.entries(hobbiesDetails).map(([key, value]) => (
-                  <p
-                    key={key}
-                    className="text-lg"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    <strong
-                      style={{ color: cardColorSchemes.basicDetails.label }}
-                    >
-                      {key}:
-                    </strong>
-                    <span
-                      style={{ color: cardColorSchemes.basicDetails.value }}
-                      className="ml-2"
-                    >
-                      {value}
-                    </span>
+              Request an introduction
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-ivory/35 bg-transparent text-ivory hover:bg-ivory hover:text-brown"
+              onClick={handleShare}
+            >
+              Share with family
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile CTAs under portrait */}
+        <div className="mt-5 flex flex-col gap-3 lg:hidden">
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={() => scrollToSection("contact")}
+          >
+            Request an introduction
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="w-full"
+            onClick={handleShare}
+          >
+            Share with family
+          </Button>
+        </div>
+
+        <div className="mt-8 space-y-5">
+          {(about || looking) && (
+            <section id="about" className="scroll-mt-28 space-y-5">
+              {about ? (
+                <div className="rounded-xl border border-brown/10 bg-card p-6 sm:p-9">
+                  <h2 className="font-display text-[1.6rem] font-semibold text-brown">
+                    {aboutHeading}
+                  </h2>
+                  <div className="mt-3 h-px w-12 bg-maroon" aria-hidden />
+                  <p className="mt-5 font-display text-[1.3rem] leading-[1.6] whitespace-pre-line text-brown-deep">
+                    {about}
                   </p>
-                ))}
-              </div>
-            </motion.div>
+                </div>
+              ) : null}
+              {looking ? (
+                <div className="rounded-xl border border-brown/10 bg-card p-6 sm:p-9">
+                  <h2 className="font-display text-[1.6rem] font-semibold text-brown">
+                    {lookingHeading}
+                  </h2>
+                  <div className="mt-3 h-px w-12 bg-maroon" aria-hidden />
+                  <p className="mt-5 font-display text-[1.3rem] leading-[1.6] whitespace-pre-line text-brown-deep">
+                    {looking}
+                  </p>
+                </div>
+              ) : null}
+            </section>
           )}
 
-        {/* Horoscope Details */}
-        <motion.div
-          variants={getCardVariants("horoscope")}
-          initial="initial"
-          animate="animate"
-          whileHover="hover"
-          className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
-          style={{
-            backgroundColor: cardColorSchemes.horoscope.bg,
-            borderColor: cardColorSchemes.horoscope.border,
-            borderWidth: "2px",
-            borderStyle: "solid",
-          }}
-        >
-          <h3
-            className="text-2xl mb-4 flex items-center"
-            style={{
-              fontFamily: "'Tiempos Headline', serif",
-              fontWeight: 400,
-              color: cardColorSchemes.horoscope.title,
-            }}
-          >
-            <FaHeart
-              className="mr-2"
-              style={{ color: cardColorSchemes.horoscope.icon }}
-            />{" "}
-            Horoscope
-          </h3>
-          <div className="space-y-2">
-            <p
-              className="text-lg"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              <strong style={{ color: cardColorSchemes.horoscope.label }}>
-                Manglik Status:
-              </strong>
-              <span
-                style={{ color: cardColorSchemes.horoscope.value }}
-                className="ml-2"
-              >
-                {formatManglikStatus(profileData.mangalik)}
-              </span>
-            </p>
-          </div>
-        </motion.div>
+          <ViewSection id="who" title={whoTitle} facts={whoFacts} />
+          <ViewSection id="family" title="Family" facts={familyFacts} />
+          <ViewSection
+            id="work"
+            title="Education & work"
+            facts={workFacts}
+          />
 
-        {/* Education Details */}
-        {Object.keys(educationDetails).length > 0 && (
-          <motion.div
-            variants={getCardVariants("education")}
-            initial="initial"
-            animate="animate"
-            whileHover="hover"
-            className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
-            style={{
-              backgroundColor: cardColorSchemes.education.bg,
-              borderColor: cardColorSchemes.education.border,
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-          >
-            <h3
-              className="text-2xl mb-4 flex items-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-                color: cardColorSchemes.education.title,
-              }}
-            >
-              <FaGraduationCap
-                className="mr-2"
-                style={{ color: cardColorSchemes.education.icon }}
-              />{" "}
-              Education
-            </h3>
-            <div className="space-y-2">
-              {Object.entries(educationDetails).map(([key, value]) => (
-                key === "Additional Information" ? (
-                  <div key={key} className="mt-4 pt-4 border-t" style={{ borderColor: cardColorSchemes.education.border }}>
-                    <strong
-                      className="block text-lg mb-2"
-                      style={{ color: cardColorSchemes.education.label }}
-                    >
-                      {key}:
-                    </strong>
-                    <p
-                      className="text-base whitespace-pre-wrap"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                        color: cardColorSchemes.education.value,
-                      }}
-                    >
-                      {value || "Not specified"}
-                    </p>
-                  </div>
-                ) : (
-                  <p
-                    key={key}
-                    className="text-lg"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    <strong style={{ color: cardColorSchemes.education.label }}>
-                      {key}:
-                    </strong>
-                    <span
-                      style={{ color: cardColorSchemes.education.value }}
-                      className="ml-2"
-                    >
-                      {value || "Not specified"}
-                    </span>
+          {(contactFacts.length > 0 || contactIntroRequired) && (
+            <section id="contact" className="scroll-mt-28">
+              {contactIntroRequired ? (
+                <div className="rounded-xl bg-brown-deep px-6 py-8 sm:px-9 sm:py-10">
+                  <p className="text-[11px] font-semibold tracking-[0.2em] text-ivory/55 uppercase">
+                    Private profile
                   </p>
-                )
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Profession Details */}
-        {Object.keys(professionDetails).length > 0 && (
-          <motion.div
-            variants={getCardVariants("profession")}
-            initial="initial"
-            animate="animate"
-            whileHover="hover"
-            className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
-            style={{
-              backgroundColor: cardColorSchemes.profession.bg,
-              borderColor: cardColorSchemes.profession.border,
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-          >
-            <h3
-              className="text-2xl mb-4 flex items-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-                color: cardColorSchemes.profession.title,
-              }}
-            >
-              <FaGraduationCap
-                className="mr-2"
-                style={{ color: cardColorSchemes.profession.icon }}
-              />{" "}
-              Profession
-            </h3>
-            <div className="space-y-2">
-              {Object.entries(professionDetails).map(([key, value]) => (
-                key === "Additional Information" ? (
-                  <div key={key} className="mt-4 pt-4 border-t" style={{ borderColor: cardColorSchemes.profession.border }}>
-                    <strong
-                      className="block text-lg mb-2"
-                      style={{ color: cardColorSchemes.profession.label }}
-                    >
-                      {key}:
-                    </strong>
-                    <p
-                      className="text-base whitespace-pre-wrap"
-                      style={{
-                        fontFamily: "'Modern Era', sans-serif",
-                        fontWeight: 400,
-                        color: cardColorSchemes.profession.value,
-                      }}
-                    >
-                      {value || "Not specified"}
-                    </p>
-                  </div>
-                ) : (
-                  <p
-                    key={key}
-                    className="text-lg"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    <strong style={{ color: cardColorSchemes.profession.label }}>
-                      {key}:
-                    </strong>
-                    <span
-                      style={{ color: cardColorSchemes.profession.value }}
-                      className="ml-2"
-                    >
-                      {value || "Not specified"}
-                    </span>
+                  <h2 className="mt-3 font-display text-[1.75rem] font-semibold text-ivory sm:text-3xl">
+                    Introductions are made personally
+                  </h2>
+                  <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-ivory/75">
+                    {profileData.contact_message ||
+                      "This family has asked us to handle first contact. Tell us you're interested and we'll introduce you."}
                   </p>
-                )
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Family Details */}
-        {Object.keys(familyDetails).length > 0 && (
-          <motion.div
-            variants={getCardVariants("family")}
-            initial="initial"
-            animate="animate"
-            whileHover="hover"
-            className="p-8 rounded-xl shadow-lg transition-all break-inside-avoid mb-8 inline-block w-full"
-            style={{
-              backgroundColor: cardColorSchemes.family.bg,
-              borderColor: cardColorSchemes.family.border,
-              borderWidth: "2px",
-              borderStyle: "solid",
-            }}
-          >
-            <h3
-              className="text-2xl mb-4 flex items-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-                color: cardColorSchemes.family.title,
-              }}
-            >
-              <FaUsers
-                className="mr-2"
-                style={{ color: cardColorSchemes.family.icon }}
-              />{" "}
-              Family
-            </h3>
-            <div className="space-y-2">
-              {Object.entries(familyDetails).map(([key, value]) => (
-                <p
-                  key={key}
-                  className="text-lg"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  <strong style={{ color: cardColorSchemes.family.label }}>
-                    {key}:
-                  </strong>
-                  <span
-                    style={{ color: cardColorSchemes.family.value }}
-                    className="ml-2"
-                  >
-                    {value || "Not specified"}
-                  </span>
-                </p>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </div>
-
-      {/* Contact Actions */}
-      <div className="flex justify-center mb-20">
-        {user && user._id === profileData._id && (
-          <button
-            className="bg-[#4F2F1D] hover:bg-[#6B4132] text-white font-bold py-3 px-8 rounded-lg transition duration-300 shadow-lg"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-          >
-            Edit Profile
-          </button>
-        )}
-      </div>
-
+                  <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                    <a
+                      href={SUPPORT_PHONE_LINK}
+                      className="inline-flex min-h-12 items-center justify-center rounded-lg bg-maroon px-6 text-base font-semibold text-primary-foreground hover:bg-[#7a0000]"
+                    >
+                      Call {SUPPORT_PHONE_NUMBER}
+                    </a>
+                    <a
+                      href={SUPPORT_WHATSAPP_LINK}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex min-h-12 items-center justify-center rounded-lg border border-ivory/35 px-6 text-base font-semibold text-ivory hover:bg-ivory hover:text-brown"
+                    >
+                      WhatsApp us
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-xl border border-brown/10 bg-card p-6 sm:p-8">
+                  <div className="flex items-center gap-3">
+                    <h2 className="font-sans text-[11px] font-semibold tracking-[0.2em] text-maroon uppercase">
+                      Contact
+                    </h2>
+                    <span className="h-px flex-1 bg-brown/10" aria-hidden />
+                  </div>
+                  <dl className="mt-6 grid gap-x-10 gap-y-5 sm:grid-cols-2">
+                    {contactFacts.map(({ label, value }) => (
+                      <div key={label}>
+                        <dt className="text-[13px] tracking-[0.06em] text-muted-foreground uppercase">
+                          {label}
+                        </dt>
+                        <dd className="mt-1 text-[17px] leading-snug font-medium break-words text-brown-deep">
+                          {value}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  <div className="mt-6 border-t border-brown/10 pt-5">
+                    <p className="mb-3 text-[11px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+                      Prefer an introduction?
+                    </p>
+                    <SupportLinks />
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
+        </div>
+      </ViewShell>
     </PageShell>
   );
 };
