@@ -5,6 +5,7 @@ import { apiUrl, BACKEND_BASE_URL } from "../config/constants";
 import { mapTestimonialsFromApi } from "../utils/testimonials";
 import { Button } from "@/components/ui/button";
 import CoupleStoryDeck from "./CoupleStoryDeck";
+import "./SuccessStories.css";
 
 const SuccessStories = () => {
   const navigate = useNavigate();
@@ -36,24 +37,22 @@ const SuccessStories = () => {
   }, []);
 
   return (
-    <section className="border-t border-border bg-paper py-20 sm:py-28 md:py-32">
-      <div className="mx-auto max-w-6xl px-6 sm:px-10">
+    <section className="success-stories">
+      <div className="success-stories__inner px-6 sm:px-10">
         <motion.header
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="mx-auto mb-14 max-w-2xl text-center sm:mb-16"
+          className="success-stories__header"
         >
-          <p className="mb-3 text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
-            Success stories
-          </p>
-          <h2 className="font-display text-3xl font-semibold text-brown sm:text-4xl md:text-5xl">
+          <h2 className="success-stories__title">
             Couples who found their match
           </h2>
-          <p className="mt-4 font-sans text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Turn through real matches: an album of Punjabi couples who found
-            each other on Punjabi Rishtey.
+          <div className="success-stories__rule" aria-hidden="true" />
+          <p className="success-stories__copy font-sans">
+            An album of Punjabi rishtas that began here — turn through their
+            stories with a little more warmth.
           </p>
         </motion.header>
 
@@ -83,13 +82,13 @@ const SuccessStories = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
-          className="mt-14 flex justify-center sm:mt-16"
+          className="success-stories__cta"
         >
           <Button
             type="button"
             size="lg"
             variant="outline"
-            className="border-brown/25 text-brown hover:bg-ivory hover:text-brown"
+            className="border-brown/25 text-brown hover:bg-card hover:text-brown"
             onClick={() => navigate("/testimonials")}
           >
             View all success stories
