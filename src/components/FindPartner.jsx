@@ -166,7 +166,7 @@ const FindPartner = () => {
           setProfileComplete(false);
           setError(
             err.response?.data?.error ||
-              "Add a photo, education, profession, and family before you can search."
+              "Your profile must be at least 70% complete to access this feature."
           );
         } else {
           setError(
@@ -607,8 +607,8 @@ const FindPartner = () => {
                 fontWeight: 400,
               }}
             >
-              {error ||
-                "Add a photo, education, profession, and family before you can search."}
+              Your profile must be at least 70% complete to access the partner
+              search feature.
             </p>
             <div className="flex justify-center">
               <button
