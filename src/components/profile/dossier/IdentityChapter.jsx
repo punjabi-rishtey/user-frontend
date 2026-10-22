@@ -6,7 +6,7 @@ import {
   RELIGION_OPTIONS,
 } from "./fieldOptions";
 
-export default function IdentityChapter({ data, onChange }) {
+export default function IdentityChapter({ data, onChange, fieldErrors = {} }) {
   return (
     <SectionStack>
       <SectionGroup title="Contact">
@@ -16,6 +16,7 @@ export default function IdentityChapter({ data, onChange }) {
             name="fullName"
             value={data.fullName}
             onChange={onChange}
+            error={fieldErrors.name || fieldErrors.fullName || ""}
           />
           <DossierField
             label="Mobile"
@@ -30,6 +31,7 @@ export default function IdentityChapter({ data, onChange }) {
             value={data.secondary_contact}
             onChange={onChange}
             type="tel"
+            error={fieldErrors.secondary_contact || ""}
           />
           <DossierField
             label="Email"

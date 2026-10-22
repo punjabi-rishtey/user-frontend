@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "export:ig-heritage": "node scripts/export-ig-heritage.mjs",
-    "export:ig-counselling": "node scripts/export-ig-counselling.mjs"
+    "export:ig-counselling": "node scripts/export-ig-counselling.mjs",
+    "export:ig-conversion": "node scripts/export-ig-conversion.mjs"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",

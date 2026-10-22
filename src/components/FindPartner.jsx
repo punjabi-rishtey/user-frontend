@@ -825,7 +825,7 @@ const FindPartner = () => {
                         />
                       </div>
                       <div className="flex flex-col px-4 py-4 sm:px-5 sm:py-5">
-                        <h3 className="font-display text-2xl font-semibold leading-tight text-brown sm:text-[1.65rem]">
+                        <h3 className="font-display text-2xl font-semibold leading-tight text-brown">
                           {item.name}
                         </h3>
                         {facts.length > 0 ? (

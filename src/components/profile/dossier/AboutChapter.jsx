@@ -1,6 +1,6 @@
 import { DossierField, DossierFieldGrid } from "./DossierField";
 
-export default function AboutChapter({ data, onChange }) {
+export default function AboutChapter({ data, onChange, fieldErrors = {} }) {
   return (
     <DossierFieldGrid>
       <DossierField
@@ -12,6 +12,7 @@ export default function AboutChapter({ data, onChange }) {
         rows={5}
         placeholder="A few honest lines about who you are"
         hint={`${(data.about_myself || "").length}/300`}
+        error={fieldErrors.about_myself || ""}
       />
       <DossierField
         label="Looking for"
@@ -22,6 +23,7 @@ export default function AboutChapter({ data, onChange }) {
         rows={5}
         placeholder="What you hope to find in a partner"
         hint={`${(data.looking_for || "").length}/300`}
+        error={fieldErrors.looking_for || ""}
       />
     </DossierFieldGrid>
   );

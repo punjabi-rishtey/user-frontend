@@ -2,7 +2,7 @@ import SectionGroup, { SectionStack } from "../studio/SectionGroup";
 import { DossierField, DossierFieldGrid } from "./DossierField";
 import { EDUCATION_LEVEL_OPTIONS } from "./fieldOptions";
 
-export default function EducationChapter({ data, onChange }) {
+export default function EducationChapter({ data, onChange, fieldErrors = {} }) {
   return (
     <SectionStack>
       <SectionGroup title="Studies">
@@ -51,6 +51,7 @@ export default function EducationChapter({ data, onChange }) {
           type="textarea"
           rows={4}
           placeholder="Anything else about your education"
+          error={fieldErrors.additional_info || ""}
         />
       </SectionGroup>
     </SectionStack>

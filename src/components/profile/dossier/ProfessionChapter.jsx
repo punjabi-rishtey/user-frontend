@@ -1,7 +1,7 @@
 import SectionGroup, { SectionStack } from "../studio/SectionGroup";
 import { DossierField, DossierFieldGrid } from "./DossierField";
 
-export default function ProfessionChapter({ data, onChange }) {
+export default function ProfessionChapter({ data, onChange, fieldErrors = {} }) {
   return (
     <SectionStack>
       <SectionGroup title="Work">
@@ -59,6 +59,7 @@ export default function ProfessionChapter({ data, onChange }) {
           onChange={onChange}
           type="textarea"
           rows={4}
+          error={fieldErrors.additional_info || ""}
         />
       </SectionGroup>
     </SectionStack>

@@ -26,6 +26,7 @@ export default function LifestyleChapter({
   onHobbyChange,
   onAddHobby,
   onRemoveHobby,
+  fieldErrors = {},
 }) {
   return (
     <SectionStack>
@@ -186,6 +187,11 @@ export default function LifestyleChapter({
             name="home_address.address"
             value={data.home_address?.address}
             onChange={onChange}
+            error={
+              fieldErrors["location.address"] ||
+              fieldErrors["home_address.address"] ||
+              ""
+            }
           />
         </DossierFieldGrid>
       </SectionGroup>
@@ -207,6 +213,11 @@ export default function LifestyleChapter({
             ))
           )}
         </div>
+        {fieldErrors.hobbies ? (
+          <p className="mb-2 text-xs text-destructive" role="alert">
+            {fieldErrors.hobbies}
+          </p>
+        ) : null}
         <div className="flex gap-2">
           <input
             type="text"

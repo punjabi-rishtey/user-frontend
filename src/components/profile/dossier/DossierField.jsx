@@ -15,6 +15,7 @@ export function DossierField({
   placeholder = "",
   rows = 4,
   hint = "",
+  error = "",
 }) {
   const displayValue =
     value === true ? "true" : value === false ? "false" : value ?? "";
@@ -31,7 +32,12 @@ export function DossierField({
           value={displayValue}
           onChange={onChange}
           disabled={readOnly}
-          className={cn(authInputClassName, readOnly && "bg-secondary/60")}
+          aria-invalid={Boolean(error)}
+          className={cn(
+            authInputClassName,
+            readOnly && "bg-secondary/60",
+            error && "border-destructive focus-visible:ring-destructive/30"
+          )}
         >
           {options.map((option) => (
             <option key={String(option.value)} value={option.value}>
@@ -48,10 +54,12 @@ export function DossierField({
           readOnly={readOnly}
           rows={rows}
           placeholder={placeholder}
+          aria-invalid={Boolean(error)}
           className={cn(
             authInputClassName,
             "min-h-[8rem] resize-y",
-            readOnly && "bg-secondary/60"
+            readOnly && "bg-secondary/60",
+            error && "border-destructive focus-visible:ring-destructive/30"
           )}
         />
       ) : (
@@ -63,10 +71,19 @@ export function DossierField({
           onChange={onChange}
           readOnly={readOnly}
           placeholder={placeholder}
-          className={cn(authInputClassName, readOnly && "bg-secondary/60")}
+          aria-invalid={Boolean(error)}
+          className={cn(
+            authInputClassName,
+            readOnly && "bg-secondary/60",
+            error && "border-destructive focus-visible:ring-destructive/30"
+          )}
         />
       )}
-      {hint ? (
+      {error ? (
+        <p className="mt-1.5 text-xs text-destructive" role="alert">
+          {error}
+        </p>
+      ) : hint ? (
         <p className="mt-1.5 text-xs text-muted-foreground">{hint}</p>
       ) : null}
     </div>

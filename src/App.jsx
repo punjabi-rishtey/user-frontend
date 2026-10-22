@@ -25,6 +25,7 @@ import SafetyStandards from "./components/SafetyStandards";
 import AtmosphereCardLab from "./components/lab/AtmosphereCardLab";
 import IgHeritageCarousel from "./components/lab/IgHeritageCarousel";
 import IgCounsellingPost from "./components/lab/IgCounsellingPost";
+import IgConversionCarousel from "./components/lab/IgConversionCarousel";
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
           <Route path="/lab/atmosphere-card" element={<AtmosphereCardLab />} />
           <Route path="/lab/ig-heritage" element={<IgHeritageCarousel />} />
           <Route path="/lab/ig-counselling" element={<IgCounsellingPost />} />
+          <Route path="/lab/ig-conversion" element={<IgConversionCarousel />} />
         </Routes>
       </div>
     </AuthProvider>

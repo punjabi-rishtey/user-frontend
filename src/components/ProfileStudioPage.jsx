@@ -32,6 +32,24 @@ const emptyIdentity = {
   age: "",
 };
 
+function parseContentRejected(error) {
+  const data = error?.response?.data;
+  if (!data || data.code !== "content_rejected") return null;
+  const fields = data.fields && typeof data.fields === "object" ? data.fields : {};
+  const messages = Object.values(fields)
+    .map((entry) => entry?.message)
+    .filter(Boolean);
+  return {
+    fields: Object.fromEntries(
+      Object.entries(fields).map(([key, entry]) => [key, entry?.message || ""])
+    ),
+    message:
+      messages[0] ||
+      data.message ||
+      "Please revise the highlighted fields and try again.",
+  };
+}
+
 const emptyLifestyle = {
   height: { feet: "", inches: "" },
   caste: "",
@@ -137,6 +155,7 @@ export default function ProfileStudioPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const [portraitUrl, setPortraitUrl] = useState("");
   const [completionPercent, setCompletionPercent] = useState(0);
 
@@ -403,6 +422,7 @@ export default function ProfileStudioPage() {
 
   const goToSection = (nextId) => {
     setNotice(null);
+    setFieldErrors({});
     setShowUnsaved(false);
     setPendingSectionId(null);
     savedSnapshotRef.current = "";
@@ -476,6 +496,7 @@ export default function ProfileStudioPage() {
     if (sectionId === "pictures" || sectionId === "account") return true;
     setSaving(true);
     setJustSaved(false);
+    setFieldErrors({});
     try {
       switch (sectionId) {
         case "identity":
@@ -514,9 +535,17 @@ export default function ProfileStudioPage() {
       return true;
     } catch (error) {
       if (isSessionExpiryError(error)) return false;
+      const rejected = parseContentRejected(error);
+      if (rejected) {
+        setFieldErrors(rejected.fields);
+        showNotice("error", rejected.message);
+        return false;
+      }
       showNotice(
         "error",
-        error.response?.data?.message || "Could not save this section."
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Could not save this section."
       );
       return false;
     } finally {
@@ -682,8 +711,15 @@ export default function ProfileStudioPage() {
         {sectionId === "identity" ? (
           <IdentityChapter
             data={identity}
+            fieldErrors={fieldErrors}
             onChange={(e) => {
               const { name, value } = e.target;
+              setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next[name];
+                if (name === "fullName") delete next.name;
+                return next;
+              });
               setIdentity((prev) => ({ ...prev, [name]: value }));
             }}
           />
@@ -692,8 +728,14 @@ export default function ProfileStudioPage() {
         {sectionId === "about" ? (
           <AboutChapter
             data={about}
+            fieldErrors={fieldErrors}
             onChange={(e) => {
               const { name, value } = e.target;
+              setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next[name];
+                return next;
+              });
               setAbout((prev) => ({ ...prev, [name]: value.slice(0, 300) }));
             }}
           />
@@ -704,14 +746,26 @@ export default function ProfileStudioPage() {
             data={lifestyle}
             hobbies={hobbies}
             newHobby={newHobby}
+            fieldErrors={fieldErrors}
             onChange={(e) => {
               const { name, value } = e.target;
+              setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next[name];
+                if (name === "location.address") delete next["location.address"];
+                return next;
+              });
               setLifestyle((prev) => setNested(prev, name, value));
             }}
             onHobbyChange={(e) => setNewHobby(e.target.value)}
             onAddHobby={() => {
               const trimmed = newHobby.trim();
               if (!trimmed) return;
+              setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next.hobbies;
+                return next;
+              });
               setHobbies((prev) => [...prev, trimmed]);
               setNewHobby("");
             }}
@@ -724,8 +778,14 @@ export default function ProfileStudioPage() {
         {sectionId === "family" ? (
           <FamilyChapter
             data={family}
+            fieldErrors={fieldErrors}
             onChange={(e) => {
               const { name, value } = e.target;
+              setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next[name];
+                return next;
+              });
               setFamily((prev) => setNested(prev, name, value));
             }}
           />
@@ -734,8 +794,14 @@ export default function ProfileStudioPage() {
         {sectionId === "education" ? (
           <EducationChapter
             data={education}
+            fieldErrors={fieldErrors}
             onChange={(e) => {
               const { name, value } = e.target;
+              setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next[name];
+                return next;
+              });
               setEducation((prev) => setNested(prev, name, value));
             }}
           />
@@ -744,8 +810,14 @@ export default function ProfileStudioPage() {
         {sectionId === "profession" ? (
           <ProfessionChapter
             data={profession}
+            fieldErrors={fieldErrors}
             onChange={(e) => {
               const { name, value } = e.target;
+              setFieldErrors((prev) => {
+                const next = { ...prev };
+                delete next[name];
+                return next;
+              });
               setProfession((prev) => setNested(prev, name, value));
             }}
           />

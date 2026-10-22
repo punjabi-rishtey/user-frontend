@@ -41,6 +41,10 @@ const MembershipPage = () => {
       return "1 year";
     }
 
+    if (numericDuration === 18) {
+      return "1.5 years";
+    }
+
     return `${numericDuration} month${numericDuration === 1 ? "" : "s"}`;
   };
 
@@ -361,8 +365,9 @@ const MembershipPage = () => {
               Payment request submitted
             </h2>
             <p className="mt-4 text-muted-foreground leading-relaxed">
-              Our team will verify your screenshot and activate Gold shortly.
-              You will be able to browse profiles once approved.
+              Our team will verify your screenshot and activate{" "}
+              {selectedPlan?.name || "your membership"} shortly. You will be
+              able to browse profiles once approved.
             </p>
             <Button
               className="mt-8"
@@ -379,7 +384,11 @@ const MembershipPage = () => {
     );
   }
 
-  const featuredPlan = plans[0];
+  const orderedPlans = [...plans].sort((a, b) => {
+    const priceDelta = Number(a.price) - Number(b.price);
+    if (priceDelta !== 0) return priceDelta;
+    return Number(a.duration) - Number(b.duration);
+  });
 
   return (
     <PageShell>
@@ -393,8 +402,9 @@ const MembershipPage = () => {
               Gold Membership
             </h1>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              One clear plan. Unlimited browsing of verified Punjabi profiles
-              for a year, verified personally by the Punjabi Rishtey team.
+              Two lengths of the same membership. Unlimited browsing of
+              verified Punjabi profiles, verified personally by the Punjabi
+              Rishtey team.
             </p>
           </div>
 
@@ -406,55 +416,74 @@ const MembershipPage = () => {
 
           {loading ? (
             <p className="mt-16 text-center text-brown">Loading membership…</p>
-          ) : featuredPlan ? (
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mx-auto mt-14 grid max-w-4xl gap-10 rounded-xl border border-border bg-card p-8 md:grid-cols-[1.1fr_0.9fr] md:p-10"
-            >
-              <div className="flex flex-col gap-6">
-                <div>
-                  <h2 className="font-display text-3xl font-semibold text-brown">
-                    {featuredPlan.name || "Gold"}
-                  </h2>
-                  <p className="mt-2 font-display text-4xl text-maroon">
-                    {formatPlanPrice(featuredPlan.price)}
-                    <span className="ml-2 text-lg text-muted-foreground">
-                      / {formatDuration(featuredPlan.duration)}
-                    </span>
-                  </p>
-                </div>
-                <Separator />
-                <ul className="flex flex-col gap-3">
-                  {(featuredPlan.features || []).map((feature, i) => (
-                    <li
-                      key={i}
-                      className="flex gap-3 text-sm text-foreground sm:text-base"
+          ) : orderedPlans.length > 0 ? (
+            <div className="mt-14 flex flex-col gap-6">
+              <div
+                className={`mx-auto grid w-full max-w-4xl gap-6 ${
+                  orderedPlans.length > 1 ? "md:grid-cols-2" : "max-w-xl"
+                }`}
+              >
+                {orderedPlans.map((plan) => (
+                  <motion.div
+                    key={plan._id || plan.name}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col gap-6 rounded-xl border border-border bg-card p-8"
+                  >
+                    <div>
+                      <h2 className="font-display text-3xl font-semibold text-brown">
+                        {plan.name || "Gold"}
+                      </h2>
+                      {plan.name === "Gold" && (
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                          The yearly membership. Same access, for 1 year.
+                        </p>
+                      )}
+                      {plan.name === "Hallmark" && (
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                          A higher standard of Gold. Same access, for 1.5 years.
+                        </p>
+                      )}
+                      <p className="mt-2 font-display text-4xl text-maroon">
+                        {formatPlanPrice(plan.price)}
+                        <span className="ml-2 text-lg text-muted-foreground">
+                          / {formatDuration(plan.duration)}
+                        </span>
+                      </p>
+                    </div>
+                    <Separator />
+                    <ul className="flex flex-col gap-3">
+                      {(plan.features || []).map((feature, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-3 text-sm text-foreground sm:text-base"
+                        >
+                          <span className="text-maroon">
+                            {feature.available ? "✓" : "–"}
+                          </span>
+                          <span
+                            className={
+                              feature.available
+                                ? "text-ink"
+                                : "text-muted-foreground line-through"
+                            }
+                          >
+                            {feature.feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button
+                      size="lg"
+                      className="mt-auto w-full sm:w-auto"
+                      onClick={() => handlePlanClick(plan)}
                     >
-                      <span className="text-maroon">
-                        {feature.available ? "✓" : "–"}
-                      </span>
-                      <span
-                        className={
-                          feature.available
-                            ? "text-ink"
-                            : "text-muted-foreground line-through"
-                        }
-                      >
-                        {feature.feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  size="lg"
-                  className="mt-2 w-full sm:w-auto"
-                  onClick={() => handlePlanClick(featuredPlan)}
-                >
-                  Unlock with Gold
-                </Button>
+                      Unlock with {plan.name || "Gold"}
+                    </Button>
+                  </motion.div>
+                ))}
               </div>
-              <div className="flex flex-col justify-center gap-4 rounded-lg border border-border bg-secondary/40 p-6">
+              <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 rounded-xl border border-border bg-secondary/40 p-6">
                 <p className="font-display text-xl text-brown">What you unlock</p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   Browse opposite-gender profiles, open full details, and
@@ -463,10 +492,10 @@ const MembershipPage = () => {
                 </p>
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   Pay via UPI, upload your screenshot, and we activate your
-                  year after a quick human check.
+                  membership after a quick human check.
                 </p>
               </div>
-            </motion.div>
+            </div>
           ) : (
             <p className="mt-16 text-center text-muted-foreground">
               No membership plans available right now.
@@ -518,7 +547,7 @@ const MembershipPage = () => {
                     <h4 className="mb-4 text-center font-display text-lg text-brown">
                       Pay exactly {formatPlanPrice(selectedPlan.price)}
                       <span className="mt-1 block text-sm font-sans text-muted-foreground">
-                        Annual membership for one user
+                        {formatDuration(selectedPlan.duration)} for one user
                       </span>
                     </h4>
 
