@@ -463,6 +463,17 @@ const MembershipPage = () => {
                 >
                   {plan.name}
                 </h3>
+                {plan.name === "Gold" && (
+                  <p
+                    className="text-[#6B4132] -mt-2 mb-4"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
+                  >
+                    The yearly membership. Same access, for 1 year.
+                  </p>
+                )}
                 {plan.name === "Hallmark" && (
                   <p
                     className="text-[#6B4132] -mt-2 mb-4"
