@@ -81,6 +81,12 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Login error:", error);
+      if (error.response?.status === 429) {
+        return (
+          error.response?.data?.message ||
+          "Too many attempts. Please wait a few minutes and try again."
+        );
+      }
       return false;
     } finally {
       setIsLoading(false);
