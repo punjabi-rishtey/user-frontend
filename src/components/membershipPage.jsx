@@ -38,6 +38,10 @@ const MembershipPage = () => {
       return "1 year";
     }
 
+    if (numericDuration === 18) {
+      return "1.5 years";
+    }
+
     return `${numericDuration} month${numericDuration === 1 ? "" : "s"}`;
   };
 
@@ -459,6 +463,17 @@ const MembershipPage = () => {
                 >
                   {plan.name}
                 </h3>
+                {plan.name === "Hallmark" && (
+                  <p
+                    className="text-[#6B4132] -mt-2 mb-4"
+                    style={{
+                      fontFamily: "'Modern Era', sans-serif",
+                      fontWeight: 400,
+                    }}
+                  >
+                    A higher standard of Gold. Same access, for 1.5 years.
+                  </p>
+                )}
                 <p
                   className="text-3xl mb-2 text-[#4F2F1D]"
                   style={{
@@ -569,7 +584,7 @@ const MembershipPage = () => {
                     >
                       Pay exactly {formatPlanPrice(selectedPlan.price)}
                       <span className="block mt-1 text-sm text-[#6B4132]">
-                        Annual membership for one user
+                        {formatDuration(selectedPlan.duration)} for one user
                       </span>
                     </h4>
 
