@@ -92,6 +92,13 @@ export const AuthProvider = ({ children }) => {
         return "sessionLimit";
       }
 
+      if (error.response?.status === 429) {
+        return (
+          error.response?.data?.message ||
+          "Too many attempts. Please wait a few minutes and try again."
+        );
+      }
+
       return false;
     } finally {
       setIsLoading(false);

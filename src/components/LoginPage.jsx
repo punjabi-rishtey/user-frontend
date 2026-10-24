@@ -49,6 +49,8 @@ const LoginPage = () => {
       );
     } else if (success === "sessionLimit") {
       navigate("/session-limit", { replace: true });
+    } else if (typeof success === "string") {
+      setLoginError(success);
     } else if (!success) {
       setLoginError("Please check your email and password, then try again.");
     } else {
