@@ -7,7 +7,9 @@ import { useAppNav } from "@/hooks/useAppNav";
 
 export default function HeroWithHeader() {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const { navigate, goFindPartner, isAuthenticated } = useAppNav();
+  const { navigate, goFindPartner, isAuthenticated, hasActiveMembership } =
+    useAppNav();
+  const memberHasPlan = hasActiveMembership();
 
   return (
     <section className="relative h-[100svh] w-full overflow-hidden bg-brown-deep">
@@ -48,19 +50,22 @@ export default function HeroWithHeader() {
             Find a life partner within the Punjabi community.
           </h1>
           <p className="max-w-md text-base leading-relaxed text-ivory/85 sm:text-lg">
-            Create your profile, unlock Gold for ₹2,000 a year, and browse
-            verified matches with confidence.
+            {memberHasPlan
+              ? "Browse verified Punjabi matches, and reach a family when you are ready."
+              : "Create your profile, unlock Gold for ₹2,000 a year, and browse verified matches with confidence."}
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Button
-              size="lg"
-              className="px-8"
-              onClick={() =>
-                isAuthenticated ? navigate("/membership") : navigate("/signup")
-              }
-            >
-              Begin with Gold
-            </Button>
+            {!memberHasPlan && (
+              <Button
+                size="lg"
+                className="px-8"
+                onClick={() =>
+                  isAuthenticated ? navigate("/membership") : navigate("/signup")
+                }
+              >
+                Begin with Gold
+              </Button>
+            )}
             <Button
               size="lg"
               variant="outline"

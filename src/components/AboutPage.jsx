@@ -1,22 +1,29 @@
 import React from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import {
+  EnvelopeSimple,
+  Handshake,
+  Phone,
+  SealCheck,
+  UsersThree,
+} from "@phosphor-icons/react";
 import Header from "./Header";
 import Footer from "./Footer";
 
 const features = [
   {
-    icon: "🏅",
+    Icon: SealCheck,
     title: "Genuine Profiles",
     description: "Verified and authentic profiles for your perfect match",
   },
   {
-    icon: "🤝",
+    Icon: Handshake,
     title: "Most Trusted",
     description: "24+ years of trusted matchmaking experience",
   },
   {
-    icon: "💍",
+    Icon: UsersThree,
     title: "Success Stories",
     description: "Thousands of happy couples found their soulmates",
   },
@@ -70,9 +77,12 @@ const AboutPage = () => {
                 transition={{ duration: 0.3, delay: index * 0.1 }}
                 className="bg-[#F5EDE7] shadow-lg p-6 sm:p-8 rounded-lg text-center w-full sm:w-96 transition-all duration-300 hover:bg-[#E5D3C8]"
               >
-                <div className="text-6xl mb-6 text-[#4F2F1D]">
-                  {feature.icon}
-                </div>
+                <feature.Icon
+                  size={44}
+                  weight="regular"
+                  className="mx-auto mb-6 text-[#4F2F1D]"
+                  aria-hidden
+                />
                 <h3
                   className="text-2xl text-[#4F2F1D]"
                   style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
@@ -123,18 +133,13 @@ const AboutPage = () => {
 
               <div className="mt-6">
                 <button
+                  type="button"
                   onClick={handleFindPartnerClick}
-                  className="bg-[#F5EDE7] text-[#4F2F1D] font-semibold text-lg px-6 py-2 rounded-md hover:bg-[#E5D3C8] transition-all duration-300"
+                  className="inline-flex items-center justify-center bg-[#4F2F1D] text-[#FCF9F2] font-semibold text-lg px-7 py-3.5 rounded-md shadow-sm hover:bg-[#3B2416] transition-colors duration-200"
                   style={{ fontFamily: "'Modern Era', sans-serif" }}
                 >
-                  Click here
+                  Start your matrimony service
                 </button>
-                <span 
-                  className="text-[#333333] ml-2"
-                  style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-                >
-                  to start your matrimony service now.
-                </span>
               </div>
 
               <hr className="border-t border-[#FEEAEA] my-8" />
@@ -153,8 +158,8 @@ const AboutPage = () => {
                   className="flex items-center space-x-4"
                   whileHover={{ scale: 1.05 }}
                 >
-                  <span className="bg-[#F5EDE7] text-[#4F2F1D] p-4 rounded-full text-2xl hover:bg-[#E5D3C8] transition-all duration-300">
-                    📞
+                  <span className="flex items-center justify-center bg-[#F5EDE7] text-[#4F2F1D] size-14 rounded-full hover:bg-[#E5D3C8] transition-colors duration-200">
+                    <Phone size={26} weight="regular" aria-hidden />
                   </span>
                   <div>
                     <p
@@ -176,8 +181,8 @@ const AboutPage = () => {
                   className="flex items-center space-x-4"
                   whileHover={{ scale: 1.05 }}
                 >
-                  <span className="bg-[#F5EDE7] text-[#4F2F1D] p-4 rounded-full text-2xl hover:bg-[#E5D3C8] transition-all duration-300">
-                    ✉️
+                  <span className="flex items-center justify-center bg-[#F5EDE7] text-[#4F2F1D] size-14 rounded-full hover:bg-[#E5D3C8] transition-colors duration-200">
+                    <EnvelopeSimple size={26} weight="regular" aria-hidden />
                   </span>
                   <div>
                     <p

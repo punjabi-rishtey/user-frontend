@@ -41,7 +41,7 @@ const steps = [
 ];
 
 export default function HowItWorks() {
-  const { navigate, isAuthenticated } = useAppNav();
+  const { navigate, isAuthenticated, hasActiveMembership } = useAppNav();
   const [activeDemo, setActiveDemo] = useState(null);
 
   return (
@@ -71,43 +71,69 @@ export default function HowItWorks() {
               {item.body}
             </p>
 
-            <button
-              type="button"
-              onClick={() => setActiveDemo(item)}
-              className="group relative mt-auto aspect-video w-full overflow-hidden rounded-sm border border-border bg-gradient-to-br from-ivory via-paper to-muted text-left outline-none transition-[border-color,box-shadow] hover:border-maroon/35 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label={`${item.demoLabel}, open demo`}
-            >
+            {item.videoSrc ? (
+              <button
+                type="button"
+                onClick={() => setActiveDemo(item)}
+                className="group relative mt-auto aspect-video w-full overflow-hidden rounded-sm border border-border bg-gradient-to-br from-ivory via-paper to-muted text-left outline-none transition-[border-color,box-shadow] hover:border-maroon/35 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-label={`${item.demoLabel}, open demo`}
+              >
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-60"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle at 30% 40%, color-mix(in oklab, var(--color-maroon) 12%, transparent), transparent 55%), radial-gradient(circle at 70% 70%, color-mix(in oklab, var(--color-brown) 8%, transparent), transparent 50%)",
+                  }}
+                  aria-hidden
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
+                  <span className="flex size-12 items-center justify-center rounded-full bg-maroon text-primary-foreground shadow-sm transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none">
+                    <Play className="size-5 fill-current" aria-hidden />
+                  </span>
+                  <span className="font-display text-sm font-medium tracking-wide text-brown">
+                    {item.demoLabel}
+                  </span>
+                </div>
+              </button>
+            ) : (
               <div
-                className="pointer-events-none absolute inset-0 opacity-60"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(circle at 30% 40%, color-mix(in oklab, var(--color-maroon) 12%, transparent), transparent 55%), radial-gradient(circle at 70% 70%, color-mix(in oklab, var(--color-brown) 8%, transparent), transparent 50%)",
-                }}
-                aria-hidden
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
-                <span className="flex size-12 items-center justify-center rounded-full bg-maroon text-primary-foreground shadow-sm transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none">
-                  <Play className="size-5 fill-current" aria-hidden />
-                </span>
-                <span className="font-display text-sm font-medium tracking-wide text-brown">
-                  {item.demoLabel}
-                </span>
+                className="relative mt-auto aspect-video w-full overflow-hidden rounded-sm border border-border/80 bg-gradient-to-br from-ivory via-paper to-muted"
+                aria-label={`${item.title}, walkthrough coming soon`}
+              >
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-40"
+                  style={{
+                    backgroundImage:
+                      "radial-gradient(circle at 30% 40%, color-mix(in oklab, var(--color-maroon) 12%, transparent), transparent 55%), radial-gradient(circle at 70% 70%, color-mix(in oklab, var(--color-brown) 8%, transparent), transparent 50%)",
+                  }}
+                  aria-hidden
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center">
+                  <span className="inline-flex items-center rounded-full border border-maroon/20 bg-maroon/10 px-3 py-1 font-display text-xs font-semibold tracking-wide text-maroon">
+                    Coming soon
+                  </span>
+                  <span className="font-display text-xs text-muted-foreground">
+                    Video walkthrough in progress
+                  </span>
+                </div>
               </div>
-            </button>
+            )}
           </motion.div>
         ))}
       </div>
 
-      <div className="flex justify-center pt-4">
-        <Button
-          size="lg"
-          onClick={() =>
-            navigate(isAuthenticated ? "/membership" : "/signup")
-          }
-        >
-          Begin with Gold
-        </Button>
-      </div>
+      {!hasActiveMembership() && (
+        <div className="flex justify-center pt-4">
+          <Button
+            size="lg"
+            onClick={() =>
+              navigate(isAuthenticated ? "/membership" : "/signup")
+            }
+          >
+            Begin with Gold
+          </Button>
+        </div>
+      )}
 
       <Dialog
         open={Boolean(activeDemo)}

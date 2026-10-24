@@ -9,6 +9,25 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { apiUrl } from "../config/constants";
 import { authApi, isSessionExpiryError } from "../config/authClient";
+import { useAppNav } from "@/hooks/useAppNav";
+import {
+  findHeldPlan,
+  membershipCardAction,
+} from "./membershipCardAction";
+
+function planReasons(plan) {
+  const view = String(plan?.premiumProfilesView || "Unlimited").trim();
+  const browsing =
+    view.toLowerCase() === "unlimited"
+      ? "Unlimited browsing of verified Punjabi profiles"
+      : `Browse up to ${view} verified Punjabi profiles`;
+
+  return [
+    browsing,
+    "Full details on every profile you open",
+    "A person confirms your payment before access starts",
+  ];
+}
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
@@ -28,8 +47,12 @@ const MembershipPage = () => {
   const [success, setSuccess] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const fileInputRef = useRef(null);
+  const [heldSubscription, setHeldSubscription] = useState(null);
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated, refreshUser } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
+  const { hasActiveMembership } = useAppNav();
+  const memberHasPlan = hasActiveMembership();
 
   const formatPlanPrice = (price) =>
     `₹${Number(price || 0).toLocaleString("en-IN")}`;
@@ -119,6 +142,36 @@ const MembershipPage = () => {
 
     fetchMemberships();
   }, []);
+
+  useEffect(() => {
+    if (!memberHasPlan) {
+      setHeldSubscription(null);
+      setSubscriptionChecked(true);
+      return;
+    }
+
+    const userId = user?._id || user?.id;
+    if (!userId) return;
+
+    let cancelled = false;
+    setSubscriptionChecked(false);
+    authApi
+      .get(apiUrl(`/api/users/subscription/${userId}`))
+      .then((response) => {
+        if (!cancelled) setHeldSubscription(response.data?.data || null);
+      })
+      .catch((err) => {
+        if (isSessionExpiryError(err)) return;
+        if (!cancelled) setHeldSubscription(null);
+      })
+      .finally(() => {
+        if (!cancelled) setSubscriptionChecked(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [memberHasPlan, user?._id, user?.id]);
 
   // Clean up preview URL when component unmounts
   useEffect(() => {
@@ -389,23 +442,29 @@ const MembershipPage = () => {
     if (priceDelta !== 0) return priceDelta;
     return Number(a.duration) - Number(b.duration);
   });
+  const heldPlan = memberHasPlan
+    ? findHeldPlan(orderedPlans, heldSubscription)
+    : null;
+  const plansReady = !loading && (!memberHasPlan || subscriptionChecked);
 
   return (
     <PageShell>
       <div className="px-6 py-16 sm:px-10">
         <div className="mx-auto max-w-5xl">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+            <h1 className="font-display text-4xl font-semibold text-brown sm:text-5xl">
               Membership
-            </p>
-            <h1 className="mt-3 font-display text-4xl font-semibold text-brown sm:text-5xl">
-              Gold Membership
             </h1>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Two lengths of the same membership. Unlimited browsing of
-              verified Punjabi profiles, verified personally by the Punjabi
-              Rishtey team.
-            </p>
+            <ul className="mx-auto mt-6 max-w-lg list-disc space-y-2 pl-5 text-left text-base leading-relaxed text-ink marker:text-maroon">
+              <li>Both plans open full opposite-gender profiles.</li>
+              <li>
+                Reach a match through support, or call when a number is shared.
+              </li>
+              <li>
+                Pay by UPI, upload the screenshot, and we activate membership
+                after a check.
+              </li>
+            </ul>
           </div>
 
           {error && !showModal && (
@@ -414,7 +473,7 @@ const MembershipPage = () => {
             </div>
           )}
 
-          {loading ? (
+          {!plansReady ? (
             <p className="mt-16 text-center text-brown">Loading membership…</p>
           ) : orderedPlans.length > 0 ? (
             <div className="mt-14 flex flex-col gap-6">
@@ -423,7 +482,9 @@ const MembershipPage = () => {
                   orderedPlans.length > 1 ? "md:grid-cols-2" : "max-w-xl"
                 }`}
               >
-                {orderedPlans.map((plan) => (
+                {orderedPlans.map((plan) => {
+                  const action = membershipCardAction(plan, heldPlan);
+                  return (
                   <motion.div
                     key={plan._id || plan.name}
                     initial={{ opacity: 0, y: 16 }}
@@ -453,47 +514,33 @@ const MembershipPage = () => {
                     </div>
                     <Separator />
                     <ul className="flex flex-col gap-3">
-                      {(plan.features || []).map((feature, i) => (
+                      {planReasons(plan).map((reason) => (
                         <li
-                          key={i}
-                          className="flex gap-3 text-sm text-foreground sm:text-base"
+                          key={reason}
+                          className="flex gap-3 text-sm text-ink sm:text-base"
                         >
-                          <span className="text-maroon">
-                            {feature.available ? "✓" : "–"}
+                          <span className="text-maroon" aria-hidden>
+                            ✓
                           </span>
-                          <span
-                            className={
-                              feature.available
-                                ? "text-ink"
-                                : "text-muted-foreground line-through"
-                            }
-                          >
-                            {feature.feature}
-                          </span>
+                          <span>{reason}</span>
                         </li>
                       ))}
                     </ul>
-                    <Button
-                      size="lg"
-                      className="mt-auto w-full sm:w-auto"
-                      onClick={() => handlePlanClick(plan)}
-                    >
-                      Unlock with {plan.name || "Gold"}
-                    </Button>
+                    {action && (
+                      <Button
+                        size="lg"
+                        className="mt-auto w-full sm:w-auto"
+                        disabled={!action.opensPayment}
+                        onClick={() => {
+                          if (action.opensPayment) handlePlanClick(plan);
+                        }}
+                      >
+                        {action.label}
+                      </Button>
+                    )}
                   </motion.div>
-                ))}
-              </div>
-              <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 rounded-xl border border-border bg-secondary/40 p-6">
-                <p className="font-display text-xl text-brown">What you unlock</p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  Browse opposite-gender profiles, open full details, and
-                  connect with intention, through support, or directly when a
-                  phone number is available.
-                </p>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  Pay via UPI, upload your screenshot, and we activate your
-                  membership after a quick human check.
-                </p>
+                  );
+                })}
               </div>
             </div>
           ) : (
@@ -508,15 +555,16 @@ const MembershipPage = () => {
         {showModal && selectedPlan && (
           <>
             <motion.div
-              className="fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-brown-deep/50 p-4"
+              className="fixed inset-0 z-40 overflow-y-auto bg-brown-deep/50"
               variants={backgroundVariants}
               initial="hidden"
               animate="visible"
               exit="exit"
               onClick={closeModal}
             >
+              <div className="mx-auto w-full max-w-3xl px-4 py-8">
               <motion.div
-                className="z-50 my-8 w-full max-w-3xl rounded-xl border border-border bg-card p-6"
+                className="w-full rounded-xl border border-border bg-card p-6"
                 variants={modalVariants}
                 initial="hidden"
                 animate="visible"
@@ -671,6 +719,7 @@ const MembershipPage = () => {
                   </div>
                 </div>
               </motion.div>
+              </div>
             </motion.div>
           </>
         )}

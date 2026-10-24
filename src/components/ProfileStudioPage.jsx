@@ -6,6 +6,7 @@ import { apiUrl } from "@/config/constants";
 import { authApi, authFetch, isSessionExpiryError } from "@/config/authClient";
 import StudioShell, { UnsavedChangesDialog } from "./profile/studio/StudioShell";
 import { FLOW_SECTION_IDS } from "./profile/studio/constants";
+import { openSectionIds } from "./profile/studio/sectionStatus";
 import AccountSection from "./profile/studio/AccountSection";
 import PhotosChapter from "./profile/dossier/PhotosChapter";
 import IdentityChapter from "./profile/dossier/IdentityChapter";
@@ -171,7 +172,6 @@ export default function ProfileStudioPage() {
 
   const [pendingSectionId, setPendingSectionId] = useState(null);
   const [showUnsaved, setShowUnsaved] = useState(false);
-  const [justSaved, setJustSaved] = useState(false);
 
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -184,28 +184,9 @@ export default function ProfileStudioPage() {
   const [loadingPassword, setLoadingPassword] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
-  const savedSnapshotRef = useRef("");
-  const justSavedTimerRef = useRef(null);
-
   const showNotice = useCallback((type, message) => {
     setNotice({ type, message });
   }, []);
-
-  const clearJustSavedTimer = useCallback(() => {
-    if (justSavedTimerRef.current) {
-      window.clearTimeout(justSavedTimerRef.current);
-      justSavedTimerRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => {
-    return () => clearJustSavedTimer();
-  }, [clearJustSavedTimer]);
-
-  useEffect(() => {
-    setJustSaved(false);
-    clearJustSavedTimer();
-  }, [sectionId, clearJustSavedTimer]);
 
   const sectionSnapshot = useMemo(() => {
     switch (sectionId) {
@@ -238,17 +219,40 @@ export default function ProfileStudioPage() {
     astrology,
   ]);
 
+  // Set during render so a section change is clean before the buttons paint.
+  const baselineRef = useRef(null);
+  if (!baselineRef.current || baselineRef.current.id !== sectionId) {
+    baselineRef.current = { id: sectionId, snapshot: sectionSnapshot };
+  }
+
   const isDirty =
     sectionId !== "pictures" &&
     sectionId !== "account" &&
-    sectionSnapshot !== savedSnapshotRef.current;
+    sectionSnapshot !== baselineRef.current.snapshot;
 
-  useEffect(() => {
-    if (isDirty) {
-      setJustSaved(false);
-      clearJustSavedTimer();
-    }
-  }, [isDirty, clearJustSavedTimer]);
+  const openSections = useMemo(
+    () =>
+      openSectionIds({
+        portraitUrl,
+        identity,
+        about,
+        lifestyle,
+        family,
+        education,
+        profession,
+        astrology,
+      }),
+    [
+      portraitUrl,
+      identity,
+      about,
+      lifestyle,
+      family,
+      education,
+      profession,
+      astrology,
+    ]
+  );
 
   const refreshCompletion = useCallback(async () => {
     try {
@@ -261,15 +265,6 @@ export default function ProfileStudioPage() {
       if (isSessionExpiryError(error)) return;
     }
   }, []);
-
-  useEffect(() => {
-    if (sectionId === "pictures" || sectionId === "account") {
-      savedSnapshotRef.current = "";
-      return;
-    }
-    savedSnapshotRef.current = sectionSnapshot;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionId]);
 
   const applyUserPayload = (userData) => {
     setIdentity({
@@ -412,7 +407,6 @@ export default function ProfileStudioPage() {
       showNotice("error", "Could not load your profile. Please refresh.");
     } finally {
       setLoading(false);
-      savedSnapshotRef.current = "";
     }
   }, [user?._id, navigate, showNotice, refreshCompletion]);
 
@@ -425,7 +419,6 @@ export default function ProfileStudioPage() {
     setFieldErrors({});
     setShowUnsaved(false);
     setPendingSectionId(null);
-    savedSnapshotRef.current = "";
     setSectionId(nextId);
   };
 
@@ -495,7 +488,6 @@ export default function ProfileStudioPage() {
   const saveCurrentSection = async () => {
     if (sectionId === "pictures" || sectionId === "account") return true;
     setSaving(true);
-    setJustSaved(false);
     setFieldErrors({});
     try {
       switch (sectionId) {
@@ -524,14 +516,9 @@ export default function ProfileStudioPage() {
           break;
       }
       await refreshUser?.();
-      savedSnapshotRef.current = sectionSnapshot;
+      baselineRef.current = { id: sectionId, snapshot: sectionSnapshot };
       await refreshCompletion();
-      setJustSaved(true);
-      clearJustSavedTimer();
-      justSavedTimerRef.current = window.setTimeout(() => {
-        setJustSaved(false);
-        justSavedTimerRef.current = null;
-      }, 2000);
+      showNotice("success", "Saved");
       return true;
     } catch (error) {
       if (isSessionExpiryError(error)) return false;
@@ -570,9 +557,14 @@ export default function ProfileStudioPage() {
     requestSection(FLOW_SECTION_IDS[flowIndex - 1]);
   };
 
-  const handleNext = () => {
+  const handleContinue = async () => {
+    if (saving) return;
+    if (isDirty) {
+      const ok = await saveCurrentSection();
+      if (!ok) return;
+    }
     if (!canGoNext) return;
-    requestSection(FLOW_SECTION_IDS[flowIndex + 1]);
+    goToSection(FLOW_SECTION_IDS[flowIndex + 1]);
   };
 
   const handleSaveUnsaved = async () => {
@@ -682,15 +674,14 @@ export default function ProfileStudioPage() {
         sectionId={sectionId}
         completionPercent={completionPercent}
         portraitUrl={portraitUrl}
+        openSectionIds={openSections}
         notice={notice}
         onSelectSection={requestSection}
-        onSave={saveCurrentSection}
+        onContinue={handleContinue}
         onPrevious={handlePrevious}
-        onNext={handleNext}
         showSave={showSave}
-        canSave={isDirty}
+        isDirty={isDirty}
         saving={saving}
-        justSaved={justSaved}
         canGoPrevious={canGoPrevious}
         canGoNext={canGoNext}
       >

@@ -310,7 +310,7 @@ export default function PhotosChapter({ onStatus }) {
             <div className="min-w-0 pt-1">
               <p className="text-sm font-semibold text-brown">Current primary</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                The large portrait on the left updates when you change this.
+                This is the portrait families see first.
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <button

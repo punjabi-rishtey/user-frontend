@@ -8,6 +8,7 @@ import MembershipRequired from "./MembershipRequired";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
+import { findPartnerRefusal } from "./findPartnerAccess";
 
 const FindPartner = () => {
   const [filters, setFilters] = useState({
@@ -161,11 +162,31 @@ const FindPartner = () => {
         }
 
         if (err.response?.status === 403) {
-          setProfileComplete(false);
-          setError(
-            err.response?.data?.error ||
-              "Your profile must be at least 70% complete to access this feature."
-          );
+          const message = err.response?.data?.error || "";
+          let completionPercent = null;
+          if (!/70%\s*complete/i.test(message)) {
+            try {
+              const completion = await authApi.get(
+                apiUrl("/api/users/profile-completion")
+              );
+              const pct = completion.data?.completionPercentage;
+              if (typeof pct === "number" && !Number.isNaN(pct)) {
+                completionPercent = pct;
+              }
+            } catch (completionError) {
+              if (isSessionExpiryError(completionError)) return;
+            }
+          }
+          if (findPartnerRefusal(message, completionPercent) === "profile") {
+            setProfileComplete(false);
+            setError(
+              message ||
+                "Your profile must be at least 70% complete to access this feature."
+            );
+          } else {
+            setProfileComplete(true);
+            setError(null);
+          }
         } else {
           setError(
             "Failed to check profile completeness. Please try again later."
