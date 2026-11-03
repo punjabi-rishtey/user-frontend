@@ -13,11 +13,13 @@ const CustomerReviews = () => {
     const fetchReviews = async () => {
       try {
         const response = await axios.get(apiUrl("/api/review/all"));
-        const mappedReviews = response.data.map((review) => ({
-          rating: review.ratings,
-          title: review.user_name,
-          text: review.message,
-          author: review.user_name,
+        const data = Array.isArray(response.data) ? response.data : [];
+        const mappedReviews = data.map((review) => ({
+          id: review._id,
+          rating: Math.max(1, Math.min(5, Math.round(Number(review.ratings) || 5))),
+          title: review.user_name?.trim() || "Happy Member",
+          text: review.message?.trim() || "",
+          author: review.user_name?.trim() || "Anonymous",
         }));
         setReviews(mappedReviews);
         setError("");
