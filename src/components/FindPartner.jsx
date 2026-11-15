@@ -180,27 +180,24 @@ const FindPartner = () => {
       limit: profilesPerPage,
     };
 
-    if (filters.ageMin) {
-      params.minAge = filters.ageMin;
-    }
-    if (filters.ageMax) {
-      params.maxAge = filters.ageMax;
+    if (filters.ageMin || filters.ageMax) {
+      params.minAge = filters.ageMin || "18";
+      params.maxAge = filters.ageMax || "99";
     }
     if (filters.maritalStatus) {
-      params.marital_status = filters.maritalStatus;
+      const maritalApiValue = {
+        "Never Married": "never_married",
+        Divorced: "divorced",
+        Widowed: "widow_widower",
+        Separated: "separated",
+      }[filters.maritalStatus];
+      params.marital_status = maritalApiValue || filters.maritalStatus;
     }
-    if (filters.manglik) {
-      params.manglik = filters.manglik;
-    }
-    if (filters.nriStatus) {
-      params.nri_status = filters.nriStatus;
-    }
-    if (filters.occupation) {
-      params.occupation = filters.occupation;
-    }
-    if (searchTerm.trim()) {
-      params.search = searchTerm.trim();
-    }
+    // Forward-compatible search params (ignored until backend deploys filter support).
+    if (filters.manglik) params.manglik = filters.manglik;
+    if (filters.nriStatus) params.nri_status = filters.nriStatus;
+    if (filters.occupation) params.occupation = filters.occupation;
+    if (searchTerm.trim()) params.search = searchTerm.trim();
 
     return params;
   }, [currentPage, filters, profilesPerPage, searchTerm]);
@@ -221,7 +218,30 @@ const FindPartner = () => {
           signal: controller.signal,
         });
         const data = response.data || {};
-        setUsers(Array.isArray(data.results) ? data.results : []);
+        const results = Array.isArray(data.results) ? data.results : [];
+        setUsers(
+          results.map((item) => ({
+            ...item,
+            _id: item._id,
+            user: item.user || item._id,
+            age:
+              item.age ??
+              (item.dob
+                ? new Date().getFullYear() - new Date(item.dob).getFullYear()
+                : null),
+            occupation: item.occupation ?? null,
+            nri_status:
+              item.nri_status ?? item.lifestyle?.nri_status ?? false,
+            city: item.city ?? item.location?.city ?? "",
+            manglik: item.manglik ?? item.mangalik,
+            profile_picture:
+              item.profile_picture ||
+              (Array.isArray(item.profile_pictures) &&
+              item.profile_pictures.length > 0
+                ? item.profile_pictures[0]
+                : null),
+          }))
+        );
         setTotalResults(
           typeof data.total === "number" ? data.total : 0
         );
@@ -330,8 +350,34 @@ const FindPartner = () => {
     return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   };
 
+  const matchesSupplementalFilters = (item) => {
+    const isManglik =
+      item.manglik === true ||
+      item.manglik === "true" ||
+      item.manglik === "manglik";
+    const isNRI =
+      item.nri_status === true ||
+      item.nri_status === "true" ||
+      item.nri_status === "yes";
+    const userOccupation = item.occupation || "";
+
+    return (
+      (filters.manglik === "" ||
+        (filters.manglik === "true" && isManglik) ||
+        (filters.manglik === "false" && !isManglik)) &&
+      (filters.nriStatus === "" ||
+        (filters.nriStatus === "true" && isNRI) ||
+        (filters.nriStatus === "false" && !isNRI)) &&
+      (filters.occupation === "" || userOccupation === filters.occupation) &&
+      (searchTerm === "" ||
+        item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  };
+
   const sortedProfiles = useMemo(() => {
-    const list = Array.isArray(users) ? users.filter(Boolean) : [];
+    const list = Array.isArray(users)
+      ? users.filter((item) => item && matchesSupplementalFilters(item))
+      : [];
 
     return [...list].sort((a, b) => {
       if (sortOption === "newest") {
@@ -351,7 +397,7 @@ const FindPartner = () => {
       }
       return 0;
     });
-  }, [users, sortOption]);
+  }, [users, sortOption, filters, searchTerm]);
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
