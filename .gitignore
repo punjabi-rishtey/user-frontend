@@ -26,3 +26,6 @@ output
 *.njsproj
 *.sln
 *.sw?
+
+# generated code graph output
+graphify-out/
