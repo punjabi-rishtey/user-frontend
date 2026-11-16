@@ -77,6 +77,8 @@ const FindPartner = () => {
   const [profilesPerPage] = useState(10);
   const urlHydratedRef = useRef(false);
   const skipNextUrlSyncRef = useRef(false);
+  const skipPageResetOnDebounceRef = useRef(false);
+  const lastCommittedSearchRef = useRef("");
   const didRefreshUserRef = useRef(false);
 
   // Helper to get query parameters from URL
@@ -136,7 +138,10 @@ const FindPartner = () => {
 
   // Hydrate filter/search/page from URL (back/forward and deep links)
   useEffect(() => {
+    skipNextUrlSyncRef.current = true;
+    skipPageResetOnDebounceRef.current = true;
     const queryParams = getQueryParams();
+    lastCommittedSearchRef.current = queryParams.search;
     setCurrentPage(queryParams.page);
     setSearchTerm(queryParams.search);
     setDebouncedSearchTerm(queryParams.search);
@@ -151,7 +156,6 @@ const FindPartner = () => {
       };
       return filtersShallowEqual(prev, next) ? prev : next;
     });
-    urlHydratedRef.current = true;
   }, [location.search]);
 
   useEffect(() => {
@@ -161,17 +165,40 @@ const FindPartner = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
+  // Commit search to page 1 only after debounce (not on each keystroke)
+  useEffect(() => {
+    if (skipPageResetOnDebounceRef.current) {
+      skipPageResetOnDebounceRef.current = false;
+      lastCommittedSearchRef.current = debouncedSearchTerm;
+      return;
+    }
+    if (debouncedSearchTerm === lastCommittedSearchRef.current) return;
+    lastCommittedSearchRef.current = debouncedSearchTerm;
+    setCurrentPage(1);
+  }, [debouncedSearchTerm]);
+
   // Replace history for filter/search edits; pagination uses push separately
   useEffect(() => {
-    if (!urlHydratedRef.current) return;
+    if (!urlHydratedRef.current) {
+      urlHydratedRef.current = true;
+      return;
+    }
     if (skipNextUrlSyncRef.current) {
       skipNextUrlSyncRef.current = false;
       return;
     }
+    // Wait until debounced search matches the input so we never write a stale ?search=
+    if (searchTerm !== debouncedSearchTerm) return;
     writeQueryToUrl(currentPage, debouncedSearchTerm, filters, {
       replace: true,
     });
-  }, [currentPage, debouncedSearchTerm, filters, writeQueryToUrl]);
+  }, [
+    currentPage,
+    debouncedSearchTerm,
+    filters,
+    searchTerm,
+    writeQueryToUrl,
+  ]);
 
   // Give auth context time to initialize before checking
   useEffect(() => {
@@ -395,12 +422,14 @@ const FindPartner = () => {
     });
     setSearchTerm("");
     setDebouncedSearchTerm("");
+    lastCommittedSearchRef.current = "";
     setCurrentPage(1);
   };
 
+  // Page reset happens in the debounce effect — not here — so URL sync never
+  // snapshots stale debouncedSearchTerm and hydration won't wipe the input.
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on search change
   };
 
   const handleProfileClick = (profile) => {
@@ -412,7 +441,9 @@ const FindPartner = () => {
   const paginate = (pageNumber) => {
     skipNextUrlSyncRef.current = true;
     setCurrentPage(pageNumber);
-    writeQueryToUrl(pageNumber, debouncedSearchTerm, filters, { replace: false });
+    const searchForUrl =
+      searchTerm !== debouncedSearchTerm ? searchTerm : debouncedSearchTerm;
+    writeQueryToUrl(pageNumber, searchForUrl, filters, { replace: false });
   };
 
   // Extract unique values for filters (unused helper removed)
