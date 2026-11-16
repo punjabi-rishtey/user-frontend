@@ -11,6 +11,13 @@ import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
 
+const resolveManglikFilterFromUrl = (value) => {
+  if (!value) return "";
+  if (value === "true") return "manglik";
+  if (value === "false") return "non_manglik";
+  return value;
+};
+
 const FindPartner = () => {
   const [filters, setFilters] = useState({
     manglik: "",
@@ -41,7 +48,7 @@ const FindPartner = () => {
     return {
       page: parseInt(params.get("page")) || 1,
       search: params.get("search") || "",
-      manglik: params.get("manglik") || "",
+      manglik: resolveManglikFilterFromUrl(params.get("manglik") || ""),
       maritalStatus: params.get("maritalStatus") || "",
       nriStatus: params.get("nriStatus") || "",
       occupation: params.get("occupation") || "",
@@ -311,12 +318,6 @@ const FindPartner = () => {
     return "";
   };
 
-  const resolveManglikFilter = (filterValue) => {
-    if (filterValue === "true") return "manglik";
-    if (filterValue === "false") return "non_manglik";
-    return filterValue;
-  };
-
   // Filter users
   const filteredData = Array.isArray(users)
     ? users.filter((item) => {
@@ -332,7 +333,7 @@ const FindPartner = () => {
         const profileManglik = normalizeManglikValue(
           item.manglik ?? item.mangalik
         );
-        const filterManglik = resolveManglikFilter(filters.manglik);
+        const filterManglik = resolveManglikFilterFromUrl(filters.manglik);
         const oppositeGender = getOppositeGender();
         const age = parseInt(item.age);
         const isNRI =
