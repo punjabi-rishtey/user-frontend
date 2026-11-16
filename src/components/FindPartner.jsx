@@ -429,6 +429,7 @@ const FindPartner = () => {
   };
 
   const paginate = (pageNumber) => {
+    if (pageNumber === currentPage) return;
     suppressUrlSyncRef.current += 1;
     setCurrentPage(pageNumber);
     const searchForUrl =
