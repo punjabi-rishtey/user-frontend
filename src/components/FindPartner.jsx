@@ -157,7 +157,11 @@ const FindPartner = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
+      const searchChanged = searchTerm !== lastCommittedSearchRef.current;
       setDebouncedSearchTerm(searchTerm);
+      if (searchChanged) {
+        setCurrentPage(1);
+      }
     }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(timer);
   }, [searchTerm]);
@@ -175,9 +179,6 @@ const FindPartner = () => {
       debouncedSearchTerm !== lastCommittedSearchRef.current;
     if (searchCommitted) {
       lastCommittedSearchRef.current = debouncedSearchTerm;
-      if (currentPage !== 1) {
-        setCurrentPage(1);
-      }
       writeQueryToUrl(1, debouncedSearchTerm, filters, { replace: true });
       return;
     }

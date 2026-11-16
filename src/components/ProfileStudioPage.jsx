@@ -424,6 +424,7 @@ export default function ProfileStudioPage() {
         navigate("/login");
         return;
       }
+      setLoadFailed(true);
       showNotice("error", "Could not load your profile. Please refresh.");
     } finally {
       setLoading(false);
