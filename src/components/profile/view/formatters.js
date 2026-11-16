@@ -52,7 +52,9 @@ export function formatManglikStatus(value) {
     const v = value.trim().toLowerCase();
     if (v === "manglik" || v === "true") return "Manglik";
     if (v === "non_manglik" || v === "false") return "Non Manglik";
-    if (v === "partial_manglik") return "Partial Manglik";
+    if (v === "partial_manglik" || v === "partial_mangalik" || v === "partial") {
+      return "Partial Manglik";
+    }
     if (!v) return null;
   }
   if (value === null || value === undefined || value === "") return null;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { apiUrl } from "../config/constants";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -9,6 +9,36 @@ import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
 import { findPartnerRefusal } from "./findPartnerAccess";
+
+const normalizeFilterParamFromUrl = (value) => {
+  if (value === null || value === undefined) return "";
+  const trimmed = String(value).trim();
+  if (!trimmed) return "";
+  if (trimmed.toLowerCase() === "any") return "";
+  return trimmed;
+};
+
+const resolveManglikFilterFromUrl = (value) => {
+  const normalized = normalizeFilterParamFromUrl(value);
+  if (!normalized) return "";
+  if (normalized === "true") return "manglik";
+  if (normalized === "false") return "non_manglik";
+  return normalized;
+};
+
+const ageFromDob = (dob) => {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  if (Number.isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const birthdayPassed =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() &&
+      today.getDate() >= birth.getDate());
+  if (!birthdayPassed) age -= 1;
+  return age >= 0 ? age : null;
+};
 
 const FindPartner = () => {
   const [filters, setFilters] = useState({
@@ -21,18 +51,19 @@ const FindPartner = () => {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [totalResults, setTotalResults] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsSettled, setResultsSettled] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, refreshUser } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
-  const [currentUserGender, setCurrentUserGender] = useState(null);
-  const [profileComplete, setProfileComplete] = useState(true);
+  const [gateStatus, setGateStatus] = useState("pending");
   const [authChecked, setAuthChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
-  const [sortOption, setSortOption] = useState("newest");
 
   // Helper to get query parameters from URL
   const getQueryParams = () => {
@@ -40,13 +71,14 @@ const FindPartner = () => {
     return {
       page: parseInt(params.get("page")) || 1,
       search: params.get("search") || "",
-      manglik: params.get("manglik") || "",
-      maritalStatus: params.get("maritalStatus") || "",
-      nriStatus: params.get("nriStatus") || "",
-      occupation: params.get("occupation") || "",
-      ageMin: params.get("ageMin") || "",
-      ageMax: params.get("ageMax") || "",
-      sort: params.get("sort") || "newest",
+      manglik: resolveManglikFilterFromUrl(params.get("manglik") || ""),
+      maritalStatus: normalizeFilterParamFromUrl(params.get("maritalStatus")),
+      nriStatus: normalizeFilterParamFromUrl(
+        params.get("nriStatus") ?? params.get("nri")
+      ),
+      occupation: normalizeFilterParamFromUrl(params.get("occupation")),
+      ageMin: normalizeFilterParamFromUrl(params.get("ageMin")),
+      ageMax: normalizeFilterParamFromUrl(params.get("ageMax")),
     };
   };
 
@@ -63,22 +95,28 @@ const FindPartner = () => {
       ageMin: queryParams.ageMin,
       ageMax: queryParams.ageMax,
     });
-    setSortOption(queryParams.sort);
   }, [location.search]);
 
   // Update URL with push to create new history entry
   const updateQueryParams = (newPage) => {
-    const params = new URLSearchParams({
-      page: newPage || currentPage,
-      search: searchTerm,
-      manglik: filters.manglik,
-      maritalStatus: filters.maritalStatus,
-      nriStatus: filters.nriStatus,
-      occupation: filters.occupation,
-      ageMin: filters.ageMin,
-      ageMax: filters.ageMax,
-      sort: sortOption,
-    });
+    const params = new URLSearchParams();
+    params.set("page", String(newPage || currentPage));
+    if (searchTerm.trim()) params.set("search", searchTerm.trim());
+
+    const manglik = resolveManglikFilterFromUrl(filters.manglik);
+    const maritalStatus = normalizeFilterParamFromUrl(filters.maritalStatus);
+    const nriStatus = normalizeFilterParamFromUrl(filters.nriStatus);
+    const occupation = normalizeFilterParamFromUrl(filters.occupation);
+    const ageMin = normalizeFilterParamFromUrl(filters.ageMin);
+    const ageMax = normalizeFilterParamFromUrl(filters.ageMax);
+
+    if (manglik) params.set("manglik", manglik);
+    if (maritalStatus) params.set("maritalStatus", maritalStatus);
+    if (nriStatus) params.set("nriStatus", nriStatus);
+    if (occupation) params.set("occupation", occupation);
+    if (ageMin) params.set("ageMin", ageMin);
+    if (ageMax) params.set("ageMax", ageMax);
+
     navigate(`${location.pathname}?${params.toString()}`, { replace: false }); // Use push instead of replace
   };
 
@@ -97,7 +135,6 @@ const FindPartner = () => {
         ageMin: queryParams.ageMin,
         ageMax: queryParams.ageMax,
       });
-      setSortOption(queryParams.sort);
     };
 
     window.addEventListener("popstate", handlePopstate);
@@ -107,7 +144,7 @@ const FindPartner = () => {
   // Update URL when state changes (except for initial load or popstate)
   useEffect(() => {
     updateQueryParams();
-  }, [currentPage, searchTerm, filters, sortOption]);
+  }, [currentPage, searchTerm, filters]);
 
   // Give auth context time to initialize before checking
   useEffect(() => {
@@ -131,14 +168,6 @@ const FindPartner = () => {
     }
   }, [isAuthenticated, refreshUser]);
 
-  // Update currentUserGender when user changes
-  useEffect(() => {
-    if (user && user.gender) {
-      setCurrentUserGender(user.gender.toLowerCase());
-      console.log("Current user gender set to:", user.gender.toLowerCase());
-    }
-  }, [user]);
-
   // Redirect if not authenticated
   useEffect(() => {
     if (!isAuthenticated && authChecked) {
@@ -153,8 +182,8 @@ const FindPartner = () => {
 
       try {
         await authApi.get(apiUrl("/api/users/find-my-partner"));
-        setProfileComplete(true);
-        fetchUsers();
+        setError(null);
+        setGateStatus("allowed");
       } catch (err) {
         console.error("Error checking profile completeness:", err);
         if (isSessionExpiryError(err)) {
@@ -178,21 +207,21 @@ const FindPartner = () => {
             }
           }
           if (findPartnerRefusal(message, completionPercent) === "profile") {
-            setProfileComplete(false);
             setError(
               message ||
                 "Your profile must be at least 70% complete to access this feature."
             );
+            setGateStatus("profile");
           } else {
-            setProfileComplete(true);
             setError(null);
+            setGateStatus("allowed");
           }
         } else {
           setError(
             "Failed to check profile completeness. Please try again later."
           );
+          setGateStatus("error");
         }
-        setLoading(false);
       }
     };
 
@@ -201,38 +230,120 @@ const FindPartner = () => {
     }
   }, [isAuthenticated, authChecked]);
 
-  // Fetch users from API
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await authApi.get(apiUrl("/api/users/all-basic"));
-      if (Array.isArray(response.data)) {
-        console.log(response.data);
-        setUsers(response.data);
-      } else if (response.data && Array.isArray(response.data.users)) {
-        setUsers(response.data.users);
-      } else {
-        console.warn(
-          "API response data is not in expected format:",
-          response.data
-        );
-        setUsers([]);
-      }
-      setError(null);
-    } catch (err) {
-      if (isSessionExpiryError(err)) {
-        return;
-      }
+  const isSubscriptionExpired =
+    Boolean(user?.metadata?.exp_date) &&
+    new Date() > new Date(user.metadata.exp_date);
+  const membershipAllowed =
+    Boolean(user) && user.status === "Approved" && !isSubscriptionExpired;
 
-      console.error("Error fetching users:", err);
-      setError(
-        err.response?.data?.error ||
-          "Failed to load users. Please try again later."
-      );
-    } finally {
-      setLoading(false);
+  const buildSearchParams = useCallback(() => {
+    const params = {
+      page: currentPage,
+      limit: profilesPerPage,
+    };
+
+    if (filters.ageMin || filters.ageMax) {
+      params.minAge = filters.ageMin || "18";
+      params.maxAge = filters.ageMax || "99";
     }
-  };
+    const maritalStatus = normalizeFilterParamFromUrl(filters.maritalStatus);
+    if (maritalStatus) {
+      const maritalApiValue = {
+        "Never Married": "never_married",
+        Divorced: "divorced",
+        Widowed: "widow_widower",
+        Separated: "separated",
+      }[maritalStatus];
+      params.marital_status = maritalApiValue || maritalStatus;
+    }
+    const manglik = resolveManglikFilterFromUrl(filters.manglik);
+    if (manglik) params.manglik = manglik;
+    const nriStatus = normalizeFilterParamFromUrl(filters.nriStatus);
+    if (nriStatus) params.nri_status = nriStatus;
+    const occupation = normalizeFilterParamFromUrl(filters.occupation);
+    if (occupation) params.occupation = occupation;
+    if (searchTerm.trim()) params.search = searchTerm.trim();
+
+    return params;
+  }, [currentPage, filters, profilesPerPage, searchTerm]);
+
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      !authChecked ||
+      gateStatus !== "allowed" ||
+      !membershipAllowed
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchPartnerPage = async () => {
+      setResultsLoading(true);
+      try {
+        const response = await authApi.get(apiUrl("/api/users/search"), {
+          params: buildSearchParams(),
+          signal: controller.signal,
+        });
+        const data = response.data || {};
+        const results = Array.isArray(data.results) ? data.results : [];
+        setUsers(
+          results.map((item) => ({
+            ...item,
+            _id: item._id,
+            user: item.user || item._id,
+            age:
+              item.age === null || item.age === undefined || item.age === ""
+                ? ageFromDob(item.dob)
+                : item.age,
+            occupation: item.occupation ?? null,
+            nri_status:
+              item.nri_status ?? item.lifestyle?.nri_status ?? false,
+            city: item.city ?? item.location?.city ?? "",
+            manglik: item.manglik ?? item.mangalik,
+            profile_picture:
+              item.profile_picture ||
+              (Array.isArray(item.profile_pictures) &&
+              item.profile_pictures.length > 0
+                ? item.profile_pictures[0]
+                : null),
+          }))
+        );
+        setTotalResults(typeof data.total === "number" ? data.total : 0);
+        setTotalPages(typeof data.pages === "number" ? data.pages : 0);
+        setError(null);
+      } catch (err) {
+        if (controller.signal.aborted || isSessionExpiryError(err)) {
+          return;
+        }
+
+        console.error("Error fetching partner search:", err);
+        setUsers([]);
+        setTotalResults(0);
+        setTotalPages(0);
+        setError(
+          err.response?.data?.error ||
+            "Failed to load users. Please try again later."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setResultsSettled(true);
+          setResultsLoading(false);
+        }
+      }
+    };
+
+    fetchPartnerPage();
+
+    return () => controller.abort();
+  }, [
+    isAuthenticated,
+    authChecked,
+    gateStatus,
+    membershipAllowed,
+    buildSearchParams,
+  ]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -242,12 +353,6 @@ const FindPartner = () => {
       [name]: value,
     });
     setCurrentPage(1); // Reset to page 1 on filter change
-  };
-
-  // Handle sort option change
-  const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on sort change
   };
 
   const handleClearFilters = () => {
@@ -260,7 +365,6 @@ const FindPartner = () => {
       ageMax: "",
     });
     setSearchTerm("");
-    setSortOption("newest");
     setCurrentPage(1);
   };
 
@@ -274,120 +378,6 @@ const FindPartner = () => {
     navigate(`/profile/${profile.user || profile._id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // Normalize marital status
-  const normalizeMaritalStatus = (status) => {
-    if (!status) return "";
-
-    const statusMap = {
-      never_married: "Never Married",
-      divorced: "Divorced",
-      widow_widower: "Widowed",
-      separated: "Separated",
-      single: "Never Married",
-      unmarried: "Never Married",
-      maried: "Never Married",
-      married: "Never Married",
-    };
-
-    const lowerCaseStatus = status.toLowerCase();
-    if (statusMap[lowerCaseStatus]) {
-      return statusMap[lowerCaseStatus];
-    }
-
-    if (status.includes("_")) {
-      return status
-        .split("_")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
-    }
-
-    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-  };
-
-  // Get opposite gender
-  const getOppositeGender = () => {
-    if (!currentUserGender) return null;
-    return currentUserGender === "male" ? "female" : "male";
-  };
-
-  // Filter users
-  const filteredData = Array.isArray(users)
-    ? users.filter((item) => {
-        if (!item) return false;
-
-        // Active members can discover approved and expired opposite-gender profiles.
-        if (!["Approved", "Expired"].includes(item.status))
-          return false;
-
-        const normalizedMaritalStatus = normalizeMaritalStatus(
-          item.marital_status
-        );
-        const isManglik = item.manglik === true || item.manglik === "true";
-        const oppositeGender = getOppositeGender();
-        const age = parseInt(item.age);
-        const isNRI =
-          item.nri_status === true ||
-          item.nri_status === "true" ||
-          item.nri_status === "yes";
-        const userOccupation = item.occupation || "";
-
-        if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
-          return false;
-        }
-
-        if (filters.ageMin && !isNaN(age) && age < parseInt(filters.ageMin)) {
-          return false;
-        }
-
-        if (filters.ageMax && !isNaN(age) && age > parseInt(filters.ageMax)) {
-          return false;
-        }
-
-        return (
-          (filters.manglik === "" ||
-            (filters.manglik === "true" && isManglik) ||
-            (filters.manglik === "false" && !isManglik)) &&
-          (filters.maritalStatus === "" ||
-            normalizedMaritalStatus === filters.maritalStatus) &&
-          (filters.nriStatus === "" ||
-            (filters.nriStatus === "true" && isNRI) ||
-            (filters.nriStatus === "false" && !isNRI)) &&
-          (filters.occupation === "" ||
-            userOccupation === filters.occupation) &&
-          (searchTerm === "" ||
-            item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      })
-    : [];
-
-  // Sort filtered data
-  const sortedFilteredData = [...filteredData].sort((a, b) => {
-    if (sortOption === "newest") {
-      const dateA = a.metadata?.register_date
-        ? new Date(a.metadata.register_date)
-        : new Date(0);
-      const dateB = b.metadata?.register_date
-        ? new Date(b.metadata.register_date)
-        : new Date(0);
-      return dateB - dateA; // Newest first
-    } else if (sortOption === "alphabetical-asc") {
-      return a.name?.toLowerCase().localeCompare(b.name?.toLowerCase());
-    } else if (sortOption === "alphabetical-desc") {
-      return b.name?.toLowerCase().localeCompare(a.name?.toLowerCase());
-    }
-    return 0;
-  });
-
-  // Pagination
-  const indexOfLastProfile = currentPage * profilesPerPage;
-  const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
-  const currentProfiles = sortedFilteredData.slice(
-    indexOfFirstProfile,
-    indexOfLastProfile
-  );
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -417,7 +407,7 @@ const FindPartner = () => {
 
   // Predefined filter options
   const predefinedOptions = {
-    manglik: ["true", "false"],
+    manglik: ["manglik", "partial_manglik", "non_manglik"],
     nriStatus: ["true", "false"],
     maritalStatus: ["Never Married", "Divorced", "Widowed", "Separated"],
   };
@@ -427,7 +417,6 @@ const FindPartner = () => {
       label: "Occupation",
       name: "occupation",
       options: [
-        { value: "", label: "Any" },
         { value: "Private Job", label: "Private Job" },
         { value: "Government Job", label: "Government Job" },
         { value: "Business Owner", label: "Business Owner" },
@@ -437,7 +426,6 @@ const FindPartner = () => {
       label: "NRI Status",
       name: "nriStatus",
       options: [
-        { value: "", label: "Any" },
         { value: "false", label: "Indian" },
         { value: "true", label: "NRI" },
       ],
@@ -451,9 +439,9 @@ const FindPartner = () => {
       label: "Manglik",
       name: "manglik",
       options: [
-        { value: "", label: "Any" },
-        { value: "true", label: "Yes" },
-        { value: "false", label: "No" },
+        { value: "manglik", label: "Manglik" },
+        { value: "partial_manglik", label: "Partial Manglik" },
+        { value: "non_manglik", label: "Non-Manglik" },
       ],
     },
   ];
@@ -588,7 +576,7 @@ const FindPartner = () => {
   };
 
   // Loading indicator
-  if (!authChecked) {
+  if (!authChecked || !isAuthenticated) {
     return (
       <PageShell>
         <div className="flex flex-1 items-center justify-center py-24 text-brown">
@@ -598,8 +586,18 @@ const FindPartner = () => {
     );
   }
 
+  if (gateStatus === "pending") {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking access…
+        </div>
+      </PageShell>
+    );
+  }
+
   // Incomplete profile message
-  if (!profileComplete) {
+  if (gateStatus === "profile") {
     return (
       <PageShell>
         <div className="flex flex-1 items-center justify-center px-6 py-20">
@@ -614,11 +612,28 @@ const FindPartner = () => {
     );
   }
 
-  // Membership status check (after profile completeness)
-  const isSubscriptionExpired =
-    user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+  if (gateStatus === "error") {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-maroon">
+          {error || "Failed to check profile completeness. Please try again later."}
+        </div>
+      </PageShell>
+    );
+  }
 
-  if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
+  if (!user) {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking membership…
+        </div>
+      </PageShell>
+    );
+  }
+
+  // Membership status check (after profile completeness)
+  if (user && !membershipAllowed) {
     return (
       <PageShell>
         <div className="relative min-h-[70vh] overflow-hidden px-6 py-16">
@@ -722,26 +737,6 @@ const FindPartner = () => {
     </div>
   );
 
-  if (loading) {
-    return (
-      <PageShell>
-        <div className="flex flex-1 items-center justify-center py-24 text-brown">
-          Loading profiles…
-        </div>
-      </PageShell>
-    );
-  }
-
-  if (error && profileComplete) {
-    return (
-      <PageShell>
-        <div className="flex flex-1 items-center justify-center py-24 text-maroon">
-          {error}
-        </div>
-      </PageShell>
-    );
-  }
-
   return (
     <PageShell>
       <div className="border-b border-border px-4 py-6 sm:px-8">
@@ -753,15 +748,6 @@ const FindPartner = () => {
             onChange={handleSearchChange}
             className="w-full flex-1 rounded-lg border border-border bg-card px-4 py-3 text-ink focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20"
           />
-          <select
-            value={sortOption}
-            onChange={handleSortChange}
-            className="w-full rounded-lg border border-border bg-card px-4 py-3 text-ink sm:w-56 focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20"
-          >
-            <option value="newest">Newest first</option>
-            <option value="alphabetical-asc">Alphabetical (A–Z)</option>
-            <option value="alphabetical-desc">Alphabetical (Z–A)</option>
-          </select>
           <button
             type="button"
             className="rounded-lg bg-brown px-4 py-3 text-sm font-medium text-ivory md:hidden"
@@ -805,17 +791,22 @@ const FindPartner = () => {
         </aside>
 
         <div className="min-w-0 flex-1">
+          {resultsLoading || !resultsSettled ? (
+            <div className="py-12 text-center text-brown">Loading profiles…</div>
+          ) : error ? (
+            <div className="py-12 text-center text-maroon">{error}</div>
+          ) : (
+            <>
           <p className="mb-4 text-sm text-muted-foreground">
-            Showing {currentProfiles.length} of {sortedFilteredData.length}{" "}
-            profiles
+            Showing {users.length} of {totalResults} profiles
           </p>
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-            {sortedFilteredData.length === 0 ? (
+            {users.length === 0 ? (
               <div className="col-span-full py-12 text-center text-muted-foreground">
                 No profiles match your search criteria.
               </div>
             ) : (
-              currentProfiles.map((item) => {
+              users.map((item) => {
                 const facts = [
                   { label: "Age", value: item.age ? String(item.age) : null },
                   { label: "City", value: item.city?.trim() || null },
@@ -876,13 +867,15 @@ const FindPartner = () => {
               })
             )}
           </div>
-          {sortedFilteredData.length > 0 && (
+          {totalPages > 1 && (
             <Pagination
               profilesPerPage={profilesPerPage}
-              totalProfiles={sortedFilteredData.length}
+              totalProfiles={totalResults}
               currentPage={currentPage}
               paginate={paginate}
             />
+          )}
+            </>
           )}
         </div>
       </div>
