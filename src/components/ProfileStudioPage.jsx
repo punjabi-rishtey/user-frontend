@@ -161,11 +161,13 @@ function normalizePortraitUrl(url) {
 
 export default function ProfileStudioPage() {
   const { user, logout, refreshUser, isAuthenticated } = useAuth();
+  const profileUserId = user?._id ?? user?.id;
   const navigate = useNavigate();
 
   const [authChecked, setAuthChecked] = useState(false);
   const [sectionId, setSectionId] = useState("pictures");
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
@@ -337,22 +339,30 @@ export default function ProfileStudioPage() {
     );
   };
 
+  const [loadFailed, setLoadFailed] = useState(false);
+
   const loadAll = useCallback(async () => {
-    if (!user?._id) return;
+    if (!profileUserId) return;
     setLoading(true);
+    setLoadFailed(false);
     try {
       const [userRes, familyRes, educationRes, professionRes, astrologyRes] =
         await Promise.allSettled([
-          authApi.get(apiUrl(`/api/users/${user._id}`)),
-          authApi.get(apiUrl(`/api/families/${user._id}`)),
-          authApi.get(apiUrl(`/api/educations/${user._id}`)),
-          authApi.get(apiUrl(`/api/professions/${user._id}`)),
-          authApi.get(apiUrl(`/api/astrologies/${user._id}`)),
+          authApi.get(apiUrl(`/api/users/${profileUserId}`)),
+          authApi.get(apiUrl(`/api/families/${profileUserId}`)),
+          authApi.get(apiUrl(`/api/educations/${profileUserId}`)),
+          authApi.get(apiUrl(`/api/professions/${profileUserId}`)),
+          authApi.get(apiUrl(`/api/astrologies/${profileUserId}`)),
         ]);
 
-      if (userRes.status === "fulfilled") {
-        applyUserPayload(userRes.value.data);
+      if (userRes.status !== "fulfilled") {
+        if (userRes.reason && isSessionExpiryError(userRes.reason)) return;
+        setLoadFailed(true);
+        showNotice("error", "Could not load your profile. Please refresh.");
+        return;
       }
+
+      applyUserPayload(userRes.value.data);
 
       if (familyRes.status === "fulfilled") {
         const data = familyRes.value.data || {};
@@ -420,7 +430,7 @@ export default function ProfileStudioPage() {
     } finally {
       setLoading(false);
     }
-  }, [user?._id, navigate, showNotice, refreshCompletion]);
+  }, [profileUserId, navigate, showNotice, refreshCompletion]);
 
   useEffect(() => {
     const timer = setTimeout(() => setAuthChecked(true), 50);
@@ -434,8 +444,8 @@ export default function ProfileStudioPage() {
   }, [authChecked, isAuthenticated, navigate]);
 
   useEffect(() => {
-    if (user?._id) loadAll();
-  }, [user?._id, loadAll]);
+    if (profileUserId) loadAll();
+  }, [profileUserId, loadAll]);
 
   const goToSection = (nextId) => {
     setNotice(null);
@@ -456,7 +466,7 @@ export default function ProfileStudioPage() {
   };
 
   const saveIdentity = async () => {
-    await authApi.put(apiUrl(`/api/users/${user._id}`), {
+    await authApi.put(apiUrl(`/api/users/${profileUserId}`), {
       name: identity.fullName,
       email: identity.email,
       mobile: identity.mobile,
@@ -469,7 +479,7 @@ export default function ProfileStudioPage() {
   };
 
   const saveAbout = async () => {
-    await authApi.put(apiUrl(`/api/users/${user._id}`), {
+    await authApi.put(apiUrl(`/api/users/${profileUserId}`), {
       about_myself: about.about_myself || "",
       looking_for: about.looking_for || "",
     });
@@ -492,7 +502,7 @@ export default function ProfileStudioPage() {
     else if (physical.physical_disability === "false")
       physical.physical_disability = false;
 
-    await authApi.put(apiUrl(`/api/users/${user._id}`), {
+    await authApi.put(apiUrl(`/api/users/${profileUserId}`), {
       height: lifestyle.height,
       language: lifestyle.language,
       manglik: lifestyle.manglik,
@@ -524,16 +534,16 @@ export default function ProfileStudioPage() {
           await saveLifestyle();
           break;
         case "family":
-          await authApi.put(apiUrl(`/api/families/${user._id}`), family);
+          await authApi.put(apiUrl(`/api/families/${profileUserId}`), family);
           break;
         case "education":
-          await authApi.put(apiUrl(`/api/educations/${user._id}`), education);
+          await authApi.put(apiUrl(`/api/educations/${profileUserId}`), education);
           break;
         case "profession":
-          await authApi.put(apiUrl(`/api/professions/${user._id}`), profession);
+          await authApi.put(apiUrl(`/api/professions/${profileUserId}`), profession);
           break;
         case "astrology":
-          await authApi.put(apiUrl(`/api/astrologies/${user._id}`), astrology);
+          await authApi.put(apiUrl(`/api/astrologies/${profileUserId}`), astrology);
           break;
         default:
           break;
@@ -661,9 +671,9 @@ export default function ProfileStudioPage() {
   };
 
   const refreshPhotos = async () => {
-    if (!user?._id) return;
+    if (!profileUserId) return;
     try {
-      const res = await authApi.get(apiUrl(`/api/users/${user._id}`));
+      const res = await authApi.get(apiUrl(`/api/users/${profileUserId}`));
       const data = res.data;
       const pictures = Array.isArray(data.profile_pictures)
         ? data.profile_pictures.filter(Boolean)
@@ -687,11 +697,30 @@ export default function ProfileStudioPage() {
     );
   }
 
-  if (!user?._id || loading) {
+  if (!profileUserId || loading) {
     return (
       <PageShell>
         <div className="flex min-h-[50vh] items-center justify-center px-4">
           <p className="text-brown">Opening your profile…</p>
+        </div>
+      </PageShell>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <PageShell>
+        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-4">
+          <p className="text-center text-brown">
+            We could not load your profile. Please refresh and try again.
+          </p>
+          <button
+            type="button"
+            className="rounded-lg bg-maroon px-4 py-2 text-sm font-semibold text-primary-foreground"
+            onClick={() => loadAll()}
+          >
+            Retry
+          </button>
         </div>
       </PageShell>
     );

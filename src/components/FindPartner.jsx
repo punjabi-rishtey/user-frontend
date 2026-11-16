@@ -162,15 +162,6 @@ const FindPartner = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Commit search to page 1 only after debounce when the input has settled
-  useEffect(() => {
-    if (suppressUrlSyncRef.current > 0) return;
-    if (searchTerm !== debouncedSearchTerm) return;
-    if (debouncedSearchTerm === lastCommittedSearchRef.current) return;
-    lastCommittedSearchRef.current = debouncedSearchTerm;
-    setCurrentPage(1);
-  }, [debouncedSearchTerm, searchTerm]);
-
   // Replace history for filter/search edits; pagination uses push separately
   useEffect(() => {
     if (suppressUrlSyncRef.current > 0) {
@@ -179,6 +170,18 @@ const FindPartner = () => {
     }
     // Wait until debounced search matches the input so we never write a stale ?search=
     if (searchTerm !== debouncedSearchTerm) return;
+
+    const searchCommitted =
+      debouncedSearchTerm !== lastCommittedSearchRef.current;
+    if (searchCommitted) {
+      lastCommittedSearchRef.current = debouncedSearchTerm;
+      if (currentPage !== 1) {
+        setCurrentPage(1);
+      }
+      writeQueryToUrl(1, debouncedSearchTerm, filters, { replace: true });
+      return;
+    }
+
     writeQueryToUrl(currentPage, debouncedSearchTerm, filters, {
       replace: true,
     });
@@ -250,7 +253,15 @@ const FindPartner = () => {
               if (isSessionExpiryError(completionError)) return;
             }
           }
-          if (findPartnerRefusal(message, completionPercent) === "profile") {
+          const refusal = findPartnerRefusal(message, completionPercent);
+          const membershipHint =
+            /membership|subscription|gold|approved|expired/i.test(message);
+          if (
+            refusal === "profile" ||
+            (refusal === "membership" &&
+              completionPercent === null &&
+              !membershipHint)
+          ) {
             setError(
               message ||
                 "Your profile must be at least 70% complete to access this feature."
@@ -430,8 +441,6 @@ const FindPartner = () => {
 
   const paginate = (pageNumber) => {
     if (pageNumber === currentPage) return;
-    suppressUrlSyncRef.current += 1;
-    setCurrentPage(pageNumber);
     const searchForUrl =
       searchTerm !== debouncedSearchTerm ? searchTerm : debouncedSearchTerm;
     writeQueryToUrl(pageNumber, searchForUrl, filters, { replace: false });
