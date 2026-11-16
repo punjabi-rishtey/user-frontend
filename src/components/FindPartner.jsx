@@ -10,11 +10,20 @@ import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
 import { findPartnerRefusal } from "./findPartnerAccess";
 
+const normalizeFilterParamFromUrl = (value) => {
+  if (value === null || value === undefined) return "";
+  const trimmed = String(value).trim();
+  if (!trimmed) return "";
+  if (trimmed.toLowerCase() === "any") return "";
+  return trimmed;
+};
+
 const resolveManglikFilterFromUrl = (value) => {
-  if (!value) return "";
-  if (value === "true") return "manglik";
-  if (value === "false") return "non_manglik";
-  return value;
+  const normalized = normalizeFilterParamFromUrl(value);
+  if (!normalized) return "";
+  if (normalized === "true") return "manglik";
+  if (normalized === "false") return "non_manglik";
+  return normalized;
 };
 
 const ageFromDob = (dob) => {
@@ -63,11 +72,13 @@ const FindPartner = () => {
       page: parseInt(params.get("page")) || 1,
       search: params.get("search") || "",
       manglik: resolveManglikFilterFromUrl(params.get("manglik") || ""),
-      maritalStatus: params.get("maritalStatus") || "",
-      nriStatus: params.get("nriStatus") || "",
-      occupation: params.get("occupation") || "",
-      ageMin: params.get("ageMin") || "",
-      ageMax: params.get("ageMax") || "",
+      maritalStatus: normalizeFilterParamFromUrl(params.get("maritalStatus")),
+      nriStatus: normalizeFilterParamFromUrl(
+        params.get("nriStatus") ?? params.get("nri")
+      ),
+      occupation: normalizeFilterParamFromUrl(params.get("occupation")),
+      ageMin: normalizeFilterParamFromUrl(params.get("ageMin")),
+      ageMax: normalizeFilterParamFromUrl(params.get("ageMax")),
     };
   };
 
@@ -88,16 +99,24 @@ const FindPartner = () => {
 
   // Update URL with push to create new history entry
   const updateQueryParams = (newPage) => {
-    const params = new URLSearchParams({
-      page: newPage || currentPage,
-      search: searchTerm,
-      manglik: filters.manglik,
-      maritalStatus: filters.maritalStatus,
-      nriStatus: filters.nriStatus,
-      occupation: filters.occupation,
-      ageMin: filters.ageMin,
-      ageMax: filters.ageMax,
-    });
+    const params = new URLSearchParams();
+    params.set("page", String(newPage || currentPage));
+    if (searchTerm.trim()) params.set("search", searchTerm.trim());
+
+    const manglik = resolveManglikFilterFromUrl(filters.manglik);
+    const maritalStatus = normalizeFilterParamFromUrl(filters.maritalStatus);
+    const nriStatus = normalizeFilterParamFromUrl(filters.nriStatus);
+    const occupation = normalizeFilterParamFromUrl(filters.occupation);
+    const ageMin = normalizeFilterParamFromUrl(filters.ageMin);
+    const ageMax = normalizeFilterParamFromUrl(filters.ageMax);
+
+    if (manglik) params.set("manglik", manglik);
+    if (maritalStatus) params.set("maritalStatus", maritalStatus);
+    if (nriStatus) params.set("nriStatus", nriStatus);
+    if (occupation) params.set("occupation", occupation);
+    if (ageMin) params.set("ageMin", ageMin);
+    if (ageMax) params.set("ageMax", ageMax);
+
     navigate(`${location.pathname}?${params.toString()}`, { replace: false }); // Use push instead of replace
   };
 
@@ -227,19 +246,22 @@ const FindPartner = () => {
       params.minAge = filters.ageMin || "18";
       params.maxAge = filters.ageMax || "99";
     }
-    if (filters.maritalStatus) {
+    const maritalStatus = normalizeFilterParamFromUrl(filters.maritalStatus);
+    if (maritalStatus) {
       const maritalApiValue = {
         "Never Married": "never_married",
         Divorced: "divorced",
         Widowed: "widow_widower",
         Separated: "separated",
-      }[filters.maritalStatus];
-      params.marital_status = maritalApiValue || filters.maritalStatus;
+      }[maritalStatus];
+      params.marital_status = maritalApiValue || maritalStatus;
     }
     const manglik = resolveManglikFilterFromUrl(filters.manglik);
     if (manglik) params.manglik = manglik;
-    if (filters.nriStatus) params.nri_status = filters.nriStatus;
-    if (filters.occupation) params.occupation = filters.occupation;
+    const nriStatus = normalizeFilterParamFromUrl(filters.nriStatus);
+    if (nriStatus) params.nri_status = nriStatus;
+    const occupation = normalizeFilterParamFromUrl(filters.occupation);
+    if (occupation) params.occupation = occupation;
     if (searchTerm.trim()) params.search = searchTerm.trim();
 
     return params;
@@ -395,7 +417,6 @@ const FindPartner = () => {
       label: "Occupation",
       name: "occupation",
       options: [
-        { value: "", label: "Any" },
         { value: "Private Job", label: "Private Job" },
         { value: "Government Job", label: "Government Job" },
         { value: "Business Owner", label: "Business Owner" },
@@ -405,7 +426,6 @@ const FindPartner = () => {
       label: "NRI Status",
       name: "nriStatus",
       options: [
-        { value: "", label: "Any" },
         { value: "false", label: "Indian" },
         { value: "true", label: "NRI" },
       ],
@@ -419,10 +439,9 @@ const FindPartner = () => {
       label: "Manglik",
       name: "manglik",
       options: [
-        { value: "", label: "Any" },
         { value: "manglik", label: "Manglik" },
         { value: "partial_manglik", label: "Partial Manglik" },
-        { value: "non_manglik", label: "Non Manglik" },
+        { value: "non_manglik", label: "Non-Manglik" },
       ],
     },
   ];
