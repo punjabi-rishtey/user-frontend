@@ -339,8 +339,6 @@ export default function ProfileStudioPage() {
     );
   };
 
-  const [loadFailed, setLoadFailed] = useState(false);
-
   const loadAll = useCallback(async () => {
     if (!profileUserId) return;
     setLoading(true);
