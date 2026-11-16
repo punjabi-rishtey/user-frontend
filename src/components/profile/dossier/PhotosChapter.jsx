@@ -21,8 +21,9 @@ const normalizeProfilePhotoUrl = (url) => {
   return url;
 };
 
-export default function PhotosChapter({ onStatus }) {
+export default function PhotosChapter({ onStatus, profileUserId }) {
   const { user, isAuthenticated, refreshUser } = useAuth();
+  const resolvedUserId = profileUserId ?? user?._id ?? user?.id;
   const [images, setImages] = useState([]);
   const [profilePicture, setProfilePicture] = useState("");
   const [operation, setOperation] = useState(null);
@@ -41,10 +42,10 @@ export default function PhotosChapter({ onStatus }) {
   const previewCanvasRef = useRef(null);
 
   useEffect(() => {
-    if (user?._id && isAuthenticated) {
+    if (resolvedUserId && isAuthenticated) {
       fetchImages();
     }
-  }, [user?._id, isAuthenticated]);
+  }, [resolvedUserId, isAuthenticated]);
 
   useEffect(() => {
     return () => {
@@ -97,9 +98,9 @@ export default function PhotosChapter({ onStatus }) {
   };
 
   const fetchImages = async () => {
-    if (!user?._id) return;
+    if (!resolvedUserId) return;
     try {
-      const response = await authFetch(`${API_URL}/${user._id}`);
+      const response = await authFetch(`${API_URL}/${resolvedUserId}`);
       if (!response.ok) throw new Error("Failed to fetch profile images");
       const data = await response.json();
       if (data.profile_pictures) {
@@ -119,7 +120,7 @@ export default function PhotosChapter({ onStatus }) {
   const handleFileInputChange = (e) => {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file || !user?._id) return;
+    if (!file || !resolvedUserId) return;
     if (!["image/jpeg", "image/png"].includes(file.type)) {
       onStatus?.({
         type: "error",
@@ -179,7 +180,7 @@ export default function PhotosChapter({ onStatus }) {
     });
 
   const uploadCroppedImage = async () => {
-    if (!originalFile || !user?._id) return;
+    if (!originalFile || !resolvedUserId) return;
     setIsSaving(true);
     setOperation("uploading");
     try {
@@ -189,7 +190,7 @@ export default function PhotosChapter({ onStatus }) {
       });
       const formData = new FormData();
       formData.append("profile_pictures", croppedFile);
-      const response = await authFetch(`${API_URL}/${user._id}/upload`, {
+      const response = await authFetch(`${API_URL}/${resolvedUserId}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -221,11 +222,13 @@ export default function PhotosChapter({ onStatus }) {
   };
 
   const handleRemoveImage = async (imageUrl) => {
-    if (!user?._id) return;
+    if (!resolvedUserId) return;
     if (!window.confirm("Remove this photo from your profile?")) return;
     setOperation("deleting");
     try {
-      const response = await authFetch(`${API_URL}/${user._id}/delete-picture`, {
+      const response = await authFetch(
+        `${API_URL}/${resolvedUserId}/delete-picture`,
+        {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ imagePath: imageUrl }),
@@ -253,11 +256,11 @@ export default function PhotosChapter({ onStatus }) {
   };
 
   const handleSetProfilePicture = async (imageUrl) => {
-    if (!user?._id || imageUrl === profilePicture) return;
+    if (!resolvedUserId || imageUrl === profilePicture) return;
     setOperation("setting-profile");
     try {
       const response = await authFetch(
-        `${API_URL}/${user._id}/set-profile-picture`,
+        `${API_URL}/${resolvedUserId}/set-profile-picture`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

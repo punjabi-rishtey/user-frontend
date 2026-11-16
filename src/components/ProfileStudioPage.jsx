@@ -746,6 +746,7 @@ export default function ProfileStudioPage() {
       >
         {sectionId === "pictures" ? (
           <PhotosChapter
+            profileUserId={profileUserId}
             onStatus={(status) => {
               if (status?.type && status?.message) {
                 showNotice(status.type, status.message);
