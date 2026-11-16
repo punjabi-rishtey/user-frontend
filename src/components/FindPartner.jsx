@@ -10,6 +10,13 @@ import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
 import { findPartnerRefusal } from "./findPartnerAccess";
 
+const resolveManglikFilterFromUrl = (value) => {
+  if (!value) return "";
+  if (value === "true") return "manglik";
+  if (value === "false") return "non_manglik";
+  return value;
+};
+
 const FindPartner = () => {
   const [filters, setFilters] = useState({
     manglik: "",
@@ -41,7 +48,7 @@ const FindPartner = () => {
     return {
       page: parseInt(params.get("page")) || 1,
       search: params.get("search") || "",
-      manglik: params.get("manglik") || "",
+      manglik: resolveManglikFilterFromUrl(params.get("manglik") || ""),
       maritalStatus: params.get("maritalStatus") || "",
       nriStatus: params.get("nriStatus") || "",
       occupation: params.get("occupation") || "",
@@ -212,7 +219,8 @@ const FindPartner = () => {
       }[filters.maritalStatus];
       params.marital_status = maritalApiValue || filters.maritalStatus;
     }
-    if (filters.manglik) params.manglik = filters.manglik;
+    const manglik = resolveManglikFilterFromUrl(filters.manglik);
+    if (manglik) params.manglik = manglik;
     if (filters.nriStatus) params.nri_status = filters.nriStatus;
     if (filters.occupation) params.occupation = filters.occupation;
     if (searchTerm.trim()) params.search = searchTerm.trim();
@@ -349,12 +357,7 @@ const FindPartner = () => {
     const profileManglik = normalizeManglikValue(
       item.manglik ?? item.mangalik
     );
-    const filterManglik =
-      filters.manglik === "true"
-        ? "manglik"
-        : filters.manglik === "false"
-          ? "non_manglik"
-          : filters.manglik;
+    const filterManglik = resolveManglikFilterFromUrl(filters.manglik);
     const isNRI =
       item.nri_status === true ||
       item.nri_status === "true" ||
