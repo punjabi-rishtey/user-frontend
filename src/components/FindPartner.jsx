@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { apiUrl } from "../config/constants";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -17,6 +17,20 @@ const resolveManglikFilterFromUrl = (value) => {
   return value;
 };
 
+const ageFromDob = (dob) => {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  if (Number.isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const birthdayPassed =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() &&
+      today.getDate() >= birth.getDate());
+  if (!birthdayPassed) age -= 1;
+  return age >= 0 ? age : null;
+};
+
 const FindPartner = () => {
   const [filters, setFilters] = useState({
     manglik: "",
@@ -30,17 +44,17 @@ const FindPartner = () => {
   const [users, setUsers] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsSettled, setResultsSettled] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, refreshUser } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
-  const [profileComplete, setProfileComplete] = useState(true);
+  const [gateStatus, setGateStatus] = useState("pending");
   const [authChecked, setAuthChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
-  const [sortOption, setSortOption] = useState("newest");
 
   // Helper to get query parameters from URL
   const getQueryParams = () => {
@@ -54,7 +68,6 @@ const FindPartner = () => {
       occupation: params.get("occupation") || "",
       ageMin: params.get("ageMin") || "",
       ageMax: params.get("ageMax") || "",
-      sort: params.get("sort") || "newest",
     };
   };
 
@@ -71,7 +84,6 @@ const FindPartner = () => {
       ageMin: queryParams.ageMin,
       ageMax: queryParams.ageMax,
     });
-    setSortOption(queryParams.sort);
   }, [location.search]);
 
   // Update URL with push to create new history entry
@@ -85,7 +97,6 @@ const FindPartner = () => {
       occupation: filters.occupation,
       ageMin: filters.ageMin,
       ageMax: filters.ageMax,
-      sort: sortOption,
     });
     navigate(`${location.pathname}?${params.toString()}`, { replace: false }); // Use push instead of replace
   };
@@ -105,7 +116,6 @@ const FindPartner = () => {
         ageMin: queryParams.ageMin,
         ageMax: queryParams.ageMax,
       });
-      setSortOption(queryParams.sort);
     };
 
     window.addEventListener("popstate", handlePopstate);
@@ -115,7 +125,7 @@ const FindPartner = () => {
   // Update URL when state changes (except for initial load or popstate)
   useEffect(() => {
     updateQueryParams();
-  }, [currentPage, searchTerm, filters, sortOption]);
+  }, [currentPage, searchTerm, filters]);
 
   // Give auth context time to initialize before checking
   useEffect(() => {
@@ -153,7 +163,8 @@ const FindPartner = () => {
 
       try {
         await authApi.get(apiUrl("/api/users/find-my-partner"));
-        setProfileComplete(true);
+        setError(null);
+        setGateStatus("allowed");
       } catch (err) {
         console.error("Error checking profile completeness:", err);
         if (isSessionExpiryError(err)) {
@@ -177,21 +188,21 @@ const FindPartner = () => {
             }
           }
           if (findPartnerRefusal(message, completionPercent) === "profile") {
-            setProfileComplete(false);
             setError(
               message ||
                 "Your profile must be at least 70% complete to access this feature."
             );
+            setGateStatus("profile");
           } else {
-            setProfileComplete(true);
             setError(null);
+            setGateStatus("allowed");
           }
         } else {
           setError(
             "Failed to check profile completeness. Please try again later."
           );
+          setGateStatus("error");
         }
-        setLoading(false);
       }
     };
 
@@ -199,6 +210,12 @@ const FindPartner = () => {
       checkProfileCompleteness();
     }
   }, [isAuthenticated, authChecked]);
+
+  const isSubscriptionExpired =
+    Boolean(user?.metadata?.exp_date) &&
+    new Date() > new Date(user.metadata.exp_date);
+  const membershipAllowed =
+    Boolean(user) && user.status === "Approved" && !isSubscriptionExpired;
 
   const buildSearchParams = useCallback(() => {
     const params = {
@@ -229,14 +246,19 @@ const FindPartner = () => {
   }, [currentPage, filters, profilesPerPage, searchTerm]);
 
   useEffect(() => {
-    if (!isAuthenticated || !authChecked || !profileComplete) {
+    if (
+      !isAuthenticated ||
+      !authChecked ||
+      gateStatus !== "allowed" ||
+      !membershipAllowed
+    ) {
       return;
     }
 
     const controller = new AbortController();
 
     const fetchPartnerPage = async () => {
-      setLoading(true);
+      setResultsLoading(true);
       try {
         const response = await authApi.get(apiUrl("/api/users/search"), {
           params: buildSearchParams(),
@@ -250,10 +272,9 @@ const FindPartner = () => {
             _id: item._id,
             user: item.user || item._id,
             age:
-              item.age ??
-              (item.dob
-                ? new Date().getFullYear() - new Date(item.dob).getFullYear()
-                : null),
+              item.age === null || item.age === undefined || item.age === ""
+                ? ageFromDob(item.dob)
+                : item.age,
             occupation: item.occupation ?? null,
             nri_status:
               item.nri_status ?? item.lifestyle?.nri_status ?? false,
@@ -285,7 +306,8 @@ const FindPartner = () => {
         );
       } finally {
         if (!controller.signal.aborted) {
-          setLoading(false);
+          setResultsSettled(true);
+          setResultsLoading(false);
         }
       }
     };
@@ -293,7 +315,13 @@ const FindPartner = () => {
     fetchPartnerPage();
 
     return () => controller.abort();
-  }, [isAuthenticated, authChecked, profileComplete, buildSearchParams]);
+  }, [
+    isAuthenticated,
+    authChecked,
+    gateStatus,
+    membershipAllowed,
+    buildSearchParams,
+  ]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -303,12 +331,6 @@ const FindPartner = () => {
       [name]: value,
     });
     setCurrentPage(1); // Reset to page 1 on filter change
-  };
-
-  // Handle sort option change
-  const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on sort change
   };
 
   const handleClearFilters = () => {
@@ -321,7 +343,6 @@ const FindPartner = () => {
       ageMax: "",
     });
     setSearchTerm("");
-    setSortOption("newest");
     setCurrentPage(1);
   };
 
@@ -335,70 +356,6 @@ const FindPartner = () => {
     navigate(`/profile/${profile.user || profile._id}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  const normalizeManglikValue = (value) => {
-    if (value === true || value === "true" || value === "manglik") {
-      return "manglik";
-    }
-    if (value === false || value === "false" || value === "non_manglik") {
-      return "non_manglik";
-    }
-    if (
-      value === "partial_manglik" ||
-      value === "partial_mangalik" ||
-      value === "partial"
-    ) {
-      return "partial_manglik";
-    }
-    return "";
-  };
-
-  const matchesSupplementalFilters = (item) => {
-    const profileManglik = normalizeManglikValue(
-      item.manglik ?? item.mangalik
-    );
-    const filterManglik = resolveManglikFilterFromUrl(filters.manglik);
-    const isNRI =
-      item.nri_status === true ||
-      item.nri_status === "true" ||
-      item.nri_status === "yes";
-    const userOccupation = item.occupation || "";
-
-    return (
-      (filterManglik === "" || profileManglik === filterManglik) &&
-      (filters.nriStatus === "" ||
-        (filters.nriStatus === "true" && isNRI) ||
-        (filters.nriStatus === "false" && !isNRI)) &&
-      (filters.occupation === "" || userOccupation === filters.occupation) &&
-      (searchTerm === "" ||
-        item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-  };
-
-  const sortedProfiles = useMemo(() => {
-    const list = Array.isArray(users)
-      ? users.filter((item) => item && matchesSupplementalFilters(item))
-      : [];
-
-    return [...list].sort((a, b) => {
-      if (sortOption === "newest") {
-        const dateA = a.metadata?.register_date
-          ? new Date(a.metadata.register_date)
-          : new Date(0);
-        const dateB = b.metadata?.register_date
-          ? new Date(b.metadata.register_date)
-          : new Date(0);
-        return dateB - dateA;
-      }
-      if (sortOption === "alphabetical-asc") {
-        return a.name?.toLowerCase().localeCompare(b.name?.toLowerCase());
-      }
-      if (sortOption === "alphabetical-desc") {
-        return b.name?.toLowerCase().localeCompare(a.name?.toLowerCase());
-      }
-      return 0;
-    });
-  }, [users, sortOption, filters, searchTerm]);
 
   const paginate = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -600,7 +557,7 @@ const FindPartner = () => {
   };
 
   // Loading indicator
-  if (!authChecked) {
+  if (!authChecked || !isAuthenticated) {
     return (
       <PageShell>
         <div className="flex flex-1 items-center justify-center py-24 text-brown">
@@ -610,8 +567,18 @@ const FindPartner = () => {
     );
   }
 
+  if (gateStatus === "pending") {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking access…
+        </div>
+      </PageShell>
+    );
+  }
+
   // Incomplete profile message
-  if (!profileComplete) {
+  if (gateStatus === "profile") {
     return (
       <PageShell>
         <div className="flex flex-1 items-center justify-center px-6 py-20">
@@ -626,11 +593,28 @@ const FindPartner = () => {
     );
   }
 
-  // Membership status check (after profile completeness)
-  const isSubscriptionExpired =
-    user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+  if (gateStatus === "error") {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-maroon">
+          {error || "Failed to check profile completeness. Please try again later."}
+        </div>
+      </PageShell>
+    );
+  }
 
-  if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
+  if (!user) {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking membership…
+        </div>
+      </PageShell>
+    );
+  }
+
+  // Membership status check (after profile completeness)
+  if (user && !membershipAllowed) {
     return (
       <PageShell>
         <div className="relative min-h-[70vh] overflow-hidden px-6 py-16">
@@ -734,26 +718,6 @@ const FindPartner = () => {
     </div>
   );
 
-  if (loading) {
-    return (
-      <PageShell>
-        <div className="flex flex-1 items-center justify-center py-24 text-brown">
-          Loading profiles…
-        </div>
-      </PageShell>
-    );
-  }
-
-  if (error && profileComplete) {
-    return (
-      <PageShell>
-        <div className="flex flex-1 items-center justify-center py-24 text-maroon">
-          {error}
-        </div>
-      </PageShell>
-    );
-  }
-
   return (
     <PageShell>
       <div className="border-b border-border px-4 py-6 sm:px-8">
@@ -765,15 +729,6 @@ const FindPartner = () => {
             onChange={handleSearchChange}
             className="w-full flex-1 rounded-lg border border-border bg-card px-4 py-3 text-ink focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20"
           />
-          <select
-            value={sortOption}
-            onChange={handleSortChange}
-            className="w-full rounded-lg border border-border bg-card px-4 py-3 text-ink sm:w-56 focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20"
-          >
-            <option value="newest">Newest first</option>
-            <option value="alphabetical-asc">Alphabetical (A–Z)</option>
-            <option value="alphabetical-desc">Alphabetical (Z–A)</option>
-          </select>
           <button
             type="button"
             className="rounded-lg bg-brown px-4 py-3 text-sm font-medium text-ivory md:hidden"
@@ -817,16 +772,22 @@ const FindPartner = () => {
         </aside>
 
         <div className="min-w-0 flex-1">
+          {resultsLoading || !resultsSettled ? (
+            <div className="py-12 text-center text-brown">Loading profiles…</div>
+          ) : error ? (
+            <div className="py-12 text-center text-maroon">{error}</div>
+          ) : (
+            <>
           <p className="mb-4 text-sm text-muted-foreground">
-            Showing {sortedProfiles.length} of {totalResults} profiles
+            Showing {users.length} of {totalResults} profiles
           </p>
           <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
-            {sortedProfiles.length === 0 ? (
+            {users.length === 0 ? (
               <div className="col-span-full py-12 text-center text-muted-foreground">
                 No profiles match your search criteria.
               </div>
             ) : (
-              sortedProfiles.map((item) => {
+              users.map((item) => {
                 const facts = [
                   { label: "Age", value: item.age ? String(item.age) : null },
                   { label: "City", value: item.city?.trim() || null },
@@ -894,6 +855,8 @@ const FindPartner = () => {
               currentPage={currentPage}
               paginate={paginate}
             />
+          )}
+            </>
           )}
         </div>
       </div>
