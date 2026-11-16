@@ -328,11 +328,33 @@ const FindPartner = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const normalizeManglikValue = (value) => {
+    if (value === true || value === "true" || value === "manglik") {
+      return "manglik";
+    }
+    if (value === false || value === "false" || value === "non_manglik") {
+      return "non_manglik";
+    }
+    if (
+      value === "partial_manglik" ||
+      value === "partial_mangalik" ||
+      value === "partial"
+    ) {
+      return "partial_manglik";
+    }
+    return "";
+  };
+
   const matchesSupplementalFilters = (item) => {
-    const isManglik =
-      item.manglik === true ||
-      item.manglik === "true" ||
-      item.manglik === "manglik";
+    const profileManglik = normalizeManglikValue(
+      item.manglik ?? item.mangalik
+    );
+    const filterManglik =
+      filters.manglik === "true"
+        ? "manglik"
+        : filters.manglik === "false"
+          ? "non_manglik"
+          : filters.manglik;
     const isNRI =
       item.nri_status === true ||
       item.nri_status === "true" ||
@@ -340,9 +362,7 @@ const FindPartner = () => {
     const userOccupation = item.occupation || "";
 
     return (
-      (filters.manglik === "" ||
-        (filters.manglik === "true" && isManglik) ||
-        (filters.manglik === "false" && !isManglik)) &&
+      (filterManglik === "" || profileManglik === filterManglik) &&
       (filters.nriStatus === "" ||
         (filters.nriStatus === "true" && isNRI) ||
         (filters.nriStatus === "false" && !isNRI)) &&
@@ -405,7 +425,7 @@ const FindPartner = () => {
 
   // Predefined filter options
   const predefinedOptions = {
-    manglik: ["true", "false"],
+    manglik: ["manglik", "partial_manglik", "non_manglik"],
     nriStatus: ["true", "false"],
     maritalStatus: ["Never Married", "Divorced", "Widowed", "Separated"],
   };
@@ -440,8 +460,9 @@ const FindPartner = () => {
       name: "manglik",
       options: [
         { value: "", label: "Any" },
-        { value: "true", label: "Yes" },
-        { value: "false", label: "No" },
+        { value: "manglik", label: "Manglik" },
+        { value: "partial_manglik", label: "Partial Manglik" },
+        { value: "non_manglik", label: "Non Manglik" },
       ],
     },
   ];
