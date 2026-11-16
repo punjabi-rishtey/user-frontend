@@ -129,6 +129,17 @@ function normalizeBoolSelect(value) {
   return "";
 }
 
+function normalizeManglikFromUser(userData) {
+  const hasMangalik =
+    userData.mangalik !== undefined && userData.mangalik !== null;
+  const raw = hasMangalik ? userData.mangalik : userData.manglik;
+  if (raw === true || raw === "true") return "manglik";
+  if (raw === false || raw === "false") return "non_manglik";
+  if (raw === "partial" || raw === "partial_manglik") return "partial_manglik";
+  if (typeof raw === "string") return raw;
+  return "";
+}
+
 function setNested(prev, name, value) {
   if (!name.includes(".")) return { ...prev, [name]: value };
   const [section, field] = name.split(".");
@@ -149,9 +160,10 @@ function normalizePortraitUrl(url) {
 }
 
 export default function ProfileStudioPage() {
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
+  const [authChecked, setAuthChecked] = useState(false);
   const [sectionId, setSectionId] = useState("pictures");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -286,7 +298,7 @@ export default function ProfileStudioPage() {
       height: parseHeight(userData.height),
       caste: userData.caste || "",
       language: userData.language || "",
-      manglik: userData.mangalik || userData.manglik || "",
+      manglik: normalizeManglikFromUser(userData),
       birth_details: {
         birth_time: userData.birth_details?.birth_time || "",
         birth_place: userData.birth_details?.birth_place || "",
@@ -409,6 +421,17 @@ export default function ProfileStudioPage() {
       setLoading(false);
     }
   }, [user?._id, navigate, showNotice, refreshCompletion]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setAuthChecked(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (authChecked && !isAuthenticated) {
+      navigate("/login", { replace: true });
+    }
+  }, [authChecked, isAuthenticated, navigate]);
 
   useEffect(() => {
     if (user?._id) loadAll();
@@ -654,13 +677,21 @@ export default function ProfileStudioPage() {
     }
   };
 
+  if (!authChecked || !isAuthenticated) {
+    return (
+      <PageShell>
+        <div className="flex min-h-[50vh] items-center justify-center px-4">
+          <p className="text-brown">Loading your profile…</p>
+        </div>
+      </PageShell>
+    );
+  }
+
   if (!user?._id || loading) {
     return (
       <PageShell>
         <div className="flex min-h-[50vh] items-center justify-center px-4">
-          <p className="text-brown">
-            {!user?._id ? "Loading your profile…" : "Opening your profile…"}
-          </p>
+          <p className="text-brown">Opening your profile…</p>
         </div>
       </PageShell>
     );

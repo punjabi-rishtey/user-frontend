@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiUrl } from "../config/constants";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -26,6 +26,16 @@ const resolveManglikFilterFromUrl = (value) => {
   return normalized;
 };
 
+const SEARCH_DEBOUNCE_MS = 400;
+
+const filtersShallowEqual = (a, b) =>
+  a.manglik === b.manglik &&
+  a.maritalStatus === b.maritalStatus &&
+  a.nriStatus === b.nriStatus &&
+  a.occupation === b.occupation &&
+  a.ageMin === b.ageMin &&
+  a.ageMax === b.ageMax;
+
 const ageFromDob = (dob) => {
   if (!dob) return null;
   const birth = new Date(dob);
@@ -50,6 +60,7 @@ const FindPartner = () => {
     ageMax: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
   const [totalResults, setTotalResults] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -64,6 +75,9 @@ const FindPartner = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
+  const urlHydratedRef = useRef(false);
+  const skipNextUrlSyncRef = useRef(false);
+  const didRefreshUserRef = useRef(false);
 
   // Helper to get query parameters from URL
   const getQueryParams = () => {
@@ -82,69 +96,82 @@ const FindPartner = () => {
     };
   };
 
-  // Initialize state from URL query parameters
+  const writeQueryToUrl = useCallback(
+    (page, search, filterState, { replace = true } = {}) => {
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      if (search.trim()) params.set("search", search.trim());
+
+      const manglik = resolveManglikFilterFromUrl(filterState.manglik);
+      const maritalStatus = normalizeFilterParamFromUrl(
+        filterState.maritalStatus
+      );
+      const nriStatus = normalizeFilterParamFromUrl(filterState.nriStatus);
+      const occupation = normalizeFilterParamFromUrl(filterState.occupation);
+      const ageMin = normalizeFilterParamFromUrl(filterState.ageMin);
+      const ageMax = normalizeFilterParamFromUrl(filterState.ageMax);
+
+      if (manglik) params.set("manglik", manglik);
+      if (maritalStatus) params.set("maritalStatus", maritalStatus);
+      if (nriStatus) params.set("nriStatus", nriStatus);
+      if (occupation) params.set("occupation", occupation);
+      if (ageMin) params.set("ageMin", ageMin);
+      if (ageMax) params.set("ageMax", ageMax);
+
+      const nextSearch = params.toString();
+      const currentSearch = location.search.startsWith("?")
+        ? location.search.slice(1)
+        : location.search;
+      if (nextSearch === currentSearch) return;
+
+      navigate(
+        nextSearch
+          ? `${location.pathname}?${nextSearch}`
+          : location.pathname,
+        { replace }
+      );
+    },
+    [location.pathname, location.search, navigate]
+  );
+
+  // Hydrate filter/search/page from URL (back/forward and deep links)
   useEffect(() => {
     const queryParams = getQueryParams();
     setCurrentPage(queryParams.page);
     setSearchTerm(queryParams.search);
-    setFilters({
-      manglik: queryParams.manglik,
-      maritalStatus: queryParams.maritalStatus,
-      nriStatus: queryParams.nriStatus,
-      occupation: queryParams.occupation,
-      ageMin: queryParams.ageMin,
-      ageMax: queryParams.ageMax,
-    });
-  }, [location.search]);
-
-  // Update URL with push to create new history entry
-  const updateQueryParams = (newPage) => {
-    const params = new URLSearchParams();
-    params.set("page", String(newPage || currentPage));
-    if (searchTerm.trim()) params.set("search", searchTerm.trim());
-
-    const manglik = resolveManglikFilterFromUrl(filters.manglik);
-    const maritalStatus = normalizeFilterParamFromUrl(filters.maritalStatus);
-    const nriStatus = normalizeFilterParamFromUrl(filters.nriStatus);
-    const occupation = normalizeFilterParamFromUrl(filters.occupation);
-    const ageMin = normalizeFilterParamFromUrl(filters.ageMin);
-    const ageMax = normalizeFilterParamFromUrl(filters.ageMax);
-
-    if (manglik) params.set("manglik", manglik);
-    if (maritalStatus) params.set("maritalStatus", maritalStatus);
-    if (nriStatus) params.set("nriStatus", nriStatus);
-    if (occupation) params.set("occupation", occupation);
-    if (ageMin) params.set("ageMin", ageMin);
-    if (ageMax) params.set("ageMax", ageMax);
-
-    navigate(`${location.pathname}?${params.toString()}`, { replace: false }); // Use push instead of replace
-  };
-
-  // Handle popstate for back/forward button navigation
-  useEffect(() => {
-    const handlePopstate = () => {
-      const queryParams = getQueryParams();
-      console.log("Popstate event: Setting currentPage to", queryParams.page);
-      setCurrentPage(queryParams.page);
-      setSearchTerm(queryParams.search);
-      setFilters({
+    setDebouncedSearchTerm(queryParams.search);
+    setFilters((prev) => {
+      const next = {
         manglik: queryParams.manglik,
         maritalStatus: queryParams.maritalStatus,
         nriStatus: queryParams.nriStatus,
         occupation: queryParams.occupation,
         ageMin: queryParams.ageMin,
         ageMax: queryParams.ageMax,
-      });
-    };
+      };
+      return filtersShallowEqual(prev, next) ? prev : next;
+    });
+    urlHydratedRef.current = true;
+  }, [location.search]);
 
-    window.addEventListener("popstate", handlePopstate);
-    return () => window.removeEventListener("popstate", handlePopstate);
-  }, []);
-
-  // Update URL when state changes (except for initial load or popstate)
   useEffect(() => {
-    updateQueryParams();
-  }, [currentPage, searchTerm, filters]);
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Replace history for filter/search edits; pagination uses push separately
+  useEffect(() => {
+    if (!urlHydratedRef.current) return;
+    if (skipNextUrlSyncRef.current) {
+      skipNextUrlSyncRef.current = false;
+      return;
+    }
+    writeQueryToUrl(currentPage, debouncedSearchTerm, filters, {
+      replace: true,
+    });
+  }, [currentPage, debouncedSearchTerm, filters, writeQueryToUrl]);
 
   // Give auth context time to initialize before checking
   useEffect(() => {
@@ -161,12 +188,12 @@ const FindPartner = () => {
     }
   }, []);
 
-  // Refresh user data when component mounts to get latest gender
+  // Refresh user once when the page opens (stable — not tied to refreshUser identity)
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshUser();
-    }
-  }, [isAuthenticated, refreshUser]);
+    if (!isAuthenticated || didRefreshUserRef.current) return;
+    didRefreshUserRef.current = true;
+    refreshUser();
+  }, [isAuthenticated]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -214,7 +241,7 @@ const FindPartner = () => {
             setGateStatus("profile");
           } else {
             setError(null);
-            setGateStatus("allowed");
+            setGateStatus("membership");
           }
         } else {
           setError(
@@ -262,10 +289,12 @@ const FindPartner = () => {
     if (nriStatus) params.nri_status = nriStatus;
     const occupation = normalizeFilterParamFromUrl(filters.occupation);
     if (occupation) params.occupation = occupation;
-    if (searchTerm.trim()) params.search = searchTerm.trim();
+    if (debouncedSearchTerm.trim()) {
+      params.search = debouncedSearchTerm.trim();
+    }
 
     return params;
-  }, [currentPage, filters, profilesPerPage, searchTerm]);
+  }, [currentPage, filters, profilesPerPage, debouncedSearchTerm]);
 
   useEffect(() => {
     if (
@@ -365,6 +394,7 @@ const FindPartner = () => {
       ageMax: "",
     });
     setSearchTerm("");
+    setDebouncedSearchTerm("");
     setCurrentPage(1);
   };
 
@@ -380,8 +410,9 @@ const FindPartner = () => {
   };
 
   const paginate = (pageNumber) => {
+    skipNextUrlSyncRef.current = true;
     setCurrentPage(pageNumber);
-    updateQueryParams(pageNumber); // Explicitly update URL with new page
+    writeQueryToUrl(pageNumber, debouncedSearchTerm, filters, { replace: false });
   };
 
   // Extract unique values for filters (unused helper removed)
@@ -632,8 +663,10 @@ const FindPartner = () => {
     );
   }
 
+  const serverDeniedMembership = gateStatus === "membership";
+
   // Membership status check (after profile completeness)
-  if (user && !membershipAllowed) {
+  if (user && (!membershipAllowed || serverDeniedMembership)) {
     return (
       <PageShell>
         <div className="relative min-h-[70vh] overflow-hidden px-6 py-16">
