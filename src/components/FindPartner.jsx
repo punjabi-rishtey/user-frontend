@@ -11,6 +11,13 @@ import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
 
+const resolveManglikFilterFromUrl = (value) => {
+  if (!value) return "";
+  if (value === "true") return "manglik";
+  if (value === "false") return "non_manglik";
+  return value;
+};
+
 const FindPartner = () => {
   const [filters, setFilters] = useState({
     manglik: "",
@@ -41,7 +48,7 @@ const FindPartner = () => {
     return {
       page: parseInt(params.get("page")) || 1,
       search: params.get("search") || "",
-      manglik: params.get("manglik") || "",
+      manglik: resolveManglikFilterFromUrl(params.get("manglik") || ""),
       maritalStatus: params.get("maritalStatus") || "",
       nriStatus: params.get("nriStatus") || "",
       occupation: params.get("occupation") || "",
@@ -294,6 +301,23 @@ const FindPartner = () => {
     return currentUserGender === "male" ? "female" : "male";
   };
 
+  const normalizeManglikValue = (value) => {
+    if (value === true || value === "true" || value === "manglik") {
+      return "manglik";
+    }
+    if (value === false || value === "false" || value === "non_manglik") {
+      return "non_manglik";
+    }
+    if (
+      value === "partial_manglik" ||
+      value === "partial_mangalik" ||
+      value === "partial"
+    ) {
+      return "partial_manglik";
+    }
+    return "";
+  };
+
   // Filter users
   const filteredData = Array.isArray(users)
     ? users.filter((item) => {
@@ -306,7 +330,10 @@ const FindPartner = () => {
         const normalizedMaritalStatus = normalizeMaritalStatus(
           item.marital_status
         );
-        const isManglik = item.manglik === true || item.manglik === "true";
+        const profileManglik = normalizeManglikValue(
+          item.manglik ?? item.mangalik
+        );
+        const filterManglik = resolveManglikFilterFromUrl(filters.manglik);
         const oppositeGender = getOppositeGender();
         const age = parseInt(item.age);
         const isNRI =
@@ -328,9 +355,7 @@ const FindPartner = () => {
         }
 
         return (
-          (filters.manglik === "" ||
-            (filters.manglik === "true" && isManglik) ||
-            (filters.manglik === "false" && !isManglik)) &&
+          (filterManglik === "" || profileManglik === filterManglik) &&
           (filters.maritalStatus === "" ||
             normalizedMaritalStatus === filters.maritalStatus) &&
           (filters.nriStatus === "" ||
@@ -399,7 +424,7 @@ const FindPartner = () => {
 
   // Predefined filter options
   const predefinedOptions = {
-    manglik: ["true", "false"],
+    manglik: ["manglik", "partial_manglik", "non_manglik"],
     nriStatus: ["true", "false"],
     maritalStatus: ["Never Married", "Divorced", "Widowed", "Separated"],
   };
@@ -434,8 +459,9 @@ const FindPartner = () => {
       name: "manglik",
       options: [
         { value: "", label: "Any" },
-        { value: "true", label: "Yes" },
-        { value: "false", label: "No" },
+        { value: "manglik", label: "Manglik" },
+        { value: "partial_manglik", label: "Partial Manglik" },
+        { value: "non_manglik", label: "Non Manglik" },
       ],
     },
   ];
