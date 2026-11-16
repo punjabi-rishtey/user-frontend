@@ -1,21 +1,53 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { apiUrl } from "../config/constants";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-// import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
-import Footer from "./Footer";
-import Header from "./Header";
-// import ProfileSlider from "./ProfileSlider";
+import PageShell from "./PageShell";
+import MembershipRequired from "./MembershipRequired";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
+import { findPartnerRefusal } from "./findPartnerAccess";
+
+const normalizeFilterParamFromUrl = (value) => {
+  if (value === null || value === undefined) return "";
+  const trimmed = String(value).trim();
+  if (!trimmed) return "";
+  if (trimmed.toLowerCase() === "any") return "";
+  return trimmed;
+};
 
 const resolveManglikFilterFromUrl = (value) => {
-  if (!value) return "";
-  if (value === "true") return "manglik";
-  if (value === "false") return "non_manglik";
-  return value;
+  const normalized = normalizeFilterParamFromUrl(value);
+  if (!normalized) return "";
+  if (normalized === "true") return "manglik";
+  if (normalized === "false") return "non_manglik";
+  return normalized;
+};
+
+const SEARCH_DEBOUNCE_MS = 400;
+
+const filtersShallowEqual = (a, b) =>
+  a.manglik === b.manglik &&
+  a.maritalStatus === b.maritalStatus &&
+  a.nriStatus === b.nriStatus &&
+  a.occupation === b.occupation &&
+  a.ageMin === b.ageMin &&
+  a.ageMax === b.ageMax;
+
+const ageFromDob = (dob) => {
+  if (!dob) return null;
+  const birth = new Date(dob);
+  if (Number.isNaN(birth.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const birthdayPassed =
+    today.getMonth() > birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() &&
+      today.getDate() >= birth.getDate());
+  if (!birthdayPassed) age -= 1;
+  return age >= 0 ? age : null;
 };
 
 const FindPartner = () => {
@@ -28,19 +60,24 @@ const FindPartner = () => {
     ageMax: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [totalResults, setTotalResults] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsSettled, setResultsSettled] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user, refreshUser } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
-  const [currentUserGender, setCurrentUserGender] = useState(null);
-  const [profileComplete, setProfileComplete] = useState(true);
+  const [gateStatus, setGateStatus] = useState("pending");
   const [authChecked, setAuthChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
-  const [sortOption, setSortOption] = useState("newest");
+  const suppressUrlSyncRef = useRef(0);
+  const lastCommittedSearchRef = useRef("");
+  const didRefreshUserRef = useRef(false);
 
   // Helper to get query parameters from URL
   const getQueryParams = () => {
@@ -49,73 +86,113 @@ const FindPartner = () => {
       page: parseInt(params.get("page")) || 1,
       search: params.get("search") || "",
       manglik: resolveManglikFilterFromUrl(params.get("manglik") || ""),
-      maritalStatus: params.get("maritalStatus") || "",
-      nriStatus: params.get("nriStatus") || "",
-      occupation: params.get("occupation") || "",
-      ageMin: params.get("ageMin") || "",
-      ageMax: params.get("ageMax") || "",
-      sort: params.get("sort") || "newest",
+      maritalStatus: normalizeFilterParamFromUrl(params.get("maritalStatus")),
+      nriStatus: normalizeFilterParamFromUrl(
+        params.get("nriStatus") ?? params.get("nri")
+      ),
+      occupation: normalizeFilterParamFromUrl(params.get("occupation")),
+      ageMin: normalizeFilterParamFromUrl(params.get("ageMin")),
+      ageMax: normalizeFilterParamFromUrl(params.get("ageMax")),
     };
   };
 
-  // Initialize state from URL query parameters
+  const writeQueryToUrl = useCallback(
+    (page, search, filterState, { replace = true } = {}) => {
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      if (search.trim()) params.set("search", search.trim());
+
+      const manglik = resolveManglikFilterFromUrl(filterState.manglik);
+      const maritalStatus = normalizeFilterParamFromUrl(
+        filterState.maritalStatus
+      );
+      const nriStatus = normalizeFilterParamFromUrl(filterState.nriStatus);
+      const occupation = normalizeFilterParamFromUrl(filterState.occupation);
+      const ageMin = normalizeFilterParamFromUrl(filterState.ageMin);
+      const ageMax = normalizeFilterParamFromUrl(filterState.ageMax);
+
+      if (manglik) params.set("manglik", manglik);
+      if (maritalStatus) params.set("maritalStatus", maritalStatus);
+      if (nriStatus) params.set("nriStatus", nriStatus);
+      if (occupation) params.set("occupation", occupation);
+      if (ageMin) params.set("ageMin", ageMin);
+      if (ageMax) params.set("ageMax", ageMax);
+
+      const nextSearch = params.toString();
+      const currentSearch = location.search.startsWith("?")
+        ? location.search.slice(1)
+        : location.search;
+      if (nextSearch === currentSearch) return;
+
+      navigate(
+        nextSearch
+          ? `${location.pathname}?${nextSearch}`
+          : location.pathname,
+        { replace }
+      );
+    },
+    [location.pathname, location.search, navigate]
+  );
+
+  // Hydrate filter/search/page from URL (back/forward and deep links)
   useEffect(() => {
+    suppressUrlSyncRef.current += 1;
     const queryParams = getQueryParams();
+    lastCommittedSearchRef.current = queryParams.search;
     setCurrentPage(queryParams.page);
     setSearchTerm(queryParams.search);
-    setFilters({
-      manglik: queryParams.manglik,
-      maritalStatus: queryParams.maritalStatus,
-      nriStatus: queryParams.nriStatus,
-      occupation: queryParams.occupation,
-      ageMin: queryParams.ageMin,
-      ageMax: queryParams.ageMax,
-    });
-    setSortOption(queryParams.sort);
-  }, [location.search]);
-
-  // Update URL with push to create new history entry
-  const updateQueryParams = (newPage) => {
-    const params = new URLSearchParams({
-      page: newPage || currentPage,
-      search: searchTerm,
-      manglik: filters.manglik,
-      maritalStatus: filters.maritalStatus,
-      nriStatus: filters.nriStatus,
-      occupation: filters.occupation,
-      ageMin: filters.ageMin,
-      ageMax: filters.ageMax,
-      sort: sortOption,
-    });
-    navigate(`${location.pathname}?${params.toString()}`, { replace: false }); // Use push instead of replace
-  };
-
-  // Handle popstate for back/forward button navigation
-  useEffect(() => {
-    const handlePopstate = () => {
-      const queryParams = getQueryParams();
-      console.log("Popstate event: Setting currentPage to", queryParams.page);
-      setCurrentPage(queryParams.page);
-      setSearchTerm(queryParams.search);
-      setFilters({
+    setDebouncedSearchTerm(queryParams.search);
+    setFilters((prev) => {
+      const next = {
         manglik: queryParams.manglik,
         maritalStatus: queryParams.maritalStatus,
         nriStatus: queryParams.nriStatus,
         occupation: queryParams.occupation,
         ageMin: queryParams.ageMin,
         ageMax: queryParams.ageMax,
-      });
-      setSortOption(queryParams.sort);
-    };
+      };
+      return filtersShallowEqual(prev, next) ? prev : next;
+    });
+  }, [location.search]);
 
-    window.addEventListener("popstate", handlePopstate);
-    return () => window.removeEventListener("popstate", handlePopstate);
-  }, []);
-
-  // Update URL when state changes (except for initial load or popstate)
   useEffect(() => {
-    updateQueryParams();
-  }, [currentPage, searchTerm, filters, sortOption]);
+    const timer = setTimeout(() => {
+      const searchChanged = searchTerm !== lastCommittedSearchRef.current;
+      setDebouncedSearchTerm(searchTerm);
+      if (searchChanged) {
+        setCurrentPage(1);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Replace history for filter/search edits; pagination uses push separately
+  useEffect(() => {
+    if (suppressUrlSyncRef.current > 0) {
+      suppressUrlSyncRef.current -= 1;
+      return;
+    }
+    // Wait until debounced search matches the input so we never write a stale ?search=
+    if (searchTerm !== debouncedSearchTerm) return;
+
+    const searchCommitted =
+      debouncedSearchTerm !== lastCommittedSearchRef.current;
+    if (searchCommitted) {
+      lastCommittedSearchRef.current = debouncedSearchTerm;
+      writeQueryToUrl(1, debouncedSearchTerm, filters, { replace: true });
+      return;
+    }
+
+    writeQueryToUrl(currentPage, debouncedSearchTerm, filters, {
+      replace: true,
+    });
+  }, [
+    currentPage,
+    debouncedSearchTerm,
+    filters,
+    searchTerm,
+    writeQueryToUrl,
+  ]);
 
   // Give auth context time to initialize before checking
   useEffect(() => {
@@ -132,20 +209,12 @@ const FindPartner = () => {
     }
   }, []);
 
-  // Refresh user data when component mounts to get latest gender
+  // Refresh user once when the page opens (stable — not tied to refreshUser identity)
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshUser();
-    }
-  }, [isAuthenticated, refreshUser]);
-
-  // Update currentUserGender when user changes
-  useEffect(() => {
-    if (user && user.gender) {
-      setCurrentUserGender(user.gender.toLowerCase());
-      console.log("Current user gender set to:", user.gender.toLowerCase());
-    }
-  }, [user]);
+    if (!isAuthenticated || didRefreshUserRef.current) return;
+    didRefreshUserRef.current = true;
+    refreshUser();
+  }, [isAuthenticated]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -161,8 +230,8 @@ const FindPartner = () => {
 
       try {
         await authApi.get(apiUrl("/api/users/find-my-partner"));
-        setProfileComplete(true);
-        fetchUsers();
+        setError(null);
+        setGateStatus("allowed");
       } catch (err) {
         console.error("Error checking profile completeness:", err);
         if (isSessionExpiryError(err)) {
@@ -170,17 +239,45 @@ const FindPartner = () => {
         }
 
         if (err.response?.status === 403) {
-          setProfileComplete(false);
-          setError(
-            err.response?.data?.error ||
-              "Your profile must be at least 70% complete to access this feature."
-          );
+          const message = err.response?.data?.error || "";
+          let completionPercent = null;
+          if (!/70%\s*complete/i.test(message)) {
+            try {
+              const completion = await authApi.get(
+                apiUrl("/api/users/profile-completion")
+              );
+              const pct = completion.data?.completionPercentage;
+              if (typeof pct === "number" && !Number.isNaN(pct)) {
+                completionPercent = pct;
+              }
+            } catch (completionError) {
+              if (isSessionExpiryError(completionError)) return;
+            }
+          }
+          const refusal = findPartnerRefusal(message, completionPercent);
+          const membershipHint =
+            /membership|subscription|gold|approved|expired/i.test(message);
+          if (
+            refusal === "profile" ||
+            (refusal === "membership" &&
+              completionPercent === null &&
+              !membershipHint)
+          ) {
+            setError(
+              message ||
+                "Your profile must be at least 70% complete to access this feature."
+            );
+            setGateStatus("profile");
+          } else {
+            setError(null);
+            setGateStatus("membership");
+          }
         } else {
           setError(
             "Failed to check profile completeness. Please try again later."
           );
+          setGateStatus("error");
         }
-        setLoading(false);
       }
     };
 
@@ -189,38 +286,122 @@ const FindPartner = () => {
     }
   }, [isAuthenticated, authChecked]);
 
-  // Fetch users from API
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await authApi.get(apiUrl("/api/users/all-basic"));
-      if (Array.isArray(response.data)) {
-        console.log(response.data);
-        setUsers(response.data);
-      } else if (response.data && Array.isArray(response.data.users)) {
-        setUsers(response.data.users);
-      } else {
-        console.warn(
-          "API response data is not in expected format:",
-          response.data
-        );
-        setUsers([]);
-      }
-      setError(null);
-    } catch (err) {
-      if (isSessionExpiryError(err)) {
-        return;
-      }
+  const isSubscriptionExpired =
+    Boolean(user?.metadata?.exp_date) &&
+    new Date() > new Date(user.metadata.exp_date);
+  const membershipAllowed =
+    Boolean(user) && user.status === "Approved" && !isSubscriptionExpired;
 
-      console.error("Error fetching users:", err);
-      setError(
-        err.response?.data?.error ||
-          "Failed to load users. Please try again later."
-      );
-    } finally {
-      setLoading(false);
+  const buildSearchParams = useCallback(() => {
+    const params = {
+      page: currentPage,
+      limit: profilesPerPage,
+    };
+
+    if (filters.ageMin || filters.ageMax) {
+      params.minAge = filters.ageMin || "18";
+      params.maxAge = filters.ageMax || "99";
     }
-  };
+    const maritalStatus = normalizeFilterParamFromUrl(filters.maritalStatus);
+    if (maritalStatus) {
+      const maritalApiValue = {
+        "Never Married": "never_married",
+        Divorced: "divorced",
+        Widowed: "widow_widower",
+        Separated: "separated",
+      }[maritalStatus];
+      params.marital_status = maritalApiValue || maritalStatus;
+    }
+    const manglik = resolveManglikFilterFromUrl(filters.manglik);
+    if (manglik) params.manglik = manglik;
+    const nriStatus = normalizeFilterParamFromUrl(filters.nriStatus);
+    if (nriStatus) params.nri_status = nriStatus;
+    const occupation = normalizeFilterParamFromUrl(filters.occupation);
+    if (occupation) params.occupation = occupation;
+    if (debouncedSearchTerm.trim()) {
+      params.search = debouncedSearchTerm.trim();
+    }
+
+    return params;
+  }, [currentPage, filters, profilesPerPage, debouncedSearchTerm]);
+
+  useEffect(() => {
+    if (
+      !isAuthenticated ||
+      !authChecked ||
+      gateStatus !== "allowed" ||
+      !membershipAllowed
+    ) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchPartnerPage = async () => {
+      setResultsLoading(true);
+      try {
+        const response = await authApi.get(apiUrl("/api/users/search"), {
+          params: buildSearchParams(),
+          signal: controller.signal,
+        });
+        const data = response.data || {};
+        const results = Array.isArray(data.results) ? data.results : [];
+        setUsers(
+          results.map((item) => ({
+            ...item,
+            _id: item._id,
+            user: item.user || item._id,
+            age:
+              item.age === null || item.age === undefined || item.age === ""
+                ? ageFromDob(item.dob)
+                : item.age,
+            occupation: item.occupation ?? null,
+            nri_status:
+              item.nri_status ?? item.lifestyle?.nri_status ?? false,
+            city: item.city ?? item.location?.city ?? "",
+            manglik: item.manglik ?? item.mangalik,
+            profile_picture:
+              item.profile_picture ||
+              (Array.isArray(item.profile_pictures) &&
+              item.profile_pictures.length > 0
+                ? item.profile_pictures[0]
+                : null),
+          }))
+        );
+        setTotalResults(typeof data.total === "number" ? data.total : 0);
+        setTotalPages(typeof data.pages === "number" ? data.pages : 0);
+        setError(null);
+      } catch (err) {
+        if (controller.signal.aborted || isSessionExpiryError(err)) {
+          return;
+        }
+
+        console.error("Error fetching partner search:", err);
+        setUsers([]);
+        setTotalResults(0);
+        setTotalPages(0);
+        setError(
+          err.response?.data?.error ||
+            "Failed to load users. Please try again later."
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setResultsSettled(true);
+          setResultsLoading(false);
+        }
+      }
+    };
+
+    fetchPartnerPage();
+
+    return () => controller.abort();
+  }, [
+    isAuthenticated,
+    authChecked,
+    gateStatus,
+    membershipAllowed,
+    buildSearchParams,
+  ]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -230,12 +411,6 @@ const FindPartner = () => {
       [name]: value,
     });
     setCurrentPage(1); // Reset to page 1 on filter change
-  };
-
-  // Handle sort option change
-  const handleSortChange = (e) => {
-    setSortOption(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on sort change
   };
 
   const handleClearFilters = () => {
@@ -248,13 +423,15 @@ const FindPartner = () => {
       ageMax: "",
     });
     setSearchTerm("");
-    setSortOption("newest");
+    setDebouncedSearchTerm("");
+    lastCommittedSearchRef.current = "";
     setCurrentPage(1);
   };
 
+  // Page reset happens in the debounce effect — not here — so URL sync never
+  // snapshots stale debouncedSearchTerm and hydration won't wipe the input.
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to page 1 on search change
   };
 
   const handleProfileClick = (profile) => {
@@ -263,141 +440,11 @@ const FindPartner = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Normalize marital status
-  const normalizeMaritalStatus = (status) => {
-    if (!status) return "";
-
-    const statusMap = {
-      never_married: "Never Married",
-      divorced: "Divorced",
-      widow_widower: "Widowed",
-      separated: "Separated",
-      single: "Never Married",
-      unmarried: "Never Married",
-      maried: "Never Married",
-      married: "Never Married",
-    };
-
-    const lowerCaseStatus = status.toLowerCase();
-    if (statusMap[lowerCaseStatus]) {
-      return statusMap[lowerCaseStatus];
-    }
-
-    if (status.includes("_")) {
-      return status
-        .split("_")
-        .map(
-          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join(" ");
-    }
-
-    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
-  };
-
-  // Get opposite gender
-  const getOppositeGender = () => {
-    if (!currentUserGender) return null;
-    return currentUserGender === "male" ? "female" : "male";
-  };
-
-  const normalizeManglikValue = (value) => {
-    if (value === true || value === "true" || value === "manglik") {
-      return "manglik";
-    }
-    if (value === false || value === "false" || value === "non_manglik") {
-      return "non_manglik";
-    }
-    if (
-      value === "partial_manglik" ||
-      value === "partial_mangalik" ||
-      value === "partial"
-    ) {
-      return "partial_manglik";
-    }
-    return "";
-  };
-
-  // Filter users
-  const filteredData = Array.isArray(users)
-    ? users.filter((item) => {
-        if (!item) return false;
-
-        // Active members can discover approved and expired opposite-gender profiles.
-        if (!["Approved", "Expired"].includes(item.status))
-          return false;
-
-        const normalizedMaritalStatus = normalizeMaritalStatus(
-          item.marital_status
-        );
-        const profileManglik = normalizeManglikValue(
-          item.manglik ?? item.mangalik
-        );
-        const filterManglik = resolveManglikFilterFromUrl(filters.manglik);
-        const oppositeGender = getOppositeGender();
-        const age = parseInt(item.age);
-        const isNRI =
-          item.nri_status === true ||
-          item.nri_status === "true" ||
-          item.nri_status === "yes";
-        const userOccupation = item.occupation || "";
-
-        if (oppositeGender && item.gender?.toLowerCase() !== oppositeGender) {
-          return false;
-        }
-
-        if (filters.ageMin && !isNaN(age) && age < parseInt(filters.ageMin)) {
-          return false;
-        }
-
-        if (filters.ageMax && !isNaN(age) && age > parseInt(filters.ageMax)) {
-          return false;
-        }
-
-        return (
-          (filterManglik === "" || profileManglik === filterManglik) &&
-          (filters.maritalStatus === "" ||
-            normalizedMaritalStatus === filters.maritalStatus) &&
-          (filters.nriStatus === "" ||
-            (filters.nriStatus === "true" && isNRI) ||
-            (filters.nriStatus === "false" && !isNRI)) &&
-          (filters.occupation === "" ||
-            userOccupation === filters.occupation) &&
-          (searchTerm === "" ||
-            item.name?.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-      })
-    : [];
-
-  // Sort filtered data
-  const sortedFilteredData = [...filteredData].sort((a, b) => {
-    if (sortOption === "newest") {
-      const dateA = a.metadata?.register_date
-        ? new Date(a.metadata.register_date)
-        : new Date(0);
-      const dateB = b.metadata?.register_date
-        ? new Date(b.metadata.register_date)
-        : new Date(0);
-      return dateB - dateA; // Newest first
-    } else if (sortOption === "alphabetical-asc") {
-      return a.name?.toLowerCase().localeCompare(b.name?.toLowerCase());
-    } else if (sortOption === "alphabetical-desc") {
-      return b.name?.toLowerCase().localeCompare(a.name?.toLowerCase());
-    }
-    return 0;
-  });
-
-  // Pagination
-  const indexOfLastProfile = currentPage * profilesPerPage;
-  const indexOfFirstProfile = indexOfLastProfile - profilesPerPage;
-  const currentProfiles = sortedFilteredData.slice(
-    indexOfFirstProfile,
-    indexOfLastProfile
-  );
-
   const paginate = (pageNumber) => {
-    setCurrentPage(pageNumber);
-    updateQueryParams(pageNumber); // Explicitly update URL with new page
+    if (pageNumber === currentPage) return;
+    const searchForUrl =
+      searchTerm !== debouncedSearchTerm ? searchTerm : debouncedSearchTerm;
+    writeQueryToUrl(pageNumber, searchForUrl, filters, { replace: false });
   };
 
   // Extract unique values for filters (unused helper removed)
@@ -413,12 +460,11 @@ const FindPartner = () => {
 
   // Card variants for animation
   const cardVariants = {
-    initial: { opacity: 0, y: 20 },
+    initial: { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
     hover: {
-      scale: 1.05,
-      backgroundColor: "#E5D3C8",
-      transition: { duration: 0.3 },
+      y: -2,
+      transition: { duration: 0.25 },
     },
   };
 
@@ -434,7 +480,6 @@ const FindPartner = () => {
       label: "Occupation",
       name: "occupation",
       options: [
-        { value: "", label: "Any" },
         { value: "Private Job", label: "Private Job" },
         { value: "Government Job", label: "Government Job" },
         { value: "Business Owner", label: "Business Owner" },
@@ -444,7 +489,6 @@ const FindPartner = () => {
       label: "NRI Status",
       name: "nriStatus",
       options: [
-        { value: "", label: "Any" },
         { value: "false", label: "Indian" },
         { value: "true", label: "NRI" },
       ],
@@ -458,10 +502,9 @@ const FindPartner = () => {
       label: "Manglik",
       name: "manglik",
       options: [
-        { value: "", label: "Any" },
         { value: "manglik", label: "Manglik" },
         { value: "partial_manglik", label: "Partial Manglik" },
-        { value: "non_manglik", label: "Non Manglik" },
+        { value: "non_manglik", label: "Non-Manglik" },
       ],
     },
   ];
@@ -596,490 +639,312 @@ const FindPartner = () => {
   };
 
   // Loading indicator
-  if (!authChecked) {
+  if (!authChecked || !isAuthenticated) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">
-            Checking authentication...
-          </div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking authentication…
         </div>
-        <Footer />
-      </div>
+      </PageShell>
+    );
+  }
+
+  if (gateStatus === "pending") {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking access…
+        </div>
+      </PageShell>
     );
   }
 
   // Incomplete profile message
-  if (!profileComplete) {
+  if (gateStatus === "profile") {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2
-              className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              Profile Incomplete
-            </h2>
-            <p
-              className="text-[#6B4132] mb-6 text-center"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              Your profile must be at least 70% complete to access the partner
-              search feature.
-            </p>
-            <div className="flex justify-center">
-              <button
-                onClick={() => navigate("/profilepage")}
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                Complete Your Profile
-              </button>
-            </div>
-          </div>
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center px-6 py-20">
+          <MembershipRequired
+            title="Complete your profile first"
+            description="Your profile must be at least 70% complete before you can search for a partner."
+            ctaLabel="Complete your profile"
+            onCta={() => navigate("/profilepage")}
+          />
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
+
+  if (gateStatus === "error") {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-maroon">
+          {error || "Failed to check profile completeness. Please try again later."}
+        </div>
+      </PageShell>
+    );
+  }
+
+  if (!user) {
+    return (
+      <PageShell>
+        <div className="flex flex-1 items-center justify-center py-24 text-brown">
+          Checking membership…
+        </div>
+      </PageShell>
+    );
+  }
+
+  const serverDeniedMembership = gateStatus === "membership";
 
   // Membership status check (after profile completeness)
-  const isSubscriptionExpired =
-    user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
-
-  if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
+  if (user && (!membershipAllowed || serverDeniedMembership)) {
     return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center h-[50vh]">
-          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
-            <h2
-              className="text-2xl mb-4 text-[#4F2F1D] text-center"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              {isSubscriptionExpired
-                ? "Your subscription has expired"
-                : "You don't have any active membership"}
-            </h2>
-            <div className="flex justify-center">
-              <button
-                onClick={() => navigate("/membership")}
-                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                {isSubscriptionExpired ? "Renew Membership" : "Buy Membership"}
-              </button>
-            </div>
+      <PageShell>
+        <div className="relative min-h-[70vh] overflow-hidden px-6 py-16">
+          <div className="pointer-events-none mx-auto grid max-w-5xl grid-cols-2 gap-4 opacity-60 blur-sm sm:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-[3/4] rounded-xl border border-border bg-secondary"
+              />
+            ))}
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center bg-paper/40 px-6 backdrop-blur-[2px]">
+            <MembershipRequired
+              title={
+                isSubscriptionExpired
+                  ? "Your Gold membership has expired"
+                  : "Gold unlocks full profiles"
+              }
+              description="Verified Punjabi matches are waiting. Unlock Gold for ₹2,000 a year to browse with confidence."
+              ctaLabel={
+                isSubscriptionExpired ? "Renew Gold" : "Unlock with Gold"
+              }
+            />
           </div>
         </div>
-        <Footer />
-      </div>
+      </PageShell>
     );
   }
 
-  if (loading) {
-    return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">Loading profiles...</div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const filterFieldClass =
+    "w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-ink focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20";
 
-  if (error && profileComplete) {
-    return (
-      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-        <Header />
-        <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#990000] text-xl">{error}</div>
+  const renderFilterFields = (forMobile = false) => (
+    <div className="flex flex-col gap-4">
+      <div>
+        <label className="mb-2 block text-sm font-medium text-brown">
+          Age Range
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            name="ageMin"
+            placeholder="Min"
+            value={filters.ageMin}
+            onChange={handleChange}
+            min="18"
+            max="100"
+            className={filterFieldClass}
+          />
+          <span className="text-muted-foreground">to</span>
+          <input
+            type="number"
+            name="ageMax"
+            placeholder="Max"
+            value={filters.ageMax}
+            onChange={handleChange}
+            min="18"
+            max="100"
+            className={filterFieldClass}
+          />
         </div>
-        <Footer />
       </div>
-    );
-  }
+      {filterOptions.map(({ label, name, options }, index) => (
+        <div key={index}>
+          <label className="mb-2 block text-sm font-medium text-brown">
+            {label}
+          </label>
+          <select
+            name={name}
+            value={filters[name]}
+            onChange={handleChange}
+            className={filterFieldClass}
+          >
+            <option value="">{forMobile ? `Select ${label}` : `Any ${label}`}</option>
+            {Array.isArray(options)
+              ? options.map((option, idx) => {
+                  if (option && typeof option === "object" && "value" in option) {
+                    return (
+                      <option key={idx} value={option.value}>
+                        {option.label || formatOption(option.value)}
+                      </option>
+                    );
+                  }
+                  return (
+                    <option key={idx} value={option}>
+                      {formatOption(option)}
+                    </option>
+                  );
+                })
+              : null}
+          </select>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="rounded-lg bg-maroon px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-maroon/90"
+        onClick={handleClearFilters}
+      >
+        Clear filters
+      </button>
+    </div>
+  );
 
   return (
-    <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
-      <Header />
-      <div className="container mx-auto px-4 sm:px-8 my-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+    <PageShell>
+      <div className="border-b border-border px-4 py-6 sm:px-8">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 sm:flex-row sm:items-center">
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder="Search by name…"
             value={searchTerm}
             onChange={handleSearchChange}
-            className="w-full sm:w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
+            className="w-full flex-1 rounded-lg border border-border bg-card px-4 py-3 text-ink focus-visible:border-maroon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/20"
           />
-          <select
-            value={sortOption}
-            onChange={handleSortChange}
-            className="w-full sm:w-1/4 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-          >
-            <option value="newest">Newest First</option>
-            <option value="alphabetical-asc">Alphabetical (A-Z)</option>
-            <option value="alphabetical-desc">Alphabetical (Z-A)</option>
-          </select>
           <button
-            className="md:hidden bg-[#4F2F1D] text-[#E5D3C8] px-4 py-2 rounded-lg"
+            type="button"
+            className="rounded-lg bg-brown px-4 py-3 text-sm font-medium text-ivory md:hidden"
             onClick={() => setShowFilters(!showFilters)}
           >
-            {showFilters ? "Hide Filters" : "Show Filters"}
+            {showFilters ? "Hide filters" : "Show filters"}
           </button>
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row flex-grow">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8 sm:px-8 md:flex-row">
         <div
-          className={`fixed inset-0 z-50 md:hidden bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${
-            showFilters ? "opacity-100" : "opacity-0 pointer-events-none"
+          className={`fixed inset-0 z-50 bg-brown-deep/30 backdrop-blur-sm transition-opacity md:hidden ${
+            showFilters ? "opacity-100" : "pointer-events-none opacity-0"
           }`}
           onClick={() => setShowFilters(false)}
         />
-        <div
-          className={`fixed left-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#6B4132] p-4 shadow-lg z-50 md:hidden transition-transform duration-300 overflow-y-auto ${
+        <aside
+          className={`fixed top-0 left-0 z-50 h-full w-72 overflow-y-auto border-r border-border bg-card p-5 transition-transform md:hidden ${
             showFilters ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <div className="flex justify-between items-center mb-6">
-            <h2
-              className="text-2xl text-[#E5D3C8]"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              Filters
-            </h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="font-display text-2xl text-brown">Filters</h2>
             <button
-              className="text-[#E5D3C8] p-2"
+              type="button"
+              className="text-muted-foreground"
               onClick={() => setShowFilters(false)}
             >
               ✕
             </button>
           </div>
-          <div className="space-y-4">
-            <div className="mb-4">
-              <label
-                className="block text-[#E5D3C8] mb-2"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                Age Range
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="number"
-                  name="ageMin"
-                  placeholder="Min"
-                  value={filters.ageMin}
-                  onChange={handleChange}
-                  min="18"
-                  max="100"
-                  className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                />
-                <input
-                  type="number"
-                  name="ageMax"
-                  placeholder="Max"
-                  value={filters.ageMax}
-                  onChange={handleChange}
-                  min="18"
-                  max="100"
-                  className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                />
-              </div>
-            </div>
-            {filterOptions.map(({ label, name, options }, index) => (
-              <div className="mb-4" key={index}>
-                <label
-                  className="block text-[#E5D3C8] mb-2"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {label}
-                </label>
-                <select
-                  name={name}
-                  value={filters[name]}
-                  onChange={handleChange}
-                  className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  <option value="">Select {label}</option>
-                  {Array.isArray(options)
-                    ? options.map((option, idx) => {
-                        if (
-                          option &&
-                          typeof option === "object" &&
-                          "value" in option
-                        ) {
-                          return (
-                            <option key={idx} value={option.value}>
-                              {option.label || formatOption(option.value)}
-                            </option>
-                          );
-                        } else {
-                          return (
-                            <option key={idx} value={option}>
-                              {formatOption(option)}
-                            </option>
-                          );
-                        }
-                      })
-                    : null}
-                </select>
-              </div>
-            ))}
-            <button
-              className="w-full bg-[#4F2F1D] hover:bg-[#6B4132] text-[#E5D3C8] font-bold py-2 px-4 rounded-lg transition duration-300 mt-4"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-              onClick={handleClearFilters}
-            >
-              Clear Filters
-            </button>
+          {renderFilterFields(true)}
+        </aside>
+
+        <aside className="hidden w-72 shrink-0 md:block">
+          <div className="sticky top-6 rounded-xl border border-border bg-card p-6">
+            <h2 className="mb-6 font-display text-2xl text-brown">Filters</h2>
+            {renderFilterFields(false)}
           </div>
-        </div>
-        <div className="hidden md:block w-1/4 p-6 bg-[#F5EDE7] shadow-lg md:sticky md:top-0 md:h-screen md:overflow-y-auto ml-8 rounded-lg border border-[#E5D3C8]">
-          <h2
-            className="text-2xl mb-6 text-[#4F2F1D]"
-            style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-          >
-            Filters
-          </h2>
-          <div className="mb-6">
-            <label
-              className="block text-[#6B4132] mb-2"
-              style={{
-                fontFamily: "'Modern Era', sans-serif",
-                fontWeight: 400,
-              }}
-            >
-              Age Range
-            </label>
-            <div className="flex space-x-3 items-center">
-              <input
-                type="number"
-                name="ageMin"
-                placeholder="Min"
-                value={filters.ageMin}
-                onChange={handleChange}
-                min="18"
-                max="100"
-                className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              />
-              <span className="text-[#6B4132]">to</span>
-              <input
-                type="number"
-                name="ageMax"
-                placeholder="Max"
-                value={filters.ageMax}
-                onChange={handleChange}
-                min="18"
-                max="100"
-                className="w-1/2 p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              />
-            </div>
-          </div>
-          {filterOptions.map(({ label, name, options }, index) => (
-            <div className="mb-4" key={index}>
-              <label
-                className="block text-[#6B4132] mb-2"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                {label}
-              </label>
-              <select
-                name={name}
-                value={filters[name]}
-                onChange={handleChange}
-                className="w-full p-3 border border-[#E5D3C8] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4F2F1D] bg-white"
-                style={{
-                  fontFamily: "'Modern Era', sans-serif",
-                  fontWeight: 400,
-                }}
-              >
-                <option value="">Any {label}</option>
-                {Array.isArray(options)
-                  ? options.map((option, idx) => {
-                      if (
-                        option &&
-                        typeof option === "object" &&
-                        "value" in option
-                      ) {
-                        return (
-                          <option key={idx} value={option.value}>
-                            {option.label || formatOption(option.value)}
-                          </option>
-                        );
-                      } else {
-                        return (
-                          <option key={idx} value={option}>
-                            {formatOption(option)}
-                          </option>
-                        );
-                      }
-                    })
-                  : null}
-              </select>
-            </div>
-          ))}
-          <button
-            className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-4 rounded-lg transition duration-300"
-            style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-            onClick={handleClearFilters}
-          >
-            Clear Filters
-          </button>
-        </div>
-        <div className="w-full md:w-3/4 p-4 sm:p-8">
-          <div className="mb-4 text-[#4F2F1D]">
-            <p>
-              Showing {currentProfiles.length} of {sortedFilteredData.length}{" "}
-              profiles
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-            {sortedFilteredData.length === 0 ? (
-              <div className="col-span-2 text-center py-8 text-[#4F2F1D]">
+        </aside>
+
+        <div className="min-w-0 flex-1">
+          {resultsLoading || !resultsSettled ? (
+            <div className="py-12 text-center text-brown">Loading profiles…</div>
+          ) : error ? (
+            <div className="py-12 text-center text-maroon">{error}</div>
+          ) : (
+            <>
+          <p className="mb-4 text-sm text-muted-foreground">
+            Showing {users.length} of {totalResults} profiles
+          </p>
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2">
+            {users.length === 0 ? (
+              <div className="col-span-full py-12 text-center text-muted-foreground">
                 No profiles match your search criteria.
               </div>
             ) : (
-              currentProfiles.map((item) => (
-                <motion.div
-                  key={item._id}
-                  variants={cardVariants}
-                  initial="initial"
-                  animate="animate"
-                  whileHover="hover"
-                  className="bg-[#F5EDE7] p-4 sm:p-6 rounded-lg shadow-lg cursor-pointer border border-[#E5D3C8]"
-                  onClick={() => handleProfileClick(item)}
-                >
-                  <div className="flex items-center flex-col sm:flex-row">
-                    <img
-                      src={item.profile_picture || profileIcon}
-                      alt={item.name}
-                      className="w-28 h-28 sm:w-32 sm:h-36 rounded-md mb-4 sm:mb-0 sm:mr-6 object-cover object-top"
-                    />
-                    <div className="text-center sm:text-left">
-                      <h3
-                        className="text-lg sm:text-xl mb-2 text-[#4F2F1D]"
-                        style={{
-                          fontFamily: "'Tiempos Headline', serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        {item.name}
-                      </h3>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Age:</strong> {item.age || "Not specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Occupation:</strong>{" "}
-                        {formatOption(item.occupation) || "Not specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Location:</strong>{" "}
-                        {item.city?.trim() || "Not Specified"}
-                      </p>
-                      <p
-                        className="text-sm sm:text-base text-[#6B4132] mb-1"
-                        style={{
-                          fontFamily: "'Modern Era', sans-serif",
-                          fontWeight: 400,
-                        }}
-                      >
-                        <strong>Marital Status:</strong>{" "}
-                        {normalizeMaritalStatus(item.marital_status) ||
-                          "Not specified"}
-                      </p>
+              users.map((item) => {
+                const facts = [
+                  { label: "Age", value: item.age ? String(item.age) : null },
+                  { label: "City", value: item.city?.trim() || null },
+                  { label: "Caste", value: formatOption(item.caste) || null },
+                  {
+                    label: "Profession",
+                    value: formatOption(item.occupation) || null,
+                  },
+                ].filter((fact) => fact.value);
+
+                return (
+                  <motion.button
+                    type="button"
+                    key={item.user || item._id}
+                    variants={cardVariants}
+                    initial="initial"
+                    animate="animate"
+                    whileHover="hover"
+                    className="group rounded-xl border border-border bg-card text-left transition-colors hover:border-brown/40"
+                    onClick={() => handleProfileClick(item)}
+                  >
+                    <div className="flex flex-col">
+                      <div className="w-full overflow-hidden rounded-t-xl bg-secondary">
+                        <img
+                          src={item.profile_picture || profileIcon}
+                          alt=""
+                          className="aspect-[3/4] w-full object-cover object-top"
+                        />
+                      </div>
+                      <div className="flex flex-col px-4 py-4 sm:px-5 sm:py-5">
+                        <h3 className="font-display text-2xl font-semibold leading-tight text-brown">
+                          {item.name}
+                        </h3>
+                        {facts.length > 0 ? (
+                          <dl className="mt-3 space-y-2.5">
+                            {facts.map(({ label, value }) => (
+                              <div
+                                key={label}
+                                className="flex items-baseline gap-3 text-sm leading-none"
+                              >
+                                <dt className="w-24 shrink-0 text-muted-foreground">
+                                  {label}
+                                </dt>
+                                <dd className="font-medium whitespace-nowrap text-brown">
+                                  {value}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : null}
+                        <span className="mt-4 text-sm font-semibold text-maroon underline-offset-4 group-hover:underline">
+                          View profile
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))
+                  </motion.button>
+                );
+              })
             )}
           </div>
-          {sortedFilteredData.length > 0 && (
+          {totalPages > 1 && (
             <Pagination
               profilesPerPage={profilesPerPage}
-              totalProfiles={sortedFilteredData.length}
+              totalProfiles={totalResults}
               currentPage={currentPage}
               paginate={paginate}
             />
           )}
+            </>
+          )}
         </div>
       </div>
-      <Footer />
-    </div>
+    </PageShell>
   );
 };
 

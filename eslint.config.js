@@ -35,4 +35,21 @@ export default [
       ],
     },
   },
+  {
+    // Generated / owned shadcn primitives - skip prop-types noise
+    files: [
+      'src/components/ui/**/*.{js,jsx}',
+      'src/lib/utils.js',
+      'src/components/PageShell.jsx',
+      'src/components/MembershipRequired.jsx',
+      'src/components/Section.jsx',
+      'src/components/Header.jsx',
+      'src/hooks/**/*.{js,jsx}',
+    ],
+    rules: {
+      'react/prop-types': 'off',
+      'no-unused-vars': ['error', { varsIgnorePattern: '^React$', argsIgnorePattern: '^_' }],
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ]

@@ -2,6 +2,11 @@ name: CI
 
 on:
   pull_request:
+  # Long-lived wip/* branches may be conflicted with main; GitHub skips
+  # pull_request workflows until conflicts are resolved (see Actions docs).
+  push:
+    branches:
+      - wip/member-site-redesign
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

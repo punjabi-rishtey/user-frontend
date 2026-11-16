@@ -43,6 +43,9 @@ const PrivacyPolicy = () => {
               <li>To communicate with you about updates, offers, and other relevant information related to the platform.</li>
               <li>To process payments and handle subscriptions.</li>
               <li>To ensure the security of the platform and protect against fraudulent activities.</li>
+              <li>
+                To automatically screen certain free-text profile fields (after your profile is approved) for prohibited content such as contact solicitation or inappropriate language. Screening may use automated systems, including trusted third-party processors, solely to enforce our community standards.
+              </li>
             </ul>
           </section>
 
@@ -53,7 +56,7 @@ const PrivacyPolicy = () => {
             </p>
             <ul className="list-disc pl-5 space-y-2 mt-2">
               <li>
-                <strong>Service Providers:</strong> Third-party companies that assist with payments, hosting, and other platform services.
+                <strong>Service Providers:</strong> Third-party companies that assist with payments, hosting, automated content screening, and other platform services.
               </li>
               <li>
                 <strong>Legal Requirements:</strong> If required by law or to protect our rights, we may share your information with legal authorities.

@@ -1,224 +1,201 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import logoSrc from "../assets/logo.png";
-import profileIcon from "../assets/profile.png";
-import { useAuth } from "../context/AuthContext";
+import { Menu } from "lucide-react";
+import logoSrc from "@/assets/logo.png";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useAppNav } from "@/hooks/useAppNav";
+import { useAuth } from "@/context/AuthContext";
+import { cn } from "@/lib/utils";
 
-const Header = () => {
-  const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+/**
+ * @param {{ variant?: "solid" | "overlay" }} props
+ */
+export default function Header({ variant = "solid" }) {
+  const {
+    navigate,
+    isAuthenticated,
+    navItems,
+    goProfile,
+    profileImageSrc,
+    firstName,
+  } = useAppNav();
+  const { logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const handleProfileClick = () => {
-    navigate("/profilepage");
-    setIsSidebarOpen(false);
+  const isOverlay = variant === "overlay";
+
+  const handleNav = (item) => {
+    setMenuOpen(false);
+    if (item.onClick) item.onClick();
+    else navigate(item.path);
   };
 
-  const handleFindPartnerClick = () => {
-    if (isAuthenticated) {
-      navigate("/findpartner");
-    } else {
-      navigate("/login");
-    }
-    setIsSidebarOpen(false);
+  const handleMobileProfile = () => {
+    setMenuOpen(false);
+    goProfile();
   };
 
-  const handleMembershipPlanClick = () => {
-    const expiryDate = user?.metadata?.exp_date
-      ? new Date(user.metadata.exp_date)
-      : null;
-    const hasActiveMembership =
-      user?.status === "Approved" &&
-      (!expiryDate || expiryDate >= new Date());
-
-    if (!isAuthenticated) {
-      navigate("/membership");
-      return;
-    }
-
-    if (hasActiveMembership) {
-      navigate("/current-plan");
-    } else {
-      navigate("/membership");
-    }
+  const handleMobileLogout = async () => {
+    setMenuOpen(false);
+    await logout();
+    navigate("/");
   };
 
-  const navItems = [
-    { label: "Home", path: "/" },
-    { label: "About Us", path: "/about" },
-    { label: "Find Your Partner", onClick: handleFindPartnerClick },
-    { label: "Membership Plans", onClick: handleMembershipPlanClick },
-    { label: "Testimonials", path: "/testimonials" },
-    { label: "Contact", path: "/contact" },
-  ];
-
-  const handleNavClick = (item) => {
-    if (item.onClick) {
-      item.onClick();
-    } else {
-      navigate(item.path);
-    }
-    setIsSidebarOpen(false);
+  const handleMobileAuthNav = (path) => {
+    setMenuOpen(false);
+    navigate(path);
   };
-
-  const profileImageSrc =
-    user?.profile_picture || user?.profile_pictures?.[0] || profileIcon;
 
   return (
-    <div className="w-full p-4 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] shadow-md">
-      <div className="container mx-auto flex justify-between items-center px-6">
-        <div>
+    <header
+      className={cn(
+        "w-full",
+        isOverlay
+          ? "absolute top-0 left-0 z-20 bg-brown-deep/40 backdrop-blur-md"
+          : "bg-brown-deep"
+      )}
+    >
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <button
+          type="button"
+          className="flex items-center"
+          onClick={() => navigate("/")}
+          aria-label="Punjabi Rishtey home"
+        >
           <img
             src={logoSrc}
-            alt="Punjabi Matrimony Logo"
-            className="h-12 sm:h-16 cursor-pointer"
-            onClick={() => navigate("/")}
+            alt="Punjabi Rishtey"
+            className="h-11 w-auto sm:h-14"
           />
-        </div>
+        </button>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-6">
-          {navItems.map((item, index) => (
+        <nav className="hidden items-center gap-6 lg:flex">
+          {navItems.map((item) => (
             <button
-              key={index}
-              onClick={() => handleNavClick(item)}
-              className="text-[#E5D3C8] hover:text-white transition duration-300 hover:underline"
+              key={item.label}
+              type="button"
+              onClick={() => handleNav(item)}
+              className="text-sm font-medium text-ivory/85 transition-colors hover:text-white"
             >
               {item.label}
             </button>
           ))}
         </nav>
 
-        {/* Mobile Menu and Profile/Auth Buttons */}
-        <div className="flex items-center space-x-4 text-white">
-          {isAuthenticated && (
-            <div>
-              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#E5D3C8] cursor-pointer m-auto">
+        <div className="flex items-center gap-3">
+          {isAuthenticated ? (
+            <button
+              type="button"
+              onClick={goProfile}
+              className="flex items-center gap-2"
+            >
+              <span className="size-9 overflow-hidden rounded-full border border-ivory/60">
                 <img
                   src={profileImageSrc}
-                  alt="Profile"
-                  className="w-full h-full object-cover object-top"
-                  onClick={handleProfileClick}
+                  alt=""
+                  className="size-full object-cover object-top"
                 />
-              </div>
-              <span>{user?.name.match(/^\s*([^\s]+)/)?.[1]}</span>
-            </div>
-          )}
-
-          {!isAuthenticated && (
-            <div className="hidden md:flex space-x-4">
-              <button
-                className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
+              </span>
+              {firstName && (
+                <span className="hidden text-sm text-ivory sm:inline">
+                  {firstName}
+                </span>
+              )}
+            </button>
+          ) : (
+            <div className="hidden items-center gap-2 lg:flex">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-ivory/70 bg-transparent text-ivory hover:bg-ivory hover:text-brown"
                 onClick={() => navigate("/login")}
               >
                 Login
-              </button>
-              <button
-                className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
-                onClick={() => navigate("/signup")}
-              >
+              </Button>
+              <Button size="sm" onClick={() => navigate("/signup")}>
                 Sign Up
-              </button>
+              </Button>
             </div>
           )}
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-[#E5D3C8] p-2"
-            onClick={() => setIsSidebarOpen(true)}
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-ivory hover:bg-white/10 hover:text-white lg:hidden"
+                aria-label="Open menu"
+              >
+                <Menu />
+              </Button>
+            </SheetTrigger>
+            <SheetContent
+              side="right"
+              className="flex w-full flex-col gap-0 border-brown bg-brown-deep p-0 text-ivory sm:max-w-xs"
+              closeButtonClassName="text-ivory/80 hover:bg-white/10 hover:text-white"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-        </div>
-        {/* <p>{user?.name}</p> */}
+              <SheetHeader className="border-b border-ivory/10 px-6 py-5">
+                <SheetTitle className="font-display text-xl text-ivory">
+                  Punjabi Rishtey
+                </SheetTitle>
+              </SheetHeader>
 
-        {/* Mobile Sidebar */}
-        {isSidebarOpen && (
-          <>
-            <div
-              className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm"
-              onClick={() => setIsSidebarOpen(false)}
-            />
-            <div
-              className="fixed right-0 top-0 h-full w-64 bg-gradient-to-b from-[#4F2F1D] to-[#2B1810] p-4 shadow-lg z-50"
-              style={{
-                transform: isSidebarOpen ? "translateX(0)" : "translateX(100%)",
-                transition: "transform 0.3s ease-in-out",
-              }}
-            >
-              <div className="flex justify-end">
-                <button
-                  className="text-[#E5D3C8] p-2"
-                  onClick={() => setIsSidebarOpen(false)}
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <div className="flex flex-col space-y-4 mt-8">
-                {navItems.map((item, index) => (
+              <nav className="flex flex-col gap-1 overflow-y-auto px-3 py-4">
+                {navItems.map((item) => (
                   <button
-                    key={index}
-                    onClick={() => handleNavClick(item)}
-                    className="text-[#E5D3C8] hover:text-white transition duration-300 text-left py-2"
+                    key={item.label}
+                    type="button"
+                    onClick={() => handleNav(item)}
+                    className="rounded-lg px-3 py-3 text-left text-base font-medium text-ivory/90 transition-colors hover:bg-white/10 hover:text-white"
                   >
                     {item.label}
                   </button>
                 ))}
-                {!isAuthenticated && (
-                  <>
-                    <button
-                      className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300 mt-4"
-                      onClick={() => {
-                        navigate("/login");
-                        setIsSidebarOpen(false);
-                      }}
+              </nav>
+
+              <div className="mt-auto border-t border-ivory/10 px-6 py-5">
+                {isAuthenticated ? (
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      className="border-ivory/70 bg-transparent text-ivory hover:bg-ivory hover:text-brown"
+                      onClick={handleMobileProfile}
+                    >
+                      My Profile
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-ivory/80 hover:bg-white/10 hover:text-white"
+                      onClick={handleMobileLogout}
+                    >
+                      Log out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      className="border-ivory/70 bg-transparent text-ivory hover:bg-ivory hover:text-brown"
+                      onClick={() => handleMobileAuthNav("/login")}
                     >
                       Login
-                    </button>
-                    <button
-                      className="bg-transparent border-2 border-[#E5D3C8] text-[#E5D3C8] px-4 py-2 rounded hover:bg-[#E5D3C8] hover:text-[#4F2F1D] transition duration-300"
-                      onClick={() => {
-                        navigate("/signup");
-                        setIsSidebarOpen(false);
-                      }}
-                    >
+                    </Button>
+                    <Button onClick={() => handleMobileAuthNav("/signup")}>
                       Sign Up
-                    </button>
-                  </>
+                    </Button>
+                  </div>
                 )}
               </div>
-            </div>
-          </>
-        )}
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
-    </div>
+    </header>
   );
-};
-
-export default Header;
+}

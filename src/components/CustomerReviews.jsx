@@ -1,13 +1,31 @@
 import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import axios from "axios";
-import { apiUrl } from "../config/constants";
+import { apiUrl } from "@/config/constants";
 
-const CustomerReviews = () => {
+function StarRow({ rating, className = "" }) {
+  const count = Math.max(0, Math.min(5, Number(rating) || 0));
+  return (
+    <div
+      className={`flex gap-0.5 ${className}`}
+      aria-label={`${count} out of 5 stars`}
+    >
+      {[...Array(count)].map((_, i) => (
+        <Star
+          key={i}
+          className="size-3.5 text-maroon"
+          fill="currentColor"
+          aria-hidden
+        />
+      ))}
+    </div>
+  );
+}
+
+export default function CustomerReviews() {
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState("");
-  const [selectedReview, setSelectedReview] = useState(null);
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -32,299 +50,75 @@ const CustomerReviews = () => {
     fetchReviews();
   }, []);
 
-  const cardVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    hover: {
-      scale: 1.05,
-      backgroundColor: "#FFB6C1",
-      transition: { duration: 0.3 },
-    },
-  };
-
-  const modalVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
-    exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
-  };
-
-  const overlayVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 0.5, transition: { duration: 0.3 } },
-    exit: { opacity: 0, transition: { duration: 0.2 } },
-  };
-
-  const openModal = (review) => {
-    setSelectedReview(review);
-  };
-
-  const closeModal = () => {
-    setSelectedReview(null);
-  };
-
   return (
-    <div className="bg-[#FCF9F2] py-8 sm:py-12 overflow-hidden">
-      <div className="container mx-auto px-4 sm:px-6 text-center">
-        <h2
-          className="text-3xl sm:text-4xl md:text-5xl mb-6 sm:mb-8 md:mb-12 text-[#111111]"
-          style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-        >
-          Everybody Loves Us
-        </h2>
-        <p
-          className="text-base sm:text-lg md:text-xl text-[#333333] mb-6 sm:mb-8 md:mb-12 max-w-2xl mx-auto"
-          style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-        >
-          Check out some of our recent product reviews.
-        </p>
+    <section className="overflow-hidden border-t border-border bg-paper py-20 sm:py-28">
+      <div className="mx-auto max-w-5xl px-6 sm:px-10">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="mb-3 text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">
+            Voices
+          </p>
+          <h2 className="font-display text-3xl font-semibold text-brown sm:text-4xl">
+            What families say
+          </h2>
+          <p className="mt-4 mb-12 text-base leading-relaxed text-muted-foreground sm:mb-14 sm:text-lg">
+            Recent words from people who found their match on Punjabi Rishtey.
+          </p>
+        </div>
 
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error ? (
+          <p className="mb-4 text-center text-sm text-destructive">{error}</p>
+        ) : null}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 md:gap-11 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 items-stretch gap-6 sm:grid-cols-2 sm:gap-7 md:grid-cols-3 md:gap-8">
           {reviews.length === 0 && !error ? (
-            <p className="text-gray-500 col-span-1 sm:col-span-2 md:col-span-3">
+            <p className="col-span-full text-center text-sm text-muted-foreground">
               No reviews available
             </p>
           ) : (
             reviews.map((review, index) => (
-              <motion.div
-                key={index}
-                variants={cardVariants}
-                initial="initial"
-                animate="animate"
-                whileHover="hover"
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-                className="bg-[#FCF9F2] px-4 py-6 rounded-lg shadow-lg border border-[#D1BFA7]"
+              <motion.article
+                key={`${review.author}-${index}`}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.5, delay: index * 0.07 }}
+                className="group relative flex h-full flex-col overflow-hidden rounded-sm border border-border bg-ivory shadow-[0_14px_36px_-20px_rgba(79,47,29,0.4)] transition-[border-color,box-shadow] hover:border-maroon/30 hover:shadow-[0_18px_40px_-18px_rgba(79,47,29,0.45)]"
               >
-                {/* Star Rating */}
-                <div className="flex justify-center mb-3 space-x-1">
-                  {[...Array(review.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="text-[#FF3D57] w-5 sm:w-6 h-5 sm:h-6"
-                      fill="currentColor"
-                    />
-                  ))}
-                </div>
+                <div
+                  className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-muted/80 to-transparent"
+                  aria-hidden
+                />
+                <div
+                  className="absolute inset-y-0 left-0 w-0.5 bg-maroon/70 transition-[width] group-hover:w-1"
+                  aria-hidden
+                />
 
-                {/* Rating Number */}
-                <p className="text-2xl sm:text-3xl font-bold text-[#111111]">
-                  {review.rating}.0
-                </p>
-
-                {/* Title */}
-                <h3
-                  className="text-xl sm:text-2xl text-[#111111] mt-2"
-                  style={{
-                    fontFamily: "'Tiempos Headline', serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {review.title}
-                </h3>
-
-                {/* Review Text */}
-                <p
-                  className="text-[#333333] text-sm sm:text-base mt-2"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {review.text.length > 100
-                    ? `${review.text.substring(0, 100)}... `
-                    : `${review.text} `}
+                <div className="relative flex h-full flex-col px-6 pb-6 pt-7 sm:px-7 sm:pb-7 sm:pt-8">
                   <span
-                    className="text-[#FF3D57] cursor-pointer hover:underline"
-                    onClick={() => openModal(review)}
+                    className="font-display text-5xl leading-none text-maroon/25 select-none sm:text-6xl"
+                    aria-hidden
                   >
-                    Read More
+                    &ldquo;
                   </span>
-                </p>
 
-                {/* Author */}
-                <p className="text-sm text-gray-600 mt-4 font-semibold">
-                  — {review.author}
-                </p>
-              </motion.div>
+                  <blockquote className="mt-2 flex-1">
+                    <p className="font-display text-xl font-medium leading-snug tracking-tight text-brown sm:text-[1.35rem] sm:leading-snug">
+                      {review.text}
+                    </p>
+                  </blockquote>
+
+                  <footer className="mt-8 border-t border-border pt-4">
+                    <p className="font-display text-lg font-semibold text-brown">
+                      {review.author}
+                    </p>
+                    <StarRow rating={review.rating} className="mt-2" />
+                  </footer>
+                </div>
+              </motion.article>
             ))
           )}
         </div>
       </div>
-
-      {/* Modal */}
-      <AnimatePresence>
-        {selectedReview && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              variants={overlayVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed inset-0 bg-black z-50"
-              onClick={closeModal}
-            />
-            {/* Modal Content */}
-            <motion.div
-              variants={modalVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-2xl p-6 sm:p-8 w-[90%] sm:w-[80%] md:w-[50%] max-w-lg z-50 max-h-[80vh] overflow-y-auto"
-            >
-              <div className="relative">
-                {/* Close Button */}
-                <button
-                  onClick={closeModal}
-                  className="absolute top-0 right-0 text-[#FF3D57] hover:text-[#FF5A71] text-xl font-bold"
-                >
-                  &times;
-                </button>
-                {/* Modal Header */}
-                <h3
-                  className="text-2xl sm:text-3xl text-[#111111] mb-4"
-                  style={{
-                    fontFamily: "'Tiempos Headline', serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  {selectedReview.title}
-                </h3>
-                {/* Star Rating */}
-                <div className="flex mb-4">
-                  {[...Array(selectedReview.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="text-[#FF3D57] w-5 sm:w-6 h-5 sm:h-6"
-                      fill="currentColor"
-                    />
-                  ))}
-                </div>
-                {/* Full Review Text */}
-                <p
-                  className="text-[#333333] text-sm sm:text-base leading-relaxed"
-                  style={{
-                    fontFamily: "'Modern Era', sans-serif",
-                    fontWeight: 400,
-                  }}
-                >
-                  &ldquo;{selectedReview.text}&rdquo;
-                </p>
-                {/* Author */}
-                <p className="text-sm text-gray-600 mt-4 font-semibold">
-                  — {selectedReview.author}
-                </p>
-                {/* Decorative Accent */}
-                <div className="absolute -bottom-4 -right-4 w-12 sm:w-16 h-12 sm:h-16 bg-[#FFE8EB] rounded-full -z-10" />
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+    </section>
   );
-};
-
-export default CustomerReviews;
-
-// import React, { useState, useEffect } from "react";
-// import { Star } from "lucide-react";
-// import { motion } from "framer-motion";
-
-// const CustomerReviews = () => {
-//   const [reviews, setReviews] = useState([]);
-
-//   useEffect(() => {
-//     fetch("https://backend-nm1z.onrender.com/api/testimonials/all")
-//       .then(response => response.json())
-//       .then(data => {
-//         const formattedReviews = data.map(item => ({
-//           rating: 5,  // Assuming a static rating as the API response does not include a rating
-//           title: "Featured Review",
-//           text: item.message,
-//           author: item.user_name,
-//           image: item.image_url || `https://backend-nm1z.onrender.com${item.image}`, // Handling different image key scenarios
-//         }));
-//         setReviews(formattedReviews);
-//       })
-//       .catch(error => console.error("Failed to fetch reviews:", error));
-//   }, []);
-
-//   const cardVariants = {
-//     initial: { opacity: 0, y: 20 },
-//     animate: { opacity: 1, y: 0 },
-//     hover: {
-//       scale: 1.05,
-//       backgroundColor: '#FFB6C1',
-//       transition: { duration: 0.3 },
-//     },
-//   };
-
-//   return (
-//     <div className="bg-[#FCF9F2] py-12 overflow-hidden">
-//       <div className="container mx-auto px-4 text-center">
-//         <h2
-//           className="text-3xl sm:text-5xl mb-6 sm:mb-12 text-[#111111]"
-//           style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-//         >
-//           Everybody Loves Us
-//         </h2>
-//         <p
-//           className="text-lg sm:text-xl text-[#333333] mb-8 sm:mb-12"
-//           style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-//         >
-//           Check out some of our recent product reviews.
-//         </p>
-
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-11 max-w-7xl mx-auto">
-//           {reviews.map((review, index) => (
-//             <motion.div
-//               key={index}
-//               variants={cardVariants}
-//               initial="initial"
-//               animate="animate"
-//               whileHover="hover"
-//               transition={{ duration: 0.3, delay: index * 0.1 }}
-//               className="bg-[#FCF9F2] px-4 py-6 rounded-lg shadow-lg border border-[#D1BFA7]"
-//             >
-//               {/* Star Rating */}
-//               <div className="flex justify-center mb-3 space-x-1">
-//                 {[...Array(review.rating)].map((_, i) => (
-//                   <Star key={i} className="text-[#FF3D57] w-6 h-6" fill="currentColor" />
-//                 ))}
-//               </div>
-
-//               {/* Rating Number */}
-//               <p className="text-3xl font-bold text-[#111111]">{review.rating}.0</p>
-
-//               {/* Title */}
-//               <h3
-//                 className="text-2xl text-[#111111]"
-//                 style={{ fontFamily: "'Tiempos Headline', serif", fontWeight: 400 }}
-//               >
-//                 {review.title}
-//               </h3>
-
-//               {/* Review Text */}
-//               <p
-//                 className="text-[#333333]"
-//                 style={{ fontFamily: "'Modern Era', sans-serif", fontWeight: 400 }}
-//               >
-//                 {review.text}{" "}
-//                 <span className="text-[#FF3D57] cursor-pointer hover:underline">
-//                   Read More
-//                 </span>
-//               </p>
-
-//               {/* Author */}
-//               <p className="text-sm text-gray-600 mt-4 font-semibold">— {review.author}</p>
-//             </motion.div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default CustomerReviews;
+}
