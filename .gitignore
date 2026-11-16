@@ -17,7 +17,6 @@ dist-ssr
 output
 
 # Editor directories and files
-.vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -26,3 +25,4 @@ output
 *.njsproj
 *.sln
 *.sw?
+config.bat
