@@ -75,9 +75,7 @@ const FindPartner = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
-  const urlHydratedRef = useRef(false);
-  const skipNextUrlSyncRef = useRef(false);
-  const skipPageResetOnDebounceRef = useRef(false);
+  const suppressUrlSyncRef = useRef(0);
   const lastCommittedSearchRef = useRef("");
   const didRefreshUserRef = useRef(false);
 
@@ -138,8 +136,7 @@ const FindPartner = () => {
 
   // Hydrate filter/search/page from URL (back/forward and deep links)
   useEffect(() => {
-    skipNextUrlSyncRef.current = true;
-    skipPageResetOnDebounceRef.current = true;
+    suppressUrlSyncRef.current += 1;
     const queryParams = getQueryParams();
     lastCommittedSearchRef.current = queryParams.search;
     setCurrentPage(queryParams.page);
@@ -165,26 +162,19 @@ const FindPartner = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Commit search to page 1 only after debounce (not on each keystroke)
+  // Commit search to page 1 only after debounce when the input has settled
   useEffect(() => {
-    if (skipPageResetOnDebounceRef.current) {
-      skipPageResetOnDebounceRef.current = false;
-      lastCommittedSearchRef.current = debouncedSearchTerm;
-      return;
-    }
+    if (suppressUrlSyncRef.current > 0) return;
+    if (searchTerm !== debouncedSearchTerm) return;
     if (debouncedSearchTerm === lastCommittedSearchRef.current) return;
     lastCommittedSearchRef.current = debouncedSearchTerm;
     setCurrentPage(1);
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, searchTerm]);
 
   // Replace history for filter/search edits; pagination uses push separately
   useEffect(() => {
-    if (!urlHydratedRef.current) {
-      urlHydratedRef.current = true;
-      return;
-    }
-    if (skipNextUrlSyncRef.current) {
-      skipNextUrlSyncRef.current = false;
+    if (suppressUrlSyncRef.current > 0) {
+      suppressUrlSyncRef.current -= 1;
       return;
     }
     // Wait until debounced search matches the input so we never write a stale ?search=
@@ -439,7 +429,7 @@ const FindPartner = () => {
   };
 
   const paginate = (pageNumber) => {
-    skipNextUrlSyncRef.current = true;
+    suppressUrlSyncRef.current += 1;
     setCurrentPage(pageNumber);
     const searchForUrl =
       searchTerm !== debouncedSearchTerm ? searchTerm : debouncedSearchTerm;
