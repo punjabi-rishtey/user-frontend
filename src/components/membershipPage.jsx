@@ -493,15 +493,27 @@ const MembershipPage = () => {
                   }}
                 >
                   {formatPlanPrice(plan.price)}
-                  <span
-                    className="text-[#6B4132] text-lg ml-1"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    / {formatDuration(plan.duration)}
-                  </span>
+                  {plan.isLifetime ? (
+                    <span
+                      className="text-[#6B4132] text-lg ml-1 block sm:inline sm:ml-2 mt-1 sm:mt-0"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
+                    >
+                      One-time, no renewal
+                    </span>
+                  ) : (
+                    <span
+                      className="text-[#6B4132] text-lg ml-1"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
+                    >
+                      / {formatDuration(plan.duration)}
+                    </span>
+                  )}
                 </p>
 
                 <ul className="space-y-4 mb-8">
@@ -594,9 +606,11 @@ const MembershipPage = () => {
                       }}
                     >
                       Pay exactly {formatPlanPrice(selectedPlan.price)}
-                      <span className="block mt-1 text-sm text-[#6B4132]">
-                        {formatDuration(selectedPlan.duration)} for one user
-                      </span>
+                      {!selectedPlan.isLifetime && (
+                        <span className="block mt-1 text-sm text-[#6B4132]">
+                          {formatDuration(selectedPlan.duration)} for one user
+                        </span>
+                      )}
                     </h4>
 
                     <div className="flex justify-center mb-4">

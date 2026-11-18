@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import { useAuth } from "../context/AuthContext";
+import { hasActiveApprovedMembership } from "../utils/membershipExpiry";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -24,12 +25,7 @@ const Header = () => {
   };
 
   const handleMembershipPlanClick = () => {
-    const expiryDate = user?.metadata?.exp_date
-      ? new Date(user.metadata.exp_date)
-      : null;
-    const hasActiveMembership =
-      user?.status === "Approved" &&
-      (!expiryDate || expiryDate >= new Date());
+    const hasActiveMembership = hasActiveApprovedMembership(user);
 
     if (!isAuthenticated) {
       navigate("/membership");

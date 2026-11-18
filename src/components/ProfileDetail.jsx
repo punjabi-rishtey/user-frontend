@@ -17,6 +17,7 @@ import {
   FaEnvelope,
 } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext";
+import { isSubscriptionExpired } from "../utils/membershipExpiry";
 import axios from "axios";
 import {
   apiUrl,
@@ -310,10 +311,9 @@ const ProfileDetail = () => {
   }
 
   // Subscription status check
-  const isSubscriptionExpired =
-    user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+  const subscriptionExpired = isSubscriptionExpired(user);
 
-  if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
+  if (user && (user.status !== "Approved" || subscriptionExpired)) {
     return (
       <div className="min-h-screen bg-[#FCF9F2] flex flex-col">
         <Header />
@@ -326,7 +326,7 @@ const ProfileDetail = () => {
                 fontWeight: 400,
               }}
             >
-              {isSubscriptionExpired
+              {subscriptionExpired
                 ? "Your subscription has expired"
                 : "You don't have any active membership"}
             </h2>
@@ -339,7 +339,7 @@ const ProfileDetail = () => {
                   fontWeight: 400,
                 }}
               >
-                {isSubscriptionExpired ? "Renew Membership" : "Buy Membership"}
+                {subscriptionExpired ? "Renew Membership" : "Buy Membership"}
               </button>
             </div>
           </div>

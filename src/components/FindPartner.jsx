@@ -10,6 +10,7 @@ import Header from "./Header";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
+import { isSubscriptionExpired } from "../utils/membershipExpiry";
 
 const resolveManglikFilterFromUrl = (value) => {
   if (!value) return "";
@@ -656,10 +657,9 @@ const FindPartner = () => {
   }
 
   // Membership status check (after profile completeness)
-  const isSubscriptionExpired =
-    user?.metadata?.exp_date && new Date() > new Date(user.metadata.exp_date);
+  const subscriptionExpired = isSubscriptionExpired(user);
 
-  if (user && (user.status !== "Approved" || isSubscriptionExpired)) {
+  if (user && (user.status !== "Approved" || subscriptionExpired)) {
     return (
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
         <Header />
@@ -672,7 +672,7 @@ const FindPartner = () => {
                 fontWeight: 400,
               }}
             >
-              {isSubscriptionExpired
+              {subscriptionExpired
                 ? "Your subscription has expired"
                 : "You don't have any active membership"}
             </h2>
@@ -685,7 +685,7 @@ const FindPartner = () => {
                   fontWeight: 400,
                 }}
               >
-                {isSubscriptionExpired ? "Renew Membership" : "Buy Membership"}
+                {subscriptionExpired ? "Renew Membership" : "Buy Membership"}
               </button>
             </div>
           </div>
