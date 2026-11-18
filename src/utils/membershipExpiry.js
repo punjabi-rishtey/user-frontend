@@ -2,42 +2,18 @@ export function parseIsLifetimeFlag(value) {
   return value === true || value === "true" || value === 1 || value === "1";
 }
 
-/**
- * Whether the signed-in member already has lifetime access.
- * Uses isLifetime from the user profile or subscription payload only.
- */
-export function memberHasLifetimeAccess(user, subscriptionRecord) {
-  if (
-    user?.status === "Approved" &&
-    (parseIsLifetimeFlag(user?.isLifetime) ||
-      parseIsLifetimeFlag(user?.hasLifetimeAccess) ||
-      parseIsLifetimeFlag(user?.metadata?.isLifetime))
-  ) {
-    return true;
+/** Whether the signed-in member already has lifetime access (GET /api/users/:id `membership`). */
+export function memberHasLifetimeAccess(user) {
+  const membership = user?.membership;
+
+  if (membership) {
+    return (
+      parseIsLifetimeFlag(membership.hasLifetimeAccess) ||
+      parseIsLifetimeFlag(membership.isLifetime)
+    );
   }
 
-  if (!subscriptionRecord) {
-    return false;
-  }
-
-  const subscription = subscriptionRecord?.data ?? subscriptionRecord;
-
-  if (!parseIsLifetimeFlag(subscription?.isLifetime)) {
-    return false;
-  }
-
-  if (user?.status !== "Approved") {
-    return false;
-  }
-
-  if (
-    subscription.reviewStatus &&
-    String(subscription.reviewStatus).toLowerCase() !== "approved"
-  ) {
-    return false;
-  }
-
-  return parseMembershipExpiry(user?.metadata?.exp_date) === null;
+  return false;
 }
 
 export function isRenewableMembershipPlan(plan) {

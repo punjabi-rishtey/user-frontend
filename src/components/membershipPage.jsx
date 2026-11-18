@@ -9,14 +9,12 @@ import { authApi, isSessionExpiryError } from "../config/authClient";
 import {
   getLifetimeDowngradeMessage,
   memberHasLifetimeAccess,
-  parseIsLifetimeFlag,
 } from "../utils/membershipExpiry";
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [membershipAccessLoading, setMembershipAccessLoading] = useState(false);
-  const [memberHasLifetime, setMemberHasLifetime] = useState(false);
+  const [membershipProfileLoaded, setMembershipProfileLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -52,11 +50,27 @@ const MembershipPage = () => {
     return `${numericDuration} month${numericDuration === 1 ? "" : "s"}`;
   };
 
-  // Refresh user data when component mounts
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshUser();
+    if (!isAuthenticated) {
+      setMembershipProfileLoaded(false);
+      return;
     }
+
+    let cancelled = false;
+
+    const loadMembershipProfile = async () => {
+      setMembershipProfileLoaded(false);
+      await refreshUser();
+      if (!cancelled) {
+        setMembershipProfileLoaded(true);
+      }
+    };
+
+    loadMembershipProfile();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, refreshUser]);
 
   // Improved authentication check - prevent premature redirects
@@ -124,51 +138,9 @@ const MembershipPage = () => {
     fetchMemberships();
   }, []);
 
-  useEffect(() => {
-    const userId = user?.id || user?._id;
-
-    if (!isAuthenticated || !userId) {
-      setMemberHasLifetime(false);
-      setMembershipAccessLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-
-    const resolveLifetimeAccess = async () => {
-      setMembershipAccessLoading(true);
-
-      try {
-        const response = await authApi.get(
-          apiUrl(`/api/users/subscription/${userId}`)
-        );
-        const subscription = response.data?.data ?? null;
-
-        if (!cancelled) {
-          setMemberHasLifetime(memberHasLifetimeAccess(user, subscription));
-        }
-      } catch (err) {
-        if (isSessionExpiryError(err)) {
-          return;
-        }
-
-        if (!cancelled) {
-          setMemberHasLifetime(memberHasLifetimeAccess(user, null));
-        }
-      } finally {
-        if (!cancelled) {
-          setMembershipAccessLoading(false);
-        }
-      }
-    };
-
-    setMemberHasLifetime(memberHasLifetimeAccess(user, null));
-    resolveLifetimeAccess();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated, user, user?.id, user?._id, user?.isLifetime]);
+  const memberHasLifetime = memberHasLifetimeAccess(user);
+  const membershipAccessLoading =
+    isAuthenticated && (!membershipProfileLoaded || !user?.membership);
 
   // Clean up preview URL when component unmounts
   useEffect(() => {
@@ -189,7 +161,7 @@ const MembershipPage = () => {
       return;
     }
 
-    if (memberHasLifetime || memberHasLifetimeAccess(user, null)) {
+    if (memberHasLifetime) {
       setError(getLifetimeDowngradeMessage());
       return;
     }
@@ -279,7 +251,7 @@ const MembershipPage = () => {
       return;
     }
 
-    if (memberHasLifetime || memberHasLifetimeAccess(user, null)) {
+    if (memberHasLifetime) {
       setError(getLifetimeDowngradeMessage());
       return;
     }
@@ -374,20 +346,10 @@ const MembershipPage = () => {
     exit: { opacity: 0 },
   };
 
-  const hideRenewablePlans =
-    isAuthenticated && (membershipAccessLoading || memberHasLifetime);
-
-  const visiblePlans = plans.filter((plan) => {
-    if (!hideRenewablePlans) {
-      return true;
-    }
-
-    if (memberHasLifetime) {
-      return false;
-    }
-
-    return parseIsLifetimeFlag(plan.isLifetime);
-  });
+  const visiblePlans =
+    membershipAccessLoading || memberHasLifetime
+      ? []
+      : plans;
 
   // Don't render anything substantial until we've checked authentication
   if (!authChecked) {
