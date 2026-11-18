@@ -6,10 +6,17 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { apiUrl } from "../config/constants";
 import { authApi, isSessionExpiryError } from "../config/authClient";
+import {
+  getLifetimeDowngradeMessage,
+  memberHasLifetimeAccess,
+  parseIsLifetimeFlag,
+} from "../utils/membershipExpiry";
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [membershipAccessLoading, setMembershipAccessLoading] = useState(false);
+  const [memberHasLifetime, setMemberHasLifetime] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -26,7 +33,7 @@ const MembershipPage = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  const { isAuthenticated, refreshUser } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
 
   const formatPlanPrice = (price) =>
     `₹${Number(price || 0).toLocaleString("en-IN")}`;
@@ -117,6 +124,52 @@ const MembershipPage = () => {
     fetchMemberships();
   }, []);
 
+  useEffect(() => {
+    const userId = user?.id || user?._id;
+
+    if (!isAuthenticated || !userId) {
+      setMemberHasLifetime(false);
+      setMembershipAccessLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const resolveLifetimeAccess = async () => {
+      setMembershipAccessLoading(true);
+
+      try {
+        const response = await authApi.get(
+          apiUrl(`/api/users/subscription/${userId}`)
+        );
+        const subscription = response.data?.data ?? null;
+
+        if (!cancelled) {
+          setMemberHasLifetime(memberHasLifetimeAccess(user, subscription));
+        }
+      } catch (err) {
+        if (isSessionExpiryError(err)) {
+          return;
+        }
+
+        if (!cancelled) {
+          setMemberHasLifetime(memberHasLifetimeAccess(user, null));
+        }
+      } finally {
+        if (!cancelled) {
+          setMembershipAccessLoading(false);
+        }
+      }
+    };
+
+    setMemberHasLifetime(memberHasLifetimeAccess(user, null));
+    resolveLifetimeAccess();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, user, user?.id, user?._id, user?.isLifetime]);
+
   // Clean up preview URL when component unmounts
   useEffect(() => {
     return () => {
@@ -129,6 +182,15 @@ const MembershipPage = () => {
     if (!isAuthenticated) {
       setError("You must be logged in to subscribe to a plan");
       navigate("/login");
+      return;
+    }
+
+    if (membershipAccessLoading) {
+      return;
+    }
+
+    if (memberHasLifetime || memberHasLifetimeAccess(user, null)) {
+      setError(getLifetimeDowngradeMessage());
       return;
     }
 
@@ -209,6 +271,16 @@ const MembershipPage = () => {
 
     if (!formData.membershipId || !selectedPlan) {
       setError("Please select a membership plan.");
+      return;
+    }
+
+    if (membershipAccessLoading) {
+      setError("Checking your membership. Please try again.");
+      return;
+    }
+
+    if (memberHasLifetime || memberHasLifetimeAccess(user, null)) {
+      setError(getLifetimeDowngradeMessage());
       return;
     }
 
@@ -301,6 +373,21 @@ const MembershipPage = () => {
     visible: { opacity: 1 },
     exit: { opacity: 0 },
   };
+
+  const hideRenewablePlans =
+    isAuthenticated && (membershipAccessLoading || memberHasLifetime);
+
+  const visiblePlans = plans.filter((plan) => {
+    if (!hideRenewablePlans) {
+      return true;
+    }
+
+    if (memberHasLifetime) {
+      return false;
+    }
+
+    return parseIsLifetimeFlag(plan.isLifetime);
+  });
 
   // Don't render anything substantial until we've checked authentication
   if (!authChecked) {
@@ -425,13 +512,33 @@ const MembershipPage = () => {
           </div>
         )}
 
-        {loading ? (
+        {memberHasLifetime && (
+          <div className="mb-8 max-w-3xl mx-auto bg-[#F5EDE7] border border-[#4F2F1D]/20 text-[#4F2F1D] p-4 rounded-lg text-center">
+            {getLifetimeDowngradeMessage()}{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/current-plan")}
+              className="underline text-[#990000] hover:text-[#800000] ml-1"
+            >
+              View your current plan
+            </button>
+          </div>
+        )}
+
+        {loading || (isAuthenticated && membershipAccessLoading) ? (
           <p className="text-center text-[#4F2F1D] text-xl">
-            Loading membership plans...
+            {loading
+              ? "Loading membership plans..."
+              : "Checking your membership..."}
+          </p>
+        ) : visiblePlans.length === 0 && memberHasLifetime ? (
+          <p className="text-center text-[#6B4132] text-lg max-w-2xl mx-auto">
+            You already have lifetime membership. No additional plan purchase is
+            required.
           </p>
         ) : (
           <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto">
-            {plans.map((plan, index) => (
+            {visiblePlans.map((plan, index) => (
               <motion.div
                 key={index}
                 variants={cardVariants}
