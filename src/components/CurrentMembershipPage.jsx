@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom"; // Added for navigation
+import { useNavigate } from "react-router-dom";
 import { apiUrl } from "../config/constants";
 import { authApi, isSessionExpiryError } from "../config/authClient";
+import {
+  formatMembershipExpiryDate,
+  getMembershipDaysRemaining,
+  hasActiveApprovedMembership,
+} from "../utils/membershipExpiry";
 
 const CurrentMembershipPage = () => {
   const { user } = useAuth();
-  const [userStatusDetails, setUserStatusDetails] = useState();
-  const [daysRemaining, setDaysRemaining] = useState();
-  const navigate = useNavigate(); // Hook for navigation
-  const expiryDate = user?.metadata?.exp_date
-    ? new Date(user.metadata.exp_date)
-    : null;
-  const hasActiveMembership =
-    user?.status === "Approved" &&
-    (!expiryDate || expiryDate >= new Date());
+  const [userStatusDetails, setUserStatusDetails] = useState(null);
+  const [daysRemaining, setDaysRemaining] = useState(null);
+  const navigate = useNavigate();
+  const hasActiveMembership = hasActiveApprovedMembership(user);
 
   useEffect(() => {
     if (user && !hasActiveMembership) {
@@ -33,8 +33,7 @@ const CurrentMembershipPage = () => {
         console.log(">fetching user subscription details: ", response.data);
         if (response.data) {
           const details = response.data.data;
-          const expiry = details.expiresAt;
-          setUserStatusDetails(expiry);
+          setUserStatusDetails(details?.expiresAt ?? null);
         }
       } catch (err) {
         if (isSessionExpiryError(err)) {
@@ -48,36 +47,19 @@ const CurrentMembershipPage = () => {
       console.log("userId: ", userId);
       fetchUserSubscriptionDetails(userId);
     }
-  }, [user?.id]);
+  }, [user?.id, user?._id]);
 
   useEffect(() => {
-    const calculateDaysRemaining = () => {
-      const expiryDate = new Date(userStatusDetails);
-      const today = new Date();
-      const diffTime = expiryDate - today;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setDaysRemaining(diffDays);
-    };
-
-    if (userStatusDetails) {
-      calculateDaysRemaining();
-    }
+    setDaysRemaining(getMembershipDaysRemaining(userStatusDetails));
   }, [userStatusDetails]);
 
-  function formatDateToDDMMYYYY(date) {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0"); // Months are 0-based
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
+  const expiryLabel = formatMembershipExpiryDate(userStatusDetails);
 
   return (
     <div>
       <div className="max-w-7xl mx-auto mt-10 px-4">
-        {/* Back Button */}
         <button
-          onClick={() => navigate("/")} // Adjust route as needed
+          onClick={() => navigate("/")}
           className="mb-6 py-2 px-4 text-[#E5D3C8] bg-[#4F2F1D] rounded-md hover:bg-[#6B4132] transition-colors"
           style={{
             fontFamily: "'Modern Era', sans-serif",
@@ -105,26 +87,30 @@ const CurrentMembershipPage = () => {
                 fontWeight: 400,
               }}
             >
-              Expires at: {formatDateToDDMMYYYY(userStatusDetails)}
+              {expiryLabel === "No renewal date"
+                ? expiryLabel
+                : `Expires at: ${expiryLabel}`}
             </h3>
-            <p
-              className="text-3xl mb-2 text-[#4F2F1D]"
-              style={{
-                fontFamily: "'Tiempos Headline', serif",
-                fontWeight: 400,
-              }}
-            >
-              {daysRemaining}
-              <span
-                className="text-[#6B4132] text-lg ml-1"
+            {daysRemaining != null && (
+              <p
+                className="text-3xl mb-2 text-[#4F2F1D]"
                 style={{
-                  fontFamily: "'Modern Era', sans-serif",
+                  fontFamily: "'Tiempos Headline', serif",
                   fontWeight: 400,
                 }}
               >
-                Days Remaining
-              </span>
-            </p>
+                {daysRemaining}
+                <span
+                  className="text-[#6B4132] text-lg ml-1"
+                  style={{
+                    fontFamily: "'Modern Era', sans-serif",
+                    fontWeight: 400,
+                  }}
+                >
+                  Days Remaining
+                </span>
+              </p>
+            )}
           </div>
         </div>
       </div>

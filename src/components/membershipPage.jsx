@@ -6,10 +6,15 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { apiUrl } from "../config/constants";
 import { authApi, isSessionExpiryError } from "../config/authClient";
+import {
+  getLifetimeDowngradeMessage,
+  memberHasLifetimeAccess,
+} from "../utils/membershipExpiry";
 
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [membershipProfileLoaded, setMembershipProfileLoaded] = useState(false);
   const [error, setError] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -26,7 +31,7 @@ const MembershipPage = () => {
   const [authChecked, setAuthChecked] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
-  const { isAuthenticated, refreshUser } = useAuth();
+  const { user, isAuthenticated, refreshUser } = useAuth();
 
   const formatPlanPrice = (price) =>
     `₹${Number(price || 0).toLocaleString("en-IN")}`;
@@ -45,11 +50,27 @@ const MembershipPage = () => {
     return `${numericDuration} month${numericDuration === 1 ? "" : "s"}`;
   };
 
-  // Refresh user data when component mounts
   useEffect(() => {
-    if (isAuthenticated) {
-      refreshUser();
+    if (!isAuthenticated) {
+      setMembershipProfileLoaded(false);
+      return;
     }
+
+    let cancelled = false;
+
+    const loadMembershipProfile = async () => {
+      setMembershipProfileLoaded(false);
+      await refreshUser();
+      if (!cancelled) {
+        setMembershipProfileLoaded(true);
+      }
+    };
+
+    loadMembershipProfile();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isAuthenticated, refreshUser]);
 
   // Improved authentication check - prevent premature redirects
@@ -117,6 +138,10 @@ const MembershipPage = () => {
     fetchMemberships();
   }, []);
 
+  const memberHasLifetime = memberHasLifetimeAccess(user);
+  const membershipAccessLoading =
+    isAuthenticated && (!membershipProfileLoaded || !user?.membership);
+
   // Clean up preview URL when component unmounts
   useEffect(() => {
     return () => {
@@ -129,6 +154,15 @@ const MembershipPage = () => {
     if (!isAuthenticated) {
       setError("You must be logged in to subscribe to a plan");
       navigate("/login");
+      return;
+    }
+
+    if (membershipAccessLoading) {
+      return;
+    }
+
+    if (memberHasLifetime) {
+      setError(getLifetimeDowngradeMessage());
       return;
     }
 
@@ -209,6 +243,16 @@ const MembershipPage = () => {
 
     if (!formData.membershipId || !selectedPlan) {
       setError("Please select a membership plan.");
+      return;
+    }
+
+    if (membershipAccessLoading) {
+      setError("Checking your membership. Please try again.");
+      return;
+    }
+
+    if (memberHasLifetime) {
+      setError(getLifetimeDowngradeMessage());
       return;
     }
 
@@ -301,6 +345,11 @@ const MembershipPage = () => {
     visible: { opacity: 1 },
     exit: { opacity: 0 },
   };
+
+  const visiblePlans =
+    membershipAccessLoading || memberHasLifetime
+      ? []
+      : plans;
 
   // Don't render anything substantial until we've checked authentication
   if (!authChecked) {
@@ -425,13 +474,33 @@ const MembershipPage = () => {
           </div>
         )}
 
-        {loading ? (
+        {memberHasLifetime && (
+          <div className="mb-8 max-w-3xl mx-auto bg-[#F5EDE7] border border-[#4F2F1D]/20 text-[#4F2F1D] p-4 rounded-lg text-center">
+            {getLifetimeDowngradeMessage()}{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/current-plan")}
+              className="underline text-[#990000] hover:text-[#800000] ml-1"
+            >
+              View your current plan
+            </button>
+          </div>
+        )}
+
+        {loading || (isAuthenticated && membershipAccessLoading) ? (
           <p className="text-center text-[#4F2F1D] text-xl">
-            Loading membership plans...
+            {loading
+              ? "Loading membership plans..."
+              : "Checking your membership..."}
+          </p>
+        ) : visiblePlans.length === 0 && memberHasLifetime ? (
+          <p className="text-center text-[#6B4132] text-lg max-w-2xl mx-auto">
+            You already have lifetime membership. No additional plan purchase is
+            required.
           </p>
         ) : (
           <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto">
-            {plans.map((plan, index) => (
+            {visiblePlans.map((plan, index) => (
               <motion.div
                 key={index}
                 variants={cardVariants}
@@ -493,15 +562,27 @@ const MembershipPage = () => {
                   }}
                 >
                   {formatPlanPrice(plan.price)}
-                  <span
-                    className="text-[#6B4132] text-lg ml-1"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    / {formatDuration(plan.duration)}
-                  </span>
+                  {plan.isLifetime ? (
+                    <span
+                      className="text-[#6B4132] text-lg ml-1 block sm:inline sm:ml-2 mt-1 sm:mt-0"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
+                    >
+                      One-time, no renewal
+                    </span>
+                  ) : (
+                    <span
+                      className="text-[#6B4132] text-lg ml-1"
+                      style={{
+                        fontFamily: "'Modern Era', sans-serif",
+                        fontWeight: 400,
+                      }}
+                    >
+                      / {formatDuration(plan.duration)}
+                    </span>
+                  )}
                 </p>
 
                 <ul className="space-y-4 mb-8">
@@ -594,9 +675,11 @@ const MembershipPage = () => {
                       }}
                     >
                       Pay exactly {formatPlanPrice(selectedPlan.price)}
-                      <span className="block mt-1 text-sm text-[#6B4132]">
-                        {formatDuration(selectedPlan.duration)} for one user
-                      </span>
+                      {!selectedPlan.isLifetime && (
+                        <span className="block mt-1 text-sm text-[#6B4132]">
+                          {formatDuration(selectedPlan.duration)} for one user
+                        </span>
+                      )}
                     </h4>
 
                     <div className="flex justify-center mb-4">

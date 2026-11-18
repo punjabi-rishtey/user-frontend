@@ -4,6 +4,7 @@ import videoSrc from "../assets/WeddingVideo.mp4";
 import logoSrc from "../assets/logo.png";
 import profileIcon from "../assets/profile.png";
 import { useAuth } from "../context/AuthContext";
+import { hasActiveApprovedMembership } from "../utils/membershipExpiry";
 
 const HeroWithHeader = () => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -26,12 +27,7 @@ const HeroWithHeader = () => {
   };
 
   const handleMembershipPlanClick = () => {
-    const expiryDate = user?.metadata?.exp_date
-      ? new Date(user.metadata.exp_date)
-      : null;
-    const hasActiveMembership =
-      user?.status === "Approved" &&
-      (!expiryDate || expiryDate >= new Date());
+    const hasActiveMembership = hasActiveApprovedMembership(user);
 
     if (!isAuthenticated) {
       navigate("/membership");
