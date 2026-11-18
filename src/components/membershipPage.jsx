@@ -11,6 +11,24 @@ import {
   memberHasLifetimeAccess,
 } from "../utils/membershipExpiry";
 
+const PLAN_DESCRIPTION_FALLBACKS = {
+  Gold: "The yearly membership. Same access, for 1 year.",
+  Hallmark: "A higher standard of Gold. Same access, for 1.5 years.",
+};
+
+const getPlanCardDescription = (plan) => {
+  const saved = (plan.description ?? "").trim();
+  if (saved) {
+    return saved;
+  }
+  return PLAN_DESCRIPTION_FALLBACKS[plan.name] ?? "";
+};
+
+const planDescriptionParagraphStyle = {
+  fontFamily: "'Modern Era', sans-serif",
+  fontWeight: 400,
+};
+
 const MembershipPage = () => {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -500,7 +518,10 @@ const MembershipPage = () => {
           </p>
         ) : (
           <div className="flex flex-wrap justify-center gap-8 max-w-7xl mx-auto">
-            {visiblePlans.map((plan, index) => (
+            {visiblePlans.map((plan, index) => {
+              const planDescription = getPlanCardDescription(plan);
+
+              return (
               <motion.div
                 key={index}
                 variants={cardVariants}
@@ -532,26 +553,12 @@ const MembershipPage = () => {
                 >
                   {plan.name}
                 </h3>
-                {plan.name === "Gold" && (
+                {planDescription && (
                   <p
                     className="text-[#6B4132] -mt-2 mb-4"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
+                    style={planDescriptionParagraphStyle}
                   >
-                    The yearly membership. Same access, for 1 year.
-                  </p>
-                )}
-                {plan.name === "Hallmark" && (
-                  <p
-                    className="text-[#6B4132] -mt-2 mb-4"
-                    style={{
-                      fontFamily: "'Modern Era', sans-serif",
-                      fontWeight: 400,
-                    }}
-                  >
-                    A higher standard of Gold. Same access, for 1.5 years.
+                    {planDescription}
                   </p>
                 )}
                 <p
@@ -615,7 +622,8 @@ const MembershipPage = () => {
                   Select Plan
                 </button>
               </motion.div>
-            ))}
+            );
+            })}
           </div>
         )}
       </main>
