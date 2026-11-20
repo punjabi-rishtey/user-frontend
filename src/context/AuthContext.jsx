@@ -1,4 +1,10 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+} from "react";
 import axios from "axios";
 import { apiUrl } from "../config/constants";
 import {
@@ -17,6 +23,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
 
   const syncAuthStateFromStorage = () => {
     const token = localStorage.getItem("token");
@@ -48,6 +55,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     syncAuthStateFromStorage();
+    setIsAuthReady(true);
 
     window.addEventListener(SESSION_EXPIRED_EVENT, syncAuthStateFromStorage);
     return () => {
@@ -57,6 +65,17 @@ export const AuthProvider = ({ children }) => {
       );
     };
   }, []);
+
+  const readStoredUserId = () => {
+    try {
+      const storedUser = localStorage.getItem("currentUser");
+      if (!storedUser) return null;
+      const parsed = JSON.parse(storedUser);
+      return parsed?._id || parsed?.id || null;
+    } catch {
+      return null;
+    }
+  };
 
   const login = async (credentials) => {
     setIsLoading(true);
@@ -131,25 +150,44 @@ export const AuthProvider = ({ children }) => {
   };
 
   // We'll rely on refreshUser() after uploading/deleting pictures:
-  const refreshUser = async () => {
-    try {
-      const userId = user?._id || user?.id;
-      if (!userId) return;
+  const refreshUser = useCallback(async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      return false;
+    }
 
+    const userId = readStoredUserId();
+    if (!userId) {
+      return false;
+    }
+
+    try {
       const response = await authApi.get(apiUrl(`/api/users/${userId}`));
 
       if (response.data) {
         localStorage.setItem("currentUser", JSON.stringify(response.data));
         setUser(response.data);
+        setIsAuthenticated(true);
+        return true;
       }
+      return false;
     } catch (error) {
       if (isSessionExpiryError(error)) {
-        return;
+        return false;
       }
 
       console.error("Error refreshing user data:", error);
+      return false;
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthReady) return;
+    const token = localStorage.getItem("token");
+    if (token) {
+      refreshUser();
+    }
+  }, [isAuthReady, refreshUser]);
 
   const value = {
     user,
@@ -159,7 +197,8 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateUser,
-    refreshUser, // make sure you destructure this where needed
+    refreshUser,
+    isAuthReady,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -10,7 +10,10 @@ import Header from "./Header";
 import { motion } from "framer-motion";
 import PropTypes from "prop-types";
 import { authApi, isSessionExpiryError } from "../config/authClient";
-import { isSubscriptionExpired } from "../utils/membershipExpiry";
+import {
+  classifyFindPartnerForbidden,
+  FIND_PARTNER_ACCESS,
+} from "../utils/findPartnerAccess";
 
 const resolveManglikFilterFromUrl = (value) => {
   if (!value) return "";
@@ -34,11 +37,12 @@ const FindPartner = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, user, refreshUser } = useAuth();
+  const { isAuthenticated, user, refreshUser, isAuthReady } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
   const [currentUserGender, setCurrentUserGender] = useState(null);
-  const [profileComplete, setProfileComplete] = useState(true);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [userRefreshState, setUserRefreshState] = useState("idle");
+  const [partnerAccess, setPartnerAccess] = useState("pending");
+  const [accessMessage, setAccessMessage] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [profilesPerPage] = useState(10);
   const [sortOption, setSortOption] = useState("newest");
@@ -118,27 +122,31 @@ const FindPartner = () => {
     updateQueryParams();
   }, [currentPage, searchTerm, filters, sortOption]);
 
-  // Give auth context time to initialize before checking
+  // Refresh user from server once per mount / auth change before any access gate
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAuthChecked(true);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (user) {
-      console.log(user);
+    if (!isAuthReady) {
+      return;
     }
-  }, []);
 
-  // Refresh user data when component mounts to get latest gender
-  useEffect(() => {
-    if (isAuthenticated) {
-      refreshUser();
+    if (!isAuthenticated) {
+      setUserRefreshState("done");
+      return;
     }
-  }, [isAuthenticated, refreshUser]);
+
+    let cancelled = false;
+    setUserRefreshState("loading");
+
+    (async () => {
+      await refreshUser();
+      if (!cancelled) {
+        setUserRefreshState("done");
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthReady, isAuthenticated, refreshUser]);
 
   // Update currentUserGender when user changes
   useEffect(() => {
@@ -150,45 +158,61 @@ const FindPartner = () => {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated && authChecked) {
+    if (isAuthReady && !isAuthenticated) {
       navigate("/login", { replace: true });
     }
-  }, [isAuthenticated, navigate, authChecked]);
+  }, [isAuthenticated, isAuthReady, navigate]);
 
-  // Check profile completeness
+  // Drive Find Partner access from find-my-partner (after fresh user is loaded)
   useEffect(() => {
-    const checkProfileCompleteness = async () => {
-      if (!isAuthenticated) return;
+    if (!isAuthenticated || userRefreshState !== "done") {
+      return;
+    }
+
+    let cancelled = false;
+
+    const checkPartnerAccess = async () => {
+      setPartnerAccess("checking");
+      setAccessMessage(null);
+      setError(null);
 
       try {
         await authApi.get(apiUrl("/api/users/find-my-partner"));
-        setProfileComplete(true);
+        if (cancelled) return;
+        setPartnerAccess(FIND_PARTNER_ACCESS.ALLOWED);
         fetchUsers();
       } catch (err) {
-        console.error("Error checking profile completeness:", err);
+        if (cancelled) return;
+
+        console.error("Error checking find-my-partner access:", err);
         if (isSessionExpiryError(err)) {
           return;
         }
 
         if (err.response?.status === 403) {
-          setProfileComplete(false);
-          setError(
+          const kind = classifyFindPartnerForbidden(err.response?.data);
+          setPartnerAccess(kind);
+          setAccessMessage(
             err.response?.data?.error ||
-              "Your profile must be at least 70% complete to access this feature."
+              "You do not have access to partner search."
           );
         } else {
+          setPartnerAccess(FIND_PARTNER_ACCESS.ERROR);
           setError(
-            "Failed to check profile completeness. Please try again later."
+            err.response?.data?.error ||
+              "Failed to check access. Please try again later."
           );
         }
         setLoading(false);
       }
     };
 
-    if (isAuthenticated && authChecked) {
-      checkProfileCompleteness();
-    }
-  }, [isAuthenticated, authChecked]);
+    checkPartnerAccess();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, userRefreshState]);
 
   // Fetch users from API
   const fetchUsers = async () => {
@@ -596,23 +620,34 @@ const FindPartner = () => {
     paginate: PropTypes.func.isRequired,
   };
 
-  // Loading indicator
-  if (!authChecked) {
+  const gatesReady =
+    isAuthReady &&
+    isAuthenticated &&
+    userRefreshState === "done" &&
+    partnerAccess !== "pending" &&
+    partnerAccess !== "checking";
+
+  // Loading until auth is ready and user has been refreshed from the server
+  if (
+    !isAuthReady ||
+    (isAuthenticated &&
+      (userRefreshState === "loading" ||
+        userRefreshState === "idle" ||
+        partnerAccess === "pending" ||
+        partnerAccess === "checking"))
+  ) {
     return (
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
         <Header />
         <div className="flex-grow flex items-center justify-center">
-          <div className="text-[#4F2F1D] text-xl">
-            Checking authentication...
-          </div>
+          <div className="text-[#4F2F1D] text-xl">Loading profiles...</div>
         </div>
         <Footer />
       </div>
     );
   }
 
-  // Incomplete profile message
-  if (!profileComplete) {
+  if (gatesReady && partnerAccess === FIND_PARTNER_ACCESS.PROFILE_INCOMPLETE) {
     return (
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
         <Header />
@@ -634,8 +669,8 @@ const FindPartner = () => {
                 fontWeight: 400,
               }}
             >
-              Your profile must be at least 70% complete to access the partner
-              search feature.
+              {accessMessage ||
+                "Your profile must be at least 70% complete to access the partner search feature."}
             </p>
             <div className="flex justify-center">
               <button
@@ -656,10 +691,7 @@ const FindPartner = () => {
     );
   }
 
-  // Membership status check (after profile completeness)
-  const subscriptionExpired = isSubscriptionExpired(user);
-
-  if (user && (user.status !== "Approved" || subscriptionExpired)) {
+  if (gatesReady && partnerAccess === FIND_PARTNER_ACCESS.EXPIRED) {
     return (
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
         <Header />
@@ -672,10 +704,19 @@ const FindPartner = () => {
                 fontWeight: 400,
               }}
             >
-              {subscriptionExpired
-                ? "Your subscription has expired"
-                : "You don't have any active membership"}
+              Your subscription has expired
             </h2>
+            {accessMessage ? (
+              <p
+                className="text-[#6B4132] mb-6 text-center"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                {accessMessage}
+              </p>
+            ) : null}
             <div className="flex justify-center">
               <button
                 onClick={() => navigate("/membership")}
@@ -685,7 +726,7 @@ const FindPartner = () => {
                   fontWeight: 400,
                 }}
               >
-                {subscriptionExpired ? "Renew Membership" : "Buy Membership"}
+                Renew Membership
               </button>
             </div>
           </div>
@@ -693,6 +734,71 @@ const FindPartner = () => {
         <Footer />
       </div>
     );
+  }
+
+  if (gatesReady && partnerAccess === FIND_PARTNER_ACCESS.NOT_APPROVED) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center h-[50vh]">
+          <div className="bg-[#F5EDE7] p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h2
+              className="text-2xl mb-4 text-[#4F2F1D] text-center"
+              style={{
+                fontFamily: "'Tiempos Headline', serif",
+                fontWeight: 400,
+              }}
+            >
+              You don&apos;t have any active membership
+            </h2>
+            {accessMessage ? (
+              <p
+                className="text-[#6B4132] mb-6 text-center"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                {accessMessage}
+              </p>
+            ) : null}
+            <div className="flex justify-center">
+              <button
+                onClick={() => navigate("/membership")}
+                className="bg-[#990000] hover:bg-[#800000] text-white font-bold py-2 px-6 rounded-lg transition duration-300"
+                style={{
+                  fontFamily: "'Modern Era', sans-serif",
+                  fontWeight: 400,
+                }}
+              >
+                Buy Membership
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (gatesReady && partnerAccess === FIND_PARTNER_ACCESS.ERROR) {
+    return (
+      <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
+        <Header />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-[#990000] text-xl">
+            {error ||
+              accessMessage ||
+              "You do not have access to partner search."}
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (gatesReady && partnerAccess !== FIND_PARTNER_ACCESS.ALLOWED) {
+    return null;
   }
 
   if (loading) {
@@ -707,7 +813,7 @@ const FindPartner = () => {
     );
   }
 
-  if (error && profileComplete) {
+  if (error && partnerAccess === FIND_PARTNER_ACCESS.ALLOWED) {
     return (
       <div className="bg-[#FCF9F2] min-h-screen flex flex-col">
         <Header />
